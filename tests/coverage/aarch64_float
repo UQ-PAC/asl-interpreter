@@ -2741,12 +2741,12 @@ ENCODING: aarch64_float_arithmetic_unary
 0x1e2143e0: [ftype=0 ; opc=2 ; Rn=31 ; Rd=0] --> OK
 0x1e2143e1: [ftype=0 ; opc=2 ; Rn=31 ; Rd=1] --> OK
 0x1e2143ff: [ftype=0 ; opc=2 ; Rn=31 ; Rd=31] --> OK
-0x1e21c000: [ftype=0 ; opc=3 ; Rn=0 ; Rd=0] --> OK
+0x1e21c000: [ftype=0 ; opc=3 ; Rn=0 ; Rd=0] --> [1] Evaluation failure: EvalError at file "./prelude.asl" line 318 char 11 - line 319 char 0: getFun sqrt_real.0
 0x1e21c001: [ftype=0 ; opc=3 ; Rn=0 ; Rd=1] --> OK
-0x1e21c01f: [ftype=0 ; opc=3 ; Rn=0 ; Rd=31] --> OK
-0x1e21c020: [ftype=0 ; opc=3 ; Rn=1 ; Rd=0] --> OK
+0x1e21c01f: [ftype=0 ; opc=3 ; Rn=0 ; Rd=31] --> [1] Evaluation failure: EvalError at file "./prelude.asl" line 318 char 11 - line 319 char 0: getFun sqrt_real.0
+0x1e21c020: [ftype=0 ; opc=3 ; Rn=1 ; Rd=0] --> [1] Evaluation failure: EvalError at file "./prelude.asl" line 318 char 11 - line 319 char 0: getFun sqrt_real.0
 0x1e21c021: [ftype=0 ; opc=3 ; Rn=1 ; Rd=1] --> OK
-0x1e21c03f: [ftype=0 ; opc=3 ; Rn=1 ; Rd=31] --> OK
+0x1e21c03f: [ftype=0 ; opc=3 ; Rn=1 ; Rd=31] --> [1] Evaluation failure: EvalError at file "./prelude.asl" line 318 char 11 - line 319 char 0: getFun sqrt_real.0
 0x1e21c3e0: [ftype=0 ; opc=3 ; Rn=31 ; Rd=0] --> OK
 0x1e21c3e1: [ftype=0 ; opc=3 ; Rn=31 ; Rd=1] --> OK
 0x1e21c3ff: [ftype=0 ; opc=3 ; Rn=31 ; Rd=31] --> OK
@@ -2777,15 +2777,15 @@ ENCODING: aarch64_float_arithmetic_unary
 0x1e6143e0: [ftype=1 ; opc=2 ; Rn=31 ; Rd=0] --> OK
 0x1e6143e1: [ftype=1 ; opc=2 ; Rn=31 ; Rd=1] --> OK
 0x1e6143ff: [ftype=1 ; opc=2 ; Rn=31 ; Rd=31] --> OK
-0x1e61c000: [ftype=1 ; opc=3 ; Rn=0 ; Rd=0] --> OK
-0x1e61c001: [ftype=1 ; opc=3 ; Rn=0 ; Rd=1] --> OK
-0x1e61c01f: [ftype=1 ; opc=3 ; Rn=0 ; Rd=31] --> OK
-0x1e61c020: [ftype=1 ; opc=3 ; Rn=1 ; Rd=0] --> OK
-0x1e61c021: [ftype=1 ; opc=3 ; Rn=1 ; Rd=1] --> OK
-0x1e61c03f: [ftype=1 ; opc=3 ; Rn=1 ; Rd=31] --> OK
-0x1e61c3e0: [ftype=1 ; opc=3 ; Rn=31 ; Rd=0] --> OK
-0x1e61c3e1: [ftype=1 ; opc=3 ; Rn=31 ; Rd=1] --> OK
-0x1e61c3ff: [ftype=1 ; opc=3 ; Rn=31 ; Rd=31] --> OK
+0x1e61c000: [ftype=1 ; opc=3 ; Rn=0 ; Rd=0] --> [1] Evaluation failure: EvalError at file "./prelude.asl" line 318 char 11 - line 319 char 0: getFun sqrt_real.0
+0x1e61c001: [ftype=1 ; opc=3 ; Rn=0 ; Rd=1] --> [1] Evaluation failure: EvalError at file "./prelude.asl" line 318 char 11 - line 319 char 0: getFun sqrt_real.0
+0x1e61c01f: [ftype=1 ; opc=3 ; Rn=0 ; Rd=31] --> [1] Evaluation failure: EvalError at file "./prelude.asl" line 318 char 11 - line 319 char 0: getFun sqrt_real.0
+0x1e61c020: [ftype=1 ; opc=3 ; Rn=1 ; Rd=0] --> [1] Evaluation failure: EvalError at file "./prelude.asl" line 318 char 11 - line 319 char 0: getFun sqrt_real.0
+0x1e61c021: [ftype=1 ; opc=3 ; Rn=1 ; Rd=1] --> [1] Evaluation failure: EvalError at file "./prelude.asl" line 318 char 11 - line 319 char 0: getFun sqrt_real.0
+0x1e61c03f: [ftype=1 ; opc=3 ; Rn=1 ; Rd=31] --> [1] Evaluation failure: EvalError at file "./prelude.asl" line 318 char 11 - line 319 char 0: getFun sqrt_real.0
+0x1e61c3e0: [ftype=1 ; opc=3 ; Rn=31 ; Rd=0] --> [1] Evaluation failure: EvalError at file "./prelude.asl" line 318 char 11 - line 319 char 0: getFun sqrt_real.0
+0x1e61c3e1: [ftype=1 ; opc=3 ; Rn=31 ; Rd=1] --> [1] Evaluation failure: EvalError at file "./prelude.asl" line 318 char 11 - line 319 char 0: getFun sqrt_real.0
+0x1e61c3ff: [ftype=1 ; opc=3 ; Rn=31 ; Rd=31] --> [1] Evaluation failure: EvalError at file "./prelude.asl" line 318 char 11 - line 319 char 0: getFun sqrt_real.0
 0x1ea04000: [ftype=2 ; opc=0 ; Rn=0 ; Rd=0] --> (invalid)
 0x1ea04001: [ftype=2 ; opc=0 ; Rn=0 ; Rd=1] --> (invalid)
 0x1ea0401f: [ftype=2 ; opc=0 ; Rn=0 ; Rd=31] --> (invalid)
@@ -2850,14 +2850,14 @@ ENCODING: aarch64_float_arithmetic_unary
 0x1ee143e1: [ftype=3 ; opc=2 ; Rn=31 ; Rd=1] --> OK
 0x1ee143ff: [ftype=3 ; opc=2 ; Rn=31 ; Rd=31] --> OK
 0x1ee1c000: [ftype=3 ; opc=3 ; Rn=0 ; Rd=0] --> OK
-0x1ee1c001: [ftype=3 ; opc=3 ; Rn=0 ; Rd=1] --> OK
-0x1ee1c01f: [ftype=3 ; opc=3 ; Rn=0 ; Rd=31] --> OK
-0x1ee1c020: [ftype=3 ; opc=3 ; Rn=1 ; Rd=0] --> OK
+0x1ee1c001: [ftype=3 ; opc=3 ; Rn=0 ; Rd=1] --> [1] Evaluation failure: EvalError at file "./prelude.asl" line 318 char 11 - line 319 char 0: getFun sqrt_real.0
+0x1ee1c01f: [ftype=3 ; opc=3 ; Rn=0 ; Rd=31] --> [1] Evaluation failure: EvalError at file "./prelude.asl" line 318 char 11 - line 319 char 0: getFun sqrt_real.0
+0x1ee1c020: [ftype=3 ; opc=3 ; Rn=1 ; Rd=0] --> [1] Evaluation failure: EvalError at file "./prelude.asl" line 318 char 11 - line 319 char 0: getFun sqrt_real.0
 0x1ee1c021: [ftype=3 ; opc=3 ; Rn=1 ; Rd=1] --> OK
 0x1ee1c03f: [ftype=3 ; opc=3 ; Rn=1 ; Rd=31] --> OK
-0x1ee1c3e0: [ftype=3 ; opc=3 ; Rn=31 ; Rd=0] --> OK
+0x1ee1c3e0: [ftype=3 ; opc=3 ; Rn=31 ; Rd=0] --> [1] Evaluation failure: EvalError at file "./prelude.asl" line 318 char 11 - line 319 char 0: getFun sqrt_real.0
 0x1ee1c3e1: [ftype=3 ; opc=3 ; Rn=31 ; Rd=1] --> OK
-0x1ee1c3ff: [ftype=3 ; opc=3 ; Rn=31 ; Rd=31] --> OK
+0x1ee1c3ff: [ftype=3 ; opc=3 ; Rn=31 ; Rd=31] --> [1] Evaluation failure: EvalError at file "./prelude.asl" line 318 char 11 - line 319 char 0: getFun sqrt_real.0
 
 ENCODING: aarch64_float_compare_cond
 0x1e201400: [ftype=0 ; Rm=0 ; cond=1 ; Rn=0 ; op=0 ; nzcv=0] --> OK
