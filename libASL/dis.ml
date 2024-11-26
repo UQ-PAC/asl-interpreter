@@ -1574,6 +1574,7 @@ let dis_core (env: Eval.Env.t) (unroll_bound) ((lenv,globals): env) (decode: dec
     let stmts' = Transforms.RemoveUnused.remove_unused globals @@ stmts in
     let stmts' = Transforms.RedundantSlice.do_transform Bindings.empty stmts' in
     let stmts' = Transforms.FixRedefinitions.run (globals : IdentSet.t) stmts' in
+    let stmts' = Loops.LoopNorm.do_transform stmts' in
     let stmts' = Transforms.StatefulIntToBits.run (enum_types env) stmts' in
     let stmts' = Transforms.IntToBits.ints_to_bits stmts' in
     let stmts' = Transforms.CommonSubExprElim.do_transform stmts' in
@@ -1604,7 +1605,7 @@ let dis_decode_entry_with_inst (env: Eval.Env.t) ((lenv,globals): env) (decode: 
   | false -> dis_core env max_upper_bound (lenv,globals) decode op
   | true ->
     let enc,stmts' = dis_core env Z.one (lenv,globals) decode op in
-    let (res,stmts') = Transforms.LoopClassify.run stmts' env in
+    let (res,stmts') = Loops.do_transform stmts' env in
     if res then (enc,stmts') else
       dis_core env max_upper_bound (lenv,globals) decode op
 

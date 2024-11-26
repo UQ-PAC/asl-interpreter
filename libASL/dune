@@ -43,6 +43,7 @@
    cpp_backend
    scala_backend 
    arm_env pretransforms flags
+   loops
    )
  (preprocessor_deps (alias ../asl_files) (alias cpp_backend_files))
  (preprocess (pps ppx_blob))

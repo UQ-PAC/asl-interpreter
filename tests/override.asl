@@ -332,8 +332,7 @@ integer LowestSetBit(bits(N) x)
 bits(W) ite(boolean c, bits(W) x, bits(W) y)
   return if c then x else y;
 
-// Vector Operations
-
+// Element Vector Operations
 bits(W * N) add_vec(bits(W * N) x, bits(W * N) y, integer N)
   bits(W * N) result;
   for i = 0 to (N - 1)
@@ -400,23 +399,26 @@ bits(N) eq_vec(bits(W * N) x, bits(W * N) y, integer N)
     Elem[result, i, 1] = if (Elem[x, i, W] == Elem[y, i, W]) then '1' else '0';
   return result;
 
-bits(NW * N) zcast_vec(bits(W * N) x, integer N, integer NW)
-  bits(NW * N) result;
+// Cast Vector Operations
+
+bits(Z * N) zcast_vec(bits(P * N) x, integer Z, integer N)
+  bits(Z * N) result;
   for i = 0 to (N - 1)
-    Elem[result, i, NW] = ZeroExtend(Elem[x, i, W], NW);
+    Elem[result, i, Z] = ZeroExtend(Elem[x, i, P], Z);
   return result;
 
-bits(NW * N) scast_vec(bits(W * N) x, integer N, integer NW)
-  bits(NW * N) result;
+bits(Z * N) scast_vec(bits(P * N) x, integer Z, integer N)
+  bits(Z * N) result;
   for i = 0 to (N - 1)
-    Elem[result, i, NW] = SignExtend(Elem[x, i, W], NW);
+    Elem[result, i, Z] = SignExtend(Elem[x, i, P], Z);
   return result;
 
-bits(NW * N) trunc_vec(bits(W * N) x, integer N, integer NW)
-  bits(NW * N) result;
+bits(Z * N) trunc_vec(bits(P * N) x, integer Z, integer N)
+  bits(Z * N) result;
   for i = 0 to (N - 1)
-    Elem[result, i, NW] = (Elem[x, i, W])[ 0 +: NW ];
+    Elem[result, i, Z] = (Elem[x, i, P])[ 0 +: Z ];
   return result;
+
 
 bits(W * N) select_vec(bits(W * M) x, bits(32 * N) sel)
   bits(W * N) result;
@@ -425,18 +427,148 @@ bits(W * N) select_vec(bits(W * M) x, bits(32 * N) sel)
     Elem[result, i, W] = Elem[x,pos,W];
   return result;
 
-bits(W * N) shuffle_vec(bits(W * M) x, bits(W * M) y, bits(32 * N) sel)
-  bits(W * N) result;
-  bits(W * M * 2) input = x:y;
-  for i = 0 to (N - 1)
-    integer pos = UInt(Elem[sel,i,32]);
-    Elem[result, i, W] = Elem[input,pos,W];
-  return result;
-
-bits(W) reduce_add(bits(W * N) x, bits(W) init)
+bits(W) reduce_add(bits(W * N) x, bits(W) init, integer N)
   bits(W) result = init;
   for i = 0 to (N - 1)
     result = result + Elem[x,i,W];
+  return result;
+
+bits(W) reduce_eor(bits(W * N) x, bits(W) init, integer N)
+  bits(W) result = init;
+  for i = 0 to (N - 1)
+    result = result EOR Elem[x,i,W];
+  return result;
+
+bits(W) reduce_smin(bits(W * N) x, bits(W) init)
+  bits(W) result = init;
+  for i = 0 to (N - 1)
+    result = if sle_bits(Elem[x, i, W],result) then Elem[x,i,W] else result;
+  return result;
+
+bits(W) reduce_smax(bits(W * N) x, bits(W) init)
+  bits(W) result = init;
+  for i = 0 to (N - 1)
+    result = if sle_bits(result,Elem[x, i, W]) then Elem[x,i,W] else result;
+  return result;
+
+bits(W) reduce_umin(bits(W * N) x, bits(W) init)
+  bits(W) result = init;
+  for i = 0 to (N - 1)
+    result = if sle_bits(ZeroExtend(Elem[x, i, W],W+1),ZeroExtend(result,W+1)) then Elem[x,i,W] else result;
+  return result;
+
+bits(W) reduce_umax(bits(W * N) x, bits(W) init)
+  bits(W) result = init;
+  for i = 0 to (N - 1)
+    result = if sle_bits(ZeroExtend(result,W+1),ZeroExtend(Elem[x, i, W],W+1)) then Elem[x,i,W] else result;
+  return result;
+
+bits(W * N) fp_add_vec(bits(W * N) op1, bits(W * N) op2, FPCRType fpcr, integer N)
+  bits(W * N) result;
+  for i = 0 to (N - 1)
+    Elem[result, i, W] = FPAdd(Elem[op1, i, W], Elem[op2, i, W], fpcr);
+  return result;
+
+bits(W * N) fp_sub_vec(bits(W * N) op1, bits(W * N) op2, FPCRType fpcr, integer N)
+  bits(W * N) result;
+  for i = 0 to (N - 1)
+    Elem[result, i, W] = FPSub(Elem[op1, i, W], Elem[op2, i, W], fpcr);
+  return result;
+
+bits(W * N) fp_mul_vec(bits(W * N) op1, bits(W * N) op2, FPCRType fpcr, integer N)
+  bits(W * N) result;
+  for i = 0 to (N - 1)
+    Elem[result, i, W] = FPMul(Elem[op1, i, W], Elem[op2, i, W], fpcr);
+  return result;
+
+bits(W * N) fp_div_vec(bits(W * N) op1, bits(W * N) op2, FPCRType fpcr, integer N)
+  bits(W * N) result;
+  for i = 0 to (N - 1)
+    Elem[result, i, W] = FPDiv(Elem[op1, i, W], Elem[op2, i, W], fpcr);
+  return result;
+
+bits(W * N) fp_mul_add_vec(bits(W * N) op1, bits(W * N) op2, bits(W * N) op3, FPCRType fpcr, integer N)
+  bits(W * N) result;
+  for i = 0 to (N - 1)
+    Elem[result, i, W] = FPMulAdd(Elem[op1, i, W], Elem[op2, i, W], Elem[op3, i, W], fpcr);
+  return result;
+
+bits(W * N) fp_sqrt_vec(bits(W * N) op1, FPCRType fpcr, integer N)
+  bits(W * N) result;
+  for i = 0 to (N - 1)
+    Elem[result, i, W] = FPSqrt(Elem[op1, i, W],  fpcr);
+  return result;
+
+bits(32 * N) bf_mul_vec(bits(16 * N) op1, bits(16 * N) op2, integer N)
+  bits(32 * N) result;
+  for i = 0 to (N - 1)
+    Elem[result, i, 32] = BFMul(Elem[op1, i, 16], Elem[op2, i, 16]);
+  return result;
+
+bits(32 * N) bf_add_vec(bits(32 * N) op1, bits(32 * N) op2, integer N)
+  bits(32 * N) result;
+  for i = 0 to (N - 1)
+    Elem[result, i, 32] = BFAdd(Elem[op1, i, 32], Elem[op2, i, 32]);
+  return result;
+
+bits(W * N) fp_max_vec(bits(W * N) op1, bits(W * N) op2, FPCRType fpcr, integer N)
+  bits(W * N) result;
+  for i = 0 to (N - 1)
+    Elem[result, i, W] = FPMax(Elem[op1, i, W], Elem[op2, i, W], fpcr);
+  return result;
+
+bits(W * N) fp_min_vec(bits(W * N) op1, bits(W * N) op2, FPCRType fpcr, integer N)
+  bits(W * N) result;
+  for i = 0 to (N - 1)
+    Elem[result, i, W] = FPMin(Elem[op1, i, W], Elem[op2, i, W], fpcr);
+  return result;
+
+bits(W * N) fp_max_num_vec(bits(W * N) op1, bits(W * N) op2, FPCRType fpcr, integer N)
+  bits(W * N) result;
+  for i = 0 to (N - 1)
+    Elem[result, i, W] = FPMaxNum(Elem[op1, i, W], Elem[op2, i, W], fpcr);
+  return result;
+
+bits(W * N) fp_min_num_vec(bits(W * N) op1, bits(W * N) op2, FPCRType fpcr, integer N)
+  bits(W * N) result;
+  for i = 0 to (N - 1)
+    Elem[result, i, W] = FPMinNum(Elem[op1, i, W], Elem[op2, i, W], fpcr);
+  return result;
+
+bits(W * N) fp_mulx_vec(bits(W * N) op1, bits(W * N) op2, FPCRType fpcr, integer N)
+  bits(W * N) result;
+  for i = 0 to (N - 1)
+    Elem[result, i, W] = FPMulX(Elem[op1, i, W], Elem[op2, i, W], fpcr);
+  return result;
+
+bits(W * N) fp_mul_addh_vec(bits(W * N) op1, bits((W * N) DIV 2) op2, bits((W * N) DIV 2) op3, FPCRType fpcr, integer N)
+  bits(W * N) result;
+  for i = 0 to (N - 1)
+    Elem[result, i, W] = FPMulAddH(Elem[op1, i, W], Elem[op2, i, W DIV 2], Elem[op3, i, W DIV 2], fpcr);
+  return result;
+
+bits(N) fp_cmp_eq_vec(bits(W * N) op1, bits(W * N) op2, FPCRType fpcr, integer N)
+  bits(N) result;
+  for i = 0 to (N - 1)
+    Elem[result, i, 1] = if (FPCompareEQ(Elem[op1, i, W], Elem[op2, i, W], fpcr)) then '1' else '0';
+  return result;
+
+bits(N) fp_cmp_ge_vec(bits(W * N) op1, bits(W * N) op2, FPCRType fpcr, integer N)
+  bits(N) result;
+  for i = 0 to (N - 1)
+    Elem[result, i, 1] = if (FPCompareGE(Elem[op1, i, W], Elem[op2, i, W], fpcr)) then '1' else '0';
+  return result;
+
+bits(N) fp_cmp_gt_vec(bits(W * N) op1, bits(W * N) op2, FPCRType fpcr, integer N)
+  bits(N) result;
+  for i = 0 to (N - 1)
+    Elem[result, i, 1] = if (FPCompareGT(Elem[op1, i, W], Elem[op2, i, W], fpcr)) then '1' else '0';
+  return result;
+
+bits(W * N) fpr_sqrt_est_vec(bits(W * N) op1, FPCRType fpcr, integer N)
+  bits(W * N) result;
+  for i = 0 to (N - 1)
+    Elem[result, i, W] = FPRSqrtEstimate(Elem[op1, i, W],  fpcr);
   return result;
 
 // bits(8*size) _Mem[AddressDescriptor desc, integer size, AccessDescriptor accdesc];
