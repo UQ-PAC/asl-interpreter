@@ -13,6 +13,7 @@ let pure_prims =
     FIdent("SignExtend",0);
     FIdent("ZeroExtend",0);
     FIdent("asr_bits",0);
+    FIdent("ror_bits",0);
     FIdent("lsr_bits",0);
     FIdent("lsl_bits",0);
     FIdent("slt_bits",0);
@@ -21,6 +22,7 @@ let pure_prims =
     FIdent("LSL",0);
     FIdent("LSR",0);
     FIdent("ASR",0);
+    FIdent("ROR",0);
     FIdent("Elem.set",0);
     FIdent("Elem.read",0);
   ]
@@ -103,9 +105,11 @@ let infer_type (e: expr): ty option =
     | "LSL"                -> Some(Type_Bits(num))
     | "LSR"                -> Some(Type_Bits(num))
     | "ASR"                -> Some(Type_Bits(num))
+    | "ROR"                -> Some(Type_Bits(num))
     | "lsl_bits"           -> Some(Type_Bits(num))
     | "lsr_bits"           -> Some(Type_Bits(num))
     | "asr_bits"           -> Some(Type_Bits(num))
+    | "ror_bits"           -> Some(Type_Bits(num))
     | "cvt_bits_uint"      -> Some(type_integer)
     | "cvt_bits_sint"      -> Some(type_integer)
     | "eq_bits"            -> Some(type_bool)
@@ -114,15 +118,11 @@ let infer_type (e: expr): ty option =
     | "slt_bits"           -> Some(type_bool)
     | _ -> None
     end
-  | Expr_TApply((FIdent(name, _) | Ident(name)), [Expr_LitInt(v1) as num1; Expr_LitInt(v2) as num2], _) -> begin
+  | Expr_TApply((FIdent(name, _) | Ident(name)), [Expr_LitInt(v1); Expr_LitInt(v2) as num2], _) -> begin
     (* These are... dubious. None appear in value.ml, so they're all based on what "looks correct". *)
     match name with
     | "ZeroExtend"         -> Some(Type_Bits(num2))
     | "SignExtend"         -> Some(Type_Bits(num2))
-    | "lsl_bits"           -> Some(Type_Bits(num1))
-    | "lsr_bits"           -> Some(Type_Bits(num1))
-    | "asl_bits"           -> Some(Type_Bits(num1))
-    | "asr_bits"           -> Some(Type_Bits(num1))
     | "append_bits"        ->
       Some(Type_Bits(Expr_LitInt(string_of_int((int_of_string v1) + (int_of_string v2)))))
     | _ -> None
@@ -222,6 +222,11 @@ end
 module StatefulIntToBits = struct
   type interval = (Z.t * Z.t)
   type abs = (int * bool * interval)
+
+  let pp_abs (w,s,(u,l)) =
+    "{width: " ^ string_of_int w ^ ", signed: " ^ (if s then "true" else "false") ^ ", upper: " ^ Z.to_string u ^
+    ", lower: " ^ Z.to_string l ^ "}"
+
   (* Track vars we change to bvs, ints we leave as ints *)
   type state = {
     changed: bool;
@@ -343,6 +348,16 @@ module StatefulIntToBits = struct
       let abs = (width old * 2, true, interval old) in
       (sym_zero_extend (width old) (width old) e, abs)
 
+  (* We need certain values to be positive, but can't necessarily show it. Use this to
+     enforce an assumption. *)
+  let assume_unsigned (y,a) =
+    if signed a then begin
+      if Z.lt (upper a) Z.zero then failwith "violated assumption, negative unsigned value";
+      (*if Z.lt (lower a) Z.zero then Printf.printf "Warning: Cannot prove value is non-negative\n";*)
+      let i = (upper a, Z.zero) in
+      (y,(width a,false,i))
+    end else (y,a)
+
   (** Extend an expression coupled with its abstract information to a width *)
   let extend (abs) ((e,old) : sym * abs) =
     (* Only extending *)
@@ -375,32 +390,56 @@ module StatefulIntToBits = struct
   let wrapper_ident = FIdent ("StatefulIntToBit_wrapper", 0)
 
   let build_div x y =
-      let wx = width (snd x) in
-      let wy = width (snd y) in
-      let abs = abs_of_div (snd x) (snd y) in
-      let mgr = merge_abs (snd x) (snd y) in
-      let base_div = sym_prim (FIdent ("sdiv_bits", 0)) [sym_of_abs mgr] [extend mgr x; extend mgr y] in
-      if wy > wx then begin
+    let wx = width (snd x) in
+    let wy = width (snd y) in
+    let abs = abs_of_div (snd x) (snd y) in
+    let mgr = merge_abs (snd x) (snd y) in
+    let base_div = sym_prim (FIdent ("sdiv_bits", 0)) [sym_of_abs mgr] [extend mgr x; extend mgr y] in
+    if wy > wx then begin
+      (base_div, abs)
+    end
+    else begin
+      assert (width mgr = wx);
+      if width abs = wx then begin
         (base_div, abs)
+      end else begin
+        let ex = extend abs in
+        (* Test if denom is -1 *)
+        let negone = VBits {n = wy ; v = Z.pred (Z.pow (Z.succ Z.one) wy)} in
+        let den = sym_prim (FIdent ("eq_bits", 0)) [sym_of_abs (snd y)] [fst y; Val negone] in
+        (* Test if num is INT_MIN *)
+        let intmin = VBits {n = wx ; v = Z.pow (Z.succ Z.one) (wx - 1)} in
+        let num = sym_prim (FIdent ("eq_bits", 0)) [sym_of_abs (snd x)] [fst x; Val intmin] in
+        (* Overflow result *)
+        let res = VBits {n = width abs; v = Z.pow (Z.succ Z.one) (wx - 1)} in
+        let test = sym_prim (FIdent ("and_bool", 0)) [] [num;den] in
+        (sym_prim (FIdent ("ite", 0)) [sym_of_abs abs] [test; Val res; ex (base_div,mgr)], abs)
       end
-      else begin
-        assert (width mgr = wx);
-        if width abs = wx then begin
-          (base_div, abs)
-        end else begin
-          let ex = extend abs in
-          (* Test if denom is -1 *)
-          let negone = VBits {n = wy ; v = Z.pred (Z.pow (Z.succ Z.one) wy)} in
-          let den = sym_prim (FIdent ("eq_bits", 0)) [sym_of_abs (snd y)] [fst y; Val negone] in
-          (* Test if num is INT_MIN *)
-          let intmin = VBits {n = wx ; v = Z.pow (Z.succ Z.one) (wx - 1)} in
-          let num = sym_prim (FIdent ("eq_bits", 0)) [sym_of_abs (snd x)] [fst x; Val intmin] in
-          (* Overflow result *)
-          let res = VBits {n = width abs; v = Z.pow (Z.succ Z.one) (wx - 1)} in
-          let test = sym_prim (FIdent ("and_bool", 0)) [] [num;den] in
-          (sym_prim (FIdent ("ite", 0)) [sym_of_abs abs] [test; Val res; ex (base_div,mgr)], abs)
-        end
-      end
+    end
+
+  let build_shift f wx x y =
+    (* First, adjust the shift to be unsigned *)
+    let y = assume_unsigned y in
+    let (w',_) = width_of_interval (interval (snd y)) in
+    (* Case 1: We can match by zero extending the shift amount *)
+    if width (snd y) <= wx then
+      let y' = extend (wx, false, interval (snd y)) y in
+      expr_prim' f [Expr_LitInt (string_of_int wx)] [x;sym_expr y']
+    (* Case 2: We can match by slicing the shift amount *)
+    else if w' <= wx then
+      let y' = sym_slice Unknown (fst y) 0 wx in
+      expr_prim' f [Expr_LitInt (string_of_int wx)] [x;sym_expr y']
+    else if f = "lsl_bits" || f = "lsr_bits" then
+      (* if y >= wx then zero[0:wx] else f (x,y[0:wx]) *)
+      failwith @@ "Cannot match shift width to that of value: " ^ (string_of_int wx) ^ " " ^ (pp_abs (snd y))
+    else if f = "asr_bits" then
+      (* if y >= wx then repeat(x[wx]) else f (x,y[0:wx]]) *)
+      failwith @@ "Cannot match shift width to that of value: " ^ (string_of_int wx) ^ " " ^ (pp_abs (snd y))
+    else if f = "ror_bits" then
+      (* f (x,(mod y wx)[]) *)
+      failwith @@ "Cannot match shift width to that of value: " ^ (string_of_int wx) ^ " " ^ (pp_abs (snd y))
+    else
+      failwith @@ "Unknown shift: " ^ f
 
   (** Covert an integer expression tree into a bitvector equivalent *)
   let rec bv_of_int_expr (st: state) (e: expr): (sym * abs) =
@@ -448,6 +487,13 @@ module StatefulIntToBits = struct
         let ex = extend w in
         let f = sym_prim (FIdent ("sub_bits", 0)) [sym_of_abs w] [ex x;ex y] in
         (f,w)
+    | Expr_TApply (FIdent ("neg_int", 0), [], [x]) ->
+        let x = bv_of_int_expr st x in
+        let w = abs_of_uop (snd x) Primops.prim_neg_int in
+        let ex = extend w in
+        let z = Val (VBits {v=Z.zero; n=width w}) in
+        let f = sym_prim (FIdent ("sub_bits", 0)) [sym_of_abs w] [z; ex x] in
+        (f,w)
     | Expr_TApply (FIdent ("mul_int", 0), [], [x;y]) ->
         let x = bv_of_int_expr st x in
         let y = bv_of_int_expr st y in
@@ -473,39 +519,24 @@ module StatefulIntToBits = struct
           let w = abs_of_uwidth digits in
           (f,w)
 
-    | Expr_TApply (FIdent ("neg_int", 0), [], [x]) ->
+    (* Integer shifts, corresponding to mult or div by 2^n. Assumes n is positive. *)
+    | Expr_TApply (FIdent ("shl_int", 0), [], [x; n]) ->
         let x = bv_of_int_expr st x in
-        let w = abs_of_uop (snd x) Primops.prim_neg_int in
-        let ex = extend w in
-        let z = Val (VBits {v=Z.zero; n=width w}) in
-        let f = sym_prim (FIdent ("sub_bits", 0)) [sym_of_abs w] [z; ex x] in
-        (f,w)
-
-    (* TODO: Somewhat haphazard translation from old approach *)
-    | Expr_TApply (FIdent ("shl_int", 0), [], [x; y]) ->
+        let n = assume_unsigned (bv_of_int_expr st n) in
+        let abs = abs_of_bop (snd x) (snd n) (fun i j -> Z.shift_left i (Z.to_int j)) in
+        let xe = extend abs x in
+        let ne = extend (width abs, signed (snd n), interval (snd n)) n in
+        let e = expr_prim' "lsl_bits" [expr_of_abs abs] [sym_expr xe; sym_expr ne] in
+        (Exp e,abs)
+    | Expr_TApply (FIdent ("shr_int", 0), [], [x; n]) ->
         let x = bv_of_int_expr st x in
-        let y = force_signed (bv_of_int_expr st y) in
-        (match fst y with
-        | Val (VBits bv) ->
-            let yshift = Z.to_int (Primops.prim_cvt_bits_sint bv) in
-            let size = width (snd x) + yshift in
-            let abs = if signed (snd x) then abs_of_width size else abs_of_uwidth size in
-            (sym_append_bits Unknown (width (snd x)) yshift (fst x) (sym_zeros yshift),abs)
-        | _ ->
-            let (u,_) = interval (snd y) in
-            (* in worst case, could shift upper bound on y, adding y bits *)
-            let size = width (snd x) + (Z.to_int (Z.max u Z.zero)) in
-            let abs = if signed (snd x) then abs_of_width size else abs_of_uwidth size in
-            let ex = extend abs in
-            let f = sym_prim (FIdent ("lsl_bits", 0)) [sym_of_int size; sym_of_abs (snd y)] [ex x;fst y] in
-            (f,abs)
-        )
-
-    (* TODO: Over-approximate range on result, could be a little closer *)
-    | Expr_TApply (FIdent ("shr_int", 0), [], [x; y]) ->
-        let x = force_signed (bv_of_int_expr st x) in
-        let y = force_signed (bv_of_int_expr st y) in
-        (sym_prim (FIdent ("asr_bits", 0)) [sym_of_abs (snd x); sym_of_abs (snd y)] [fst x;fst y],snd x)
+        let n = assume_unsigned (bv_of_int_expr st n) in
+        let abs = abs_of_bop (snd x) (snd n) (fun i j -> Z.shift_right i (Z.to_int j)) in
+        let xe = extend abs x in
+        let ne = extend (width abs, signed (snd n), interval (snd n)) n in
+        let f = if signed (snd x) then "asr_bits" else "lsr_bits" in
+        let e = expr_prim' f [expr_of_abs abs] [sym_expr xe; sym_expr ne] in
+        (Exp e,abs)
 
     | Expr_TApply (FIdent ("round_tozero_real",0), [], [x]) ->
         bv_of_real_expr st x
@@ -637,18 +668,24 @@ module StatefulIntToBits = struct
             let ex = extend w in
             (sym_expr @@ sym_prim (FIdent ("ne_bits", 0)) [sym_of_abs w] [ex x; ex y])
 
-      (* these functions take bits as first argument and integer as second. just coerce second to bits. *)
-      (* TODO: primitive implementations of these expressions expect the shift amount to be signed,
-               but a negative shift is invalid anyway. Can't it just be unsigned? *)
-      | Expr_TApply (FIdent ("LSL", 0), [size], [x; n]) ->
-          let (n,w) = force_signed (bv_of_int_expr st n) in
-          expr_prim' "lsl_bits" [size; expr_of_abs w] [x;sym_expr n]
-      | Expr_TApply (FIdent ("LSR", 0), [size], [x; n]) ->
-          let (n,w) = force_signed (bv_of_int_expr st n) in
-          expr_prim' "lsr_bits" [size; expr_of_abs w] [x;sym_expr n]
-      | Expr_TApply (FIdent ("ASR", 0), [size], [x; n]) ->
-          let (n,w) = force_signed (bv_of_int_expr st n) in
-          expr_prim' "asr_bits" [size; expr_of_abs w] [x;sym_expr n]
+      (* these functions take bits as first argument and integer as second. just coerce second to
+         unsigned bits of the same size as the first argument. *)
+      | Expr_TApply (FIdent ("LSL", 0), [Expr_LitInt size], [x; n]) ->
+          let w = int_of_string size in
+          let n = bv_of_int_expr st n in
+          build_shift "lsl_bits" w x n
+      | Expr_TApply (FIdent ("LSR", 0), [Expr_LitInt size], [x; n]) ->
+          let w = int_of_string size in
+          let n = bv_of_int_expr st n in
+          build_shift "lsr_bits" w x n
+      | Expr_TApply (FIdent ("ASR", 0), [Expr_LitInt size], [x; n]) ->
+          let w = int_of_string size in
+          let n = bv_of_int_expr st n in
+          build_shift "asr_bits" w x n
+      | Expr_TApply (FIdent ("ROR", 0), [Expr_LitInt size], [x; n]) ->
+          let w = int_of_string size in
+          let n = bv_of_int_expr st n in
+          build_shift "ror_bits" w x n
 
       | e -> e
       in
@@ -911,9 +948,10 @@ module IntToBits = struct
       | FIdent ("eor_bits", 0), [Expr_LitInt n], _
       | FIdent ("not_bits", 0), [Expr_LitInt n], _
       | FIdent ("zeros_bits", 0), [Expr_LitInt n], _
-      | FIdent ("lsl_bits", 0), [Expr_LitInt n; _], _
-      | FIdent ("lsr_bits", 0), [Expr_LitInt n; _], _
-      | FIdent ("asr_bits", 0), [Expr_LitInt n; _], _
+      | FIdent ("lsl_bits", 0), [Expr_LitInt n], _
+      | FIdent ("lsr_bits", 0), [Expr_LitInt n], _
+      | FIdent ("asr_bits", 0), [Expr_LitInt n], _
+      | FIdent ("ror_bits", 0), [Expr_LitInt n], _
       | FIdent ("ones_bits", 0), [Expr_LitInt n], _ -> int_of_string n
       | FIdent ("append_bits", 0), [Expr_LitInt n; Expr_LitInt m], _ -> int_of_string n + int_of_string m
       | FIdent ("replicate_bits", 0), [Expr_LitInt n; Expr_LitInt m], _ -> int_of_string n * int_of_string m

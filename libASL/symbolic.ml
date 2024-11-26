@@ -369,13 +369,37 @@ let rec sym_mul_int (loc: l) (x: sym) (y: sym) =
   (* x * 1 = x *)
   | Val x, y
   | y, Val x when is_one x -> y
+  | Val x, y
+  | y, Val x when is_zero x -> Val (VInt Z.zero)
   (* (x + c) * c' = x * c' + c * c' *)
   | Exp (Expr_TApply (FIdent ("add_int", 0), [], [x; Expr_LitInt lit])), Val (VInt c') ->
       let c = Z.of_string lit in
       let offset = Val (VInt (Z.mul c c')) in
-      let base = sym_mul_int loc (Exp x) y in
+      let base = sym_mul_int loc (sym_of_expr x) y in
       sym_add_int loc base offset
   | _ -> Exp (Expr_TApply (FIdent ("mul_int", 0), [], [sym_expr x; sym_expr y]))
+
+let sym_shl_int (loc: l) (x: sym) (y: sym) =
+  match x, y with
+  | Val x, Val y -> Val (VInt (prim_shl_int (to_integer loc x) (to_integer loc y)))
+  | _, Val y when is_zero y -> x
+  | _ -> Exp (Expr_TApply (FIdent ("shl_int", 0), [], [sym_expr x; sym_expr y]))
+
+let sym_shr_int (loc: l) (x: sym) (y: sym) =
+  match x, y with
+  | Val x, Val y -> Val (VInt (prim_shr_int (to_integer loc x) (to_integer loc y)))
+  | _, Val y when is_zero y -> x
+  | _ -> Exp (Expr_TApply (FIdent ("shr_int", 0), [], [sym_expr x; sym_expr y]))
+
+let sym_lt_int (loc: l) (x: sym) (y: sym) =
+  match x, y with
+  | Val x, Val y -> Val (VBool (prim_lt_int (to_integer loc x) (to_integer loc y)))
+  | _ -> Exp (Expr_TApply (FIdent ("lt_int", 0), [], [sym_expr x; sym_expr y]))
+
+let sym_zrem_int (loc: l) (x: sym) (y: sym) =
+  match x, y with
+  | Val x, Val y -> Val (VInt (prim_zrem_int (to_integer loc x) (to_integer loc y)))
+  | _ -> Exp (Expr_TApply (FIdent ("zrem_int", 0), [], [sym_expr x; sym_expr y]))
 
 (*** Symbolic Boolean Operations ***)
 
@@ -643,11 +667,11 @@ let sym_lsl_bits loc w x y =
   | _ ->
       sym_prim (FIdent ("LSL", 0)) [sym_of_int w] [x;y]
 
-let zdiv_int x y =
+let sym_zdiv_int loc x y =
   match x, y with
   | Val (VInt i), Val (VInt j) -> Val (VInt (Z.div i j))
   | _, Val (VInt i) when i = Z.one -> x
-  | _ -> Exp (Expr_TApply (FIdent ("sdiv_int", 0), [], [sym_expr x; sym_expr y]))
+  | _ -> Exp (Expr_TApply (FIdent ("zdiv_int", 0), [], [sym_expr x; sym_expr y]))
 
 (** Overwrite bits from position lo up to (lo+wd) exclusive of old with the value v.
     Needs to know the widths of both old and v to perform the operation.
@@ -668,7 +692,7 @@ let sym_insert_bits loc (old_width: int) (old: sym) (lo: sym) (wd: sym) (v: sym)
           (sym_append_bits loc wd lo v (sym_slice loc old 0 lo))
   | (_, _, Val wd', _) when Primops.prim_zrem_int (Z.of_int old_width) (to_integer Unknown wd') = Z.zero && !use_vectoriser ->
       (* Elem.set *)
-      let pos = zdiv_int lo wd in
+      let pos = sym_zdiv_int loc lo wd in
       Exp ( Expr_TApply (FIdent("Elem.set", 0), [expr_of_int old_width ; sym_expr wd],
           List.map sym_expr [old ; pos ; wd ; v]) )
   | (_, Val (VInt l), _, _) when l = Z.zero && !use_vectoriser ->
@@ -746,6 +770,8 @@ let sym_prim_simplify (name: string) (tes: sym list) (es: sym list): sym option 
   | ("add_int",  [ ], [x1; x2]) -> Some (sym_add_int loc x1 x2)
   | ("sub_int",  [ ], [x1; x2]) -> Some (sym_sub_int loc x1 x2)
   | ("mul_int",  [ ], [x1; x2]) -> Some (sym_mul_int loc x1 x2)
+  | ("shl_int",  [ ], [x1; x2]) -> Some (sym_shl_int loc x1 x2)
+  | ("shr_int",  [ ], [x1; x2]) -> Some (sym_shr_int loc x1 x2)
   | ("eq_int",   [ ], [x1; x2]) -> Some (sym_eq_int loc x1 x2)
   | ("add_bits", [w], [x1; x2]) -> Some (sym_add_bits loc (sym_expr w) x1 x2)
 
@@ -767,6 +793,14 @@ let sym_prim_simplify (name: string) (tes: sym list) (es: sym list): sym option 
       let z = Val (VBits (prim_zeros_bits s)) in
       let lower = sym_slice loc x1 si u in
       Some (sym_append_bits loc si u z lower)
+
+  (* ROR{w}(x,y) = x[0 +: s]:x[s +: (w - s)] where s = y mod w, when y >= 0 *)
+  | ("ROR",         [Val (VInt w)],   [x; Val (VInt y)]) when Z.geq y Z.zero ->
+      let s = Z.to_int (prim_frem_int y w) in
+      let w' = Z.to_int w - s in
+      let upper = sym_slice loc x 0 s in
+      let lower = sym_slice loc x s w' in
+      Some (sym_append_bits loc s w' upper lower)
 
   | ("ZeroExtend",  [Val (VInt v1); Val (VInt v2)], [x1;_]) when Z.equal v1 v2 -> Some x1
 

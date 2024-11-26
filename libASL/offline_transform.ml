@@ -179,6 +179,7 @@ let pure_prims =
     "sle_bits";
     "lsl_bits";
     "asr_bits";
+    "ror_bits";
     "slt_bits";
     "sdiv_bits";
   ]

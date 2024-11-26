@@ -37,19 +37,21 @@ bits(N) sdiv_bits(bits(N) x, bits(N) y)
     integer yn = SInt(y);
     return RoundTowardsZero(Real(xn) / Real (yn))[N-1:0];
 
-bits(N1) lsl_bits(bits(N1) x, bits(N2) y)
-    integer yn = SInt(y);
-    // LSL will assert if yn is negative, but we assume this
-    // operation is pure. Wrap it to be identity in this case.
-    return if yn < 0 then x else LSL(x, yn);
+bits(N) lsl_bits(bits(N) x, bits(N) y)
+    integer yn = UInt(y);
+    return LSL(x, yn);
 
-bits(N1) lsr_bits(bits(N1) x, bits(N2) y)
-    integer yn = SInt(y);
+bits(N) lsr_bits(bits(N) x, bits(N) y)
+    integer yn = UInt(y);
     return LSR(x, yn);
 
-bits(N1) asr_bits(bits(N1) x, bits(N2) y)
-    integer yn = SInt(y);
+bits(N) asr_bits(bits(N) x, bits(N) y)
+    integer yn = UInt(y);
     return ASR(x, yn);
+
+bits(N) ror_bits(bits(N) x, bits(N) y)
+    integer yn = UInt(y);
+    return ROR(x, yn);
 
 integer HighestSetBit(bits(N) x)
     assert 0 < N && N <= 64;

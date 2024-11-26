@@ -114,6 +114,7 @@ let no_inline_pure () = [
   "LSL",0;
   "LSR",0;
   "ASR",0;
+  "ROR",0;
   "SignExtend",0;
   "ZeroExtend",0;
 ] @ (if !Symbolic.use_vectoriser then [
