@@ -104,7 +104,9 @@ let prim_round_up_real     (x: real): bigint =
         Z.add Z.one (Q.to_bigint x)
     end
 
-let prim_sqrt_real         (x: real): real = failwith "prim_sqrt_real"
+(* TODO: Not sure exactly what rounding/precision is expected here *)
+let prim_sqrt_real         (x: real): real =
+    Q.make (Z.sqrt (Q.num x)) (Z.sqrt (Q.den x))
 
 
 (****************************************************************)

@@ -307,7 +307,7 @@ let eval_prim (f: string) (tvs: value list) (vs: value list): value option =
     | ("round_tozero_real", [      ], [VReal x             ])     -> Some (VInt    (prim_round_tozero_real x))
     | ("round_down_real",   [      ], [VReal x             ])     -> Some (VInt    (prim_round_down_real x))
     | ("round_up_real",     [      ], [VReal x             ])     -> Some (VInt    (prim_round_up_real x))
-    | ("sqrt_real",         [      ], [VReal x; VReal y    ])     -> Some (VReal   (prim_sqrt_real x))
+    | ("sqrt_real",         [      ], [VReal x             ])     -> Some (VReal   (prim_sqrt_real x))
     | ("cvt_int_bits",      [_     ], [VInt  x; VInt  n    ])     -> Some (VBits   (prim_cvt_int_bits n x))
     | ("cvt_bits_sint",     [VInt n], [VBits x             ])     -> Some (VInt    (prim_cvt_bits_sint x))
     | ("cvt_bits_uint",     [VInt n], [VBits x             ])     -> Some (VInt    (prim_cvt_bits_uint x))

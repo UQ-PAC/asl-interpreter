@@ -298,36 +298,44 @@
   __array _Z [ 1 ] = and_bits.0 {{ 128 }} ( __array _Z [ 5 ],__array _Z [ 1 ] ) ;
   "0x4e61d800"
   Decoding instruction A64 4e61d800
+  constant bits ( 128 ) Exp6__5 = __array _Z [ 0 ] ;
   bits ( 128 ) result__4 ;
+  constant bits ( 32 ) Exp7__4 = FPCR ;
   bits ( 4 ) FPDecodeRounding9__6 ;
   FPDecodeRounding9__6 = ZeroExtend.0 {{ 2,4 }} ( FPCR [ 22 +: 2 ],4 ) ;
-  constant bits ( 64 ) Exp12__5 = FixedToFP.0 {{ 64,64 }} ( Elem.read.0 {{ 128,64 }} ( __array _Z [ 0 ],0,64 ),0,FALSE,FPCR,cvt_bits_uint.0 {{ 4 }} ( FPDecodeRounding9__6 ) ) ;
-  constant bits ( 64 ) Exp13__5 = FixedToFP.0 {{ 64,64 }} ( Elem.read.0 {{ 128,64 }} ( __array _Z [ 0 ],1,64 ),0,FALSE,FPCR,cvt_bits_uint.0 {{ 4 }} ( FPDecodeRounding9__6 ) ) ;
-  __array _Z [ 0 ] = Elem.set.0 {{ 128,64 }} ( Elem.set.0 {{ 128,64 }} ( result__4,0,64,Exp12__5 ),1,64,Exp13__5 ) ;
+  constant bits ( 4 ) Exp10__6 = FPDecodeRounding9__6 ;
+  result__4 = fixed_to_fp_vec.0 {{ 2,64,64 }} ( Exp6__5,0,FALSE,Exp7__4,cvt_bits_uint.0 {{ 4 }} ( Exp10__6 ),2 ) ;
+  __array _Z [ 0 ] = result__4 ;
   "0x4e61d821"
   Decoding instruction A64 4e61d821
+  constant bits ( 128 ) Exp6__5 = __array _Z [ 1 ] ;
   bits ( 128 ) result__4 ;
+  constant bits ( 32 ) Exp7__4 = FPCR ;
   bits ( 4 ) FPDecodeRounding9__6 ;
   FPDecodeRounding9__6 = ZeroExtend.0 {{ 2,4 }} ( FPCR [ 22 +: 2 ],4 ) ;
-  constant bits ( 64 ) Exp12__5 = FixedToFP.0 {{ 64,64 }} ( Elem.read.0 {{ 128,64 }} ( __array _Z [ 1 ],0,64 ),0,FALSE,FPCR,cvt_bits_uint.0 {{ 4 }} ( FPDecodeRounding9__6 ) ) ;
-  constant bits ( 64 ) Exp13__5 = FixedToFP.0 {{ 64,64 }} ( Elem.read.0 {{ 128,64 }} ( __array _Z [ 1 ],1,64 ),0,FALSE,FPCR,cvt_bits_uint.0 {{ 4 }} ( FPDecodeRounding9__6 ) ) ;
-  __array _Z [ 1 ] = Elem.set.0 {{ 128,64 }} ( Elem.set.0 {{ 128,64 }} ( result__4,0,64,Exp12__5 ),1,64,Exp13__5 ) ;
+  constant bits ( 4 ) Exp10__6 = FPDecodeRounding9__6 ;
+  result__4 = fixed_to_fp_vec.0 {{ 2,64,64 }} ( Exp6__5,0,FALSE,Exp7__4,cvt_bits_uint.0 {{ 4 }} ( Exp10__6 ),2 ) ;
+  __array _Z [ 1 ] = result__4 ;
   "0x4e61d842"
   Decoding instruction A64 4e61d842
+  constant bits ( 128 ) Exp6__5 = __array _Z [ 2 ] ;
   bits ( 128 ) result__4 ;
+  constant bits ( 32 ) Exp7__4 = FPCR ;
   bits ( 4 ) FPDecodeRounding9__6 ;
   FPDecodeRounding9__6 = ZeroExtend.0 {{ 2,4 }} ( FPCR [ 22 +: 2 ],4 ) ;
-  constant bits ( 64 ) Exp12__5 = FixedToFP.0 {{ 64,64 }} ( Elem.read.0 {{ 128,64 }} ( __array _Z [ 2 ],0,64 ),0,FALSE,FPCR,cvt_bits_uint.0 {{ 4 }} ( FPDecodeRounding9__6 ) ) ;
-  constant bits ( 64 ) Exp13__5 = FixedToFP.0 {{ 64,64 }} ( Elem.read.0 {{ 128,64 }} ( __array _Z [ 2 ],1,64 ),0,FALSE,FPCR,cvt_bits_uint.0 {{ 4 }} ( FPDecodeRounding9__6 ) ) ;
-  __array _Z [ 2 ] = Elem.set.0 {{ 128,64 }} ( Elem.set.0 {{ 128,64 }} ( result__4,0,64,Exp12__5 ),1,64,Exp13__5 ) ;
+  constant bits ( 4 ) Exp10__6 = FPDecodeRounding9__6 ;
+  result__4 = fixed_to_fp_vec.0 {{ 2,64,64 }} ( Exp6__5,0,FALSE,Exp7__4,cvt_bits_uint.0 {{ 4 }} ( Exp10__6 ),2 ) ;
+  __array _Z [ 2 ] = result__4 ;
   "0x4e61d863"
   Decoding instruction A64 4e61d863
+  constant bits ( 128 ) Exp6__5 = __array _Z [ 3 ] ;
   bits ( 128 ) result__4 ;
+  constant bits ( 32 ) Exp7__4 = FPCR ;
   bits ( 4 ) FPDecodeRounding9__6 ;
   FPDecodeRounding9__6 = ZeroExtend.0 {{ 2,4 }} ( FPCR [ 22 +: 2 ],4 ) ;
-  constant bits ( 64 ) Exp12__5 = FixedToFP.0 {{ 64,64 }} ( Elem.read.0 {{ 128,64 }} ( __array _Z [ 3 ],0,64 ),0,FALSE,FPCR,cvt_bits_uint.0 {{ 4 }} ( FPDecodeRounding9__6 ) ) ;
-  constant bits ( 64 ) Exp13__5 = FixedToFP.0 {{ 64,64 }} ( Elem.read.0 {{ 128,64 }} ( __array _Z [ 3 ],1,64 ),0,FALSE,FPCR,cvt_bits_uint.0 {{ 4 }} ( FPDecodeRounding9__6 ) ) ;
-  __array _Z [ 3 ] = Elem.set.0 {{ 128,64 }} ( Elem.set.0 {{ 128,64 }} ( result__4,0,64,Exp12__5 ),1,64,Exp13__5 ) ;
+  constant bits ( 4 ) Exp10__6 = FPDecodeRounding9__6 ;
+  result__4 = fixed_to_fp_vec.0 {{ 2,64,64 }} ( Exp6__5,0,FALSE,Exp7__4,cvt_bits_uint.0 {{ 4 }} ( Exp10__6 ),2 ) ;
+  __array _Z [ 3 ] = result__4 ;
   "0x4ea11c23"
   Decoding instruction A64 4ea11c23
   __array _Z [ 3 ] = or_bits.0 {{ 128 }} ( __array _Z [ 1 ],__array _Z [ 1 ] ) ;
