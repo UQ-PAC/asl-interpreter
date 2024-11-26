@@ -33,7 +33,7 @@ let elem_ops = [
   ("ite",       "ite_vec");
   ("BFMul",     "bf_mul_vec");
   ("BFAdd",     "bf_add_vec");
-]
+] (* FPRSqrtStepFused, FPRecipStepFused, UnsignedRSqrtEstimate *)
 
 (* Operations expecting an additional, final scalar argument. *)
 let sv_final_ops = [
@@ -53,9 +53,19 @@ let sv_final_ops = [
   ("FPCompareGE", "fp_cmp_ge_vec");
   ("FPCompareGT", "fp_cmp_gt_vec");
   ("FPRSqrtEstimate", "fpr_sqrt_est_vec");
+  ("FPRecipEstimate", "fp_recip_est_vec");
   ("ZeroExtend",  "zcast_vec");
   ("SignExtend",  "scast_vec");
   ("trunc",       "trunc_vec");
+]
+
+let cast_ops = [
+  ("FPConvert",   "fp_convert_vec");
+  ("FPConvertBF", "fp_convert_bf_vec");
+  ("FPRoundInt",  "fp_round_int_vec");
+  ("FPRoundIntN", "fp_round_intn_vec");
+  ("FPToFixed",   "fp_to_fixed_vec");
+  ("FixedToFP",   "fixed_to_fp_vec");
 ]
 
 (* Trivial vector operations, with a iteration count as the final argument. *)
@@ -828,14 +838,9 @@ module Vectorize = struct
         Value e
     | Value e, Value lo, Value wd ->
         Value (Expr_Slices(e, [Slice_LoWd(lo, wd)]))
-    (* A truncate operation *)
-    | Map _, Value lo, Value nw when expr_is_int lo 0 ->
-        Map ("trunc", [ow; nw], [e; Value nw])
     (* A shift and truncate operation *)
-    | Map _, Value lo, Value nw  ->
-        let lo = cvt_int_bits lo ow in
-        let e' = Map("asr_bits", [ow], [e; Value lo]) in
-        Map ("trunc", [ow; nw], [e'; Value nw])
+    | Map _, Value _, Value _->
+        Map("slice", [ow], [e; lo; nw])
     (* Slice that can be converted to Elem.read *)
     | Value e, Index[b,m], Value wd
         when is_factor b wd && is_factor m wd && is_factor ow wd ->
@@ -891,6 +896,7 @@ module Vectorize = struct
     | f, 0, tes, es when List.mem_assoc f elem_ops -> Map(f, tes, es)
     (* Element-wise + Scalar Arg Operations *)
     | f, 0, tes, es when List.mem_assoc f sv_final_ops -> Map(f, tes, es)
+    | f, 0, tes, es when List.mem_assoc f cast_ops -> Map(f, tes, es)
     (* Vec Ops *)
     | f, 0, tes, es when List.mem f vec_ops -> Map(f, tes, es)
     | f, 0, tes, es when List.mem f sv_final_vec_ops -> Map(f, tes, es)
@@ -1060,8 +1066,11 @@ module Vectorize = struct
     | Map(f,[w],es) when List.mem_assoc f bit_ops ->
         Expr_TApply(FIdent(List.assoc f bit_ops,0), [mul_int iters w], List.map (unroll st) es)
     (* Element-wise Vector Operations *)
-    | Map(f,[w],es) when List.mem_assoc f elem_ops ->
-        Expr_TApply(FIdent(List.assoc f elem_ops,0), [iters; w], (List.map (unroll st) es)@[iters])
+    | Map(f,tes,es) when List.mem_assoc f elem_ops ->
+        Expr_TApply(FIdent(List.assoc f elem_ops,0), iters::tes, (List.map (unroll st) es)@[iters])
+    | Map(f,tes,e::es) when List.mem_assoc f cast_ops && List.for_all is_val es ->
+        let es = List.map force_val es in
+        Expr_TApply(FIdent(List.assoc f cast_ops,0), iters::tes, (unroll st e)::es@[iters])
     (* Element-wise + Scalar Arg Operations *)
     | Map(f, tes, es) as abs when List.mem_assoc f sv_final_ops ->
         let (es,l) = Utils.getlast es in
@@ -1114,6 +1123,7 @@ module Vectorize = struct
         let iters = expr_of_int (List.length sel) in
         select_vec elems iters elemw e (mk_int_list sel)
 
+    (* Append patterns *)
     | Map("append_bits", [w1;w2], [e1;e2]) when w1 = w2 ->
         let e1 = unroll st e1 in
         let e2 = unroll st e2 in
@@ -1123,6 +1133,30 @@ module Vectorize = struct
         let sel = mk_int_list sel in
         let i = mul_int st.iterations (expr_of_int 2) in
         select_vec i i w1 e sel
+    | Map("append_bits", [w1;w2], [e1;Value (Expr_LitBits s)]) when (parse_bits s).v = Z.zero  ->
+        let e = unroll st e1 in
+        let w = add_int w1 w2 in
+        let s = unroll st (Value (cvt_int_bits w2 w)) in
+        let e' = Expr_TApply(FIdent("zcast_vec",0), [st.iterations; w1; w], [e; w; st.iterations]) in
+        Expr_TApply(FIdent("lsl_vec", 0), [st.iterations; w], [e'; s; st.iterations])
+    | Map("append_bits", [w1;w2], [
+        Map("not_bits", _, [Map("slice", _, [e;Value lo;_])]);
+        Map("slice",[ow],[e';Value lo';_])])
+          when expr_is_int w1 1 && e = e' && lo = w2 && expr_is_int lo' 0 && ow = add_int w2 w1 ->
+            let w = int_of_expr ow in
+            let m = expr_of_bv { n = w ; v = Z.shift_left Z.one (w - 1) } in
+            let m = unroll st (Value m) in
+            let e = unroll st e in
+            Expr_TApply(FIdent("eor_bits", 0), [mul_int st.iterations ow], [e;m])
+    | Map("append_bits", [w1;w2], [e1;e2]) ->
+        let e1 = unroll st e1 in
+        let e2 = unroll st e2 in
+        let w = add_int w1 w2 in
+        let s = unroll st (Value (cvt_int_bits w2 w)) in
+        let e1 = Expr_TApply(FIdent("zcast_vec",0), [st.iterations; w1; w], [e1; w; st.iterations]) in
+        let e2 = Expr_TApply(FIdent("zcast_vec",0), [st.iterations; w2; w], [e2; w; st.iterations]) in
+        let e1 = Expr_TApply(FIdent("lsl_vec", 0), [st.iterations; w], [e1; s; st.iterations]) in
+        Expr_TApply(FIdent("add_vec",0), [st.iterations; w], [e1; e2; st.iterations])
 
     (* Array Loads *)
     | Map("array", [], [Value v; Index[b,m]]) ->
@@ -1130,6 +1164,11 @@ module Vectorize = struct
         let w = width_of_expr st (Expr_Array(v, expr_of_int 0)) in
         let z = List.map (fun i -> (w,Expr_Array(v, i))) is in
         concat_bits z
+
+    (* Slice ops *)
+    | Map("slice", [ow], [e; Value lo; Value nw]) ->
+        let e = if expr_is_int lo 0 then e else Map("asr_bits", [ow], [e; Value (cvt_int_bits lo ow)]) in
+        unroll st (Map ("trunc", [ow; nw], [e; Value nw]))
 
     (* Index unrolling *)
     | Index l   ->
@@ -1160,6 +1199,12 @@ module Vectorize = struct
         let es = List.for_all (no_write_read var pos) es in
         tes && es
     | _ -> no_fv var abs
+
+  let is_bit_set w var e =
+    match e with
+    | Expr_TApply(FIdent("append_bits",0), _, [Expr_Slices(var', [Slice_LoWd(lo,wd)]);Expr_TApply(FIdent("append_bits",0), _, [Expr_LitBits "1"; Expr_Slices(var'', [Slice_LoWd(lo',wd')])])]) ->
+        expr_is_int lo' 0 && add_int wd' (expr_of_int 1) = lo && add_int lo wd = w && var = var' && var = var''
+    | _ -> false
 
   (* Ensure a vector write does not create a write-write dependency.
      Takes the position argument of an update_vec and ensures all locations
@@ -1197,19 +1242,26 @@ module Vectorize = struct
           update_vec elems iters elemw (Expr_Var var) sel arg
 
     (* Reduce Add/EOR *)
-    | Map(("add_bits" | "eor_bits") as f, [w], [Value (Expr_Var var') ; e])
+    | Map(("add_bits" | "eor_bits" | "BFAdd") as f, tes, [Value (Expr_Var var') ; e])
         when var' = var && not (IdentSet.mem var (deps e)) ->
           let e = unroll st e in
-          let op = if f = "add_bits" then "reduce_add" else "reduce_eor" in
-          Expr_TApply (FIdent(op,0), [st.iterations; w], [e ; Expr_Var var; st.iterations])
+          let op = if f = "add_bits" then "reduce_add" else if f = "eor_bits" then "reduce_eor"  else "reduce_bf_add" in
+          Expr_TApply (FIdent(op,0), st.iterations::tes, [e ; Expr_Var var; st.iterations])
     | Map("ite", [w], [c; Map("eor_bits" as f, _, [Value (Expr_Var var') ; e]); Value (Expr_Var var'')])
-        when var' = var && var'' = var && not (IdentSet.mem var (deps e)) ->
+        when var' = var && var'' = var && not (IdentSet.mem var (deps e)) && not (IdentSet.mem var (deps c)) ->
           let z = zeroes (mul_int st.iterations w) in
           let e = unroll st e in
           let c = unroll st c in
           let f = if f = "add_bits" then "reduce_add" else "reduce_eor" in
           let i = Expr_TApply (FIdent("ite_vec", 0), [st.iterations; w], [c ; e ; z ; st.iterations]) in
           Expr_TApply (FIdent(f,0), [st.iterations; w], [i;Expr_Var var;st.iterations])
+    | Map("ite", [w], [c; Value(Expr_TApply(FIdent("add_bits",0), _, [Expr_Var var'; e])); Value(Expr_Var var'')]) 
+        when var = var' && var = var'' && not (IdentSet.mem var (fv_expr e)) && no_fv var c ->
+          let z = zeroes (mul_int st.iterations w) in
+          let e = unroll st (Value e) in
+          let c = unroll st c in
+          let i = Expr_TApply (FIdent("ite_vec", 0), [st.iterations; w], [c ; e ; z ; st.iterations]) in
+          Expr_TApply (FIdent("reduce_add", 0), [st.iterations; w], [i; Expr_Var var; st.iterations])
 
     (* Signed Min : var <= e ? var : e *)
     | Map("ite", [w], [Map("sle_bits", _, [Value (Expr_Var var'); e]); Value (Expr_Var var''); e'])
@@ -1225,20 +1277,20 @@ module Vectorize = struct
     | Map("ite", [w], [Map("sle_bits", _, [Value (Expr_TApply (FIdent("ZeroExtend", 0), _, [Expr_Var var';_])); Map("ZeroExtend", _, [e;_])]); Value (Expr_Var var''); e'])
         when var' = var'' && var = var' && e = e' && no_fv var e ->
           let e = unroll st e in
-          Expr_TApply (FIdent("reduce_smin",0), [st.iterations; w], [e; Expr_Var var])
+          Expr_TApply (FIdent("reduce_umin",0), [st.iterations; w], [e; Expr_Var var])
     (* Unsigned Max : zcast e <= zcast var ? var : e *)
     | Map("ite", [w], [Map("sle_bits", _, [Map("ZeroExtend", _, [e;_]); Value (Expr_TApply (FIdent("ZeroExtend", 0), _, [Expr_Var var';_]))]); Value (Expr_Var var''); e'])
         when var' = var'' && var = var' && e = e' && no_fv var e ->
           let e = unroll st e in
-          Expr_TApply (FIdent("reduce_smax",0), [st.iterations; w], [e; Expr_Var var])
+          Expr_TApply (FIdent("reduce_umax",0), [st.iterations; w], [e; Expr_Var var])
 
     (* Conditional Bit Set *)
-    (*| Map("ite", tes, [c;Value t;Value f]) when var = Ident "FPSR" ->
+    | Map("ite", [w], [c;Value t; Value (Expr_Var var')]) when no_fv var c && var' = var && is_bit_set w (Expr_Var var) t ->
         let ew = width_of_expr st t in
         let c = unroll st c in
         let w = width_of_expr st c in
         let test = Expr_TApply(FIdent("eq_bits", 0), [w], [c; zeroes w]) in
-        Expr_TApply(FIdent("ite", 0), [ew], [test; f; t]) *)
+        Expr_TApply(FIdent("ite", 0), [ew], [test; Expr_Var var; t])
 
     | _ -> error @@ "Failed to summarize " ^ pprint_ident var ^ " <- " ^ pp_abs abs
 
