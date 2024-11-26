@@ -502,6 +502,13 @@ let initializeRegistersAndMemory (env: Env.t) (xs: bigint list): unit =
         vals
     in
     Env.setVar Unknown env (Ident "_R") (VArray (arr, d));
+    let vals = List.mapi (fun i v -> (i, VBits {n=128; v})) xs in
+    let arr = List.fold_left
+        (fun a (k,v) -> ImmutableArray.add k v a)
+        ImmutableArray.empty
+        vals
+    in
+    Env.setVar Unknown env (Ident "_Z") (VArray (arr, d));
     let ram = Primops.init_ram (char_of_int 0) in
     ram.default <- None;
     Env.setVar Unknown env (Ident "__Memory") (VRAM ram)
@@ -811,7 +818,7 @@ and eval_lexpr (loc: l) (env: Env.t) (x: AST.lexpr) (r: value): unit =
                 | (s :: ss) ->
                         let (i, w) = eval_slice loc env s in
                         let v      = extract_bits'' loc r o w in
-                        eval (eval_add_int loc o w) ss (insert_bits loc prev i w v)
+                        eval (eval_add_int loc o w) ss (insert_bits'' loc prev i w v)
                 )
             in
             eval_lexpr_modify loc env l (eval (VInt Z.zero) (List.rev ss))

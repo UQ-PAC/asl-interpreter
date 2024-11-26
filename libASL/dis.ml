@@ -100,6 +100,8 @@ let no_inline = [
   "BFAdd",0;
   "BFMul",0;
   "FPRecipEstimate",0;
+  "FPRSqrtEstimate",0;
+  "UnsignedRSqrtEstimate",0;
   "Mem.read",0;
   "Mem.set",0;
   "AtomicStart",0;

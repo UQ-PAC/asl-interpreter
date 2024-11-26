@@ -17,6 +17,12 @@ let pure_prims =
     FIdent("lsl_bits",0);
     FIdent("slt_bits",0);
     FIdent("sle_bits",0);
+    FIdent("sdiv_bits",0);
+    FIdent("LSL",0);
+    FIdent("LSR",0);
+    FIdent("ASR",0);
+    FIdent("Elem.set",0);
+    FIdent("Elem.read",0);
   ]
 
 let infer_type (e: expr): ty option =
@@ -97,6 +103,9 @@ let infer_type (e: expr): ty option =
     | "LSL"                -> Some(Type_Bits(num))
     | "LSR"                -> Some(Type_Bits(num))
     | "ASR"                -> Some(Type_Bits(num))
+    | "lsl_bits"           -> Some(Type_Bits(num))
+    | "lsr_bits"           -> Some(Type_Bits(num))
+    | "asr_bits"           -> Some(Type_Bits(num))
     | "cvt_bits_uint"      -> Some(type_integer)
     | "cvt_bits_sint"      -> Some(type_integer)
     | "eq_bits"            -> Some(type_bool)
@@ -134,6 +143,9 @@ module RemoveUnused = struct
     | Expr_TApply (FIdent ("or_bool", 0), [], [a;b]) -> is_true a || is_true b
     | _ -> false
 
+  let pure_fns = IdentSet.of_seq (List.to_seq (FIdent("Mem.read",0) :: pure_prims))
+  let contains_impure s =  not (IdentSet.subset (calls_of_stmt s) pure_fns)
+
   let rec remove_unused (globals: IdentSet.t) xs = fst (remove_unused' globals IdentSet.empty xs)
 
   and remove_unused' globals (used: IdentSet.t) (xs: stmt list): (stmt list * IdentSet.t) =
@@ -151,16 +163,16 @@ module RemoveUnused = struct
         | [] -> pass
         | _ -> emit (Stmt_VarDeclsNoInit(ty, vs', loc)))
       | Stmt_VarDecl(ty, v, i, loc) ->
-        if IdentSet.mem v used
+        if IdentSet.mem v used || contains_impure stmt
           then emit stmt
           else pass
       | Stmt_ConstDecl(ty, v, i, loc) ->
-        if IdentSet.mem v used
+        if IdentSet.mem v used || contains_impure stmt
           then emit stmt
           else pass
       | Stmt_Assign(le, r, loc) ->
         let lvs = assigned_vars_of_stmts [stmt] in
-        if not (IdentSet.disjoint lvs used) || not (IdentSet.disjoint lvs globals)
+        if not (IdentSet.disjoint lvs used) || not (IdentSet.disjoint lvs globals) || contains_impure stmt
           then emit stmt
           else pass
 
@@ -1472,7 +1484,19 @@ module CommonSubExprElim = struct
   *)
   exception CSEError of string
 
-  class gather_expressions = object
+  class gather_consts = object
+    inherit nopAslVisitor
+    val mutable consts : IdentSet.t = IdentSet.empty
+    method! vstmt s =
+      (match s with
+      | Stmt_ConstDecl(_, n, _, _) ->
+          consts <- IdentSet.add n consts;
+          SkipChildren
+      | _ -> DoChildren)
+    method get_info = consts
+  end
+
+  class gather_expressions consts = object
     inherit Asl_visitor.nopAslVisitor
 
     val mutable exprs: expr list = ([]: expr list);
@@ -1488,7 +1512,7 @@ module CommonSubExprElim = struct
       let () = match e with
       (* For now, only gather TApply's that we've seen more than once
          See eval_prim in value.ml for the list of what that covers. *)
-      | Expr_TApply(f,_,_) when List.mem f pure_prims ->
+      | Expr_TApply(f,_,_) when List.mem f pure_prims && IdentSet.subset (fv_expr e) consts ->
           (match infer_type e with
           | Some (Type_Bits _) ->
               if (List.mem e cand_exprs) && not (List.mem e exprs) then
@@ -1592,7 +1616,10 @@ module CommonSubExprElim = struct
     )
 
   let do_transform (xs: stmt list): stmt list =
-    let expression_visitor = new gather_expressions in
+    let const_visitor = new gather_consts in
+    let _ = visit_stmts const_visitor xs in
+
+    let expression_visitor = new gather_expressions (const_visitor#get_info) in
     let expression_replacer = new replace_all_instances in
 
     let xs = visit_stmts expression_visitor xs in

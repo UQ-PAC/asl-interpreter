@@ -371,6 +371,11 @@ let calls_of_expr expr =
   ignore (visit_expr (cc :> aslVisitor) expr);
   cc#result
 
+let calls_of_stmt stmt =
+  let cc = new callsClass in
+  ignore (visit_stmt (cc :> aslVisitor) stmt);
+  cc#result
+
 let calls_of_stmts stmts =
   let cc = new callsClass in
   ignore (visit_stmts (cc :> aslVisitor) stmts);

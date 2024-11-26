@@ -425,6 +425,11 @@ let insert_bits (loc: AST.l) (x: value) (i: value) (w: value) (y: value): value 
 let insert_bits' (loc: AST.l) (x: value) (i: int) (w: int) (y: value): value =
     VBits (prim_insert (to_bits loc x) (Z.of_int i) (Z.of_int w) (to_bits loc y))
 
+let insert_bits'' (loc: AST.l) (x: value) (i: value) (w: value) (y: value): value =
+    (match x with
+    | VInt(x')  -> VInt (prim_insert_int x' (to_integer loc i) (to_integer loc w) (to_bits loc y))
+    | _ -> insert_bits loc x i w y)
+
 let rec eval_eq (loc: AST.l) (x: value) (y: value): bool =
     (match (x, y) with
     | (VBool   x', VBool   y') -> prim_eq_bool x' y'
