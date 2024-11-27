@@ -454,13 +454,16 @@ let sym_inmask loc v mask =
       let v = Val (VBits {v = mask.v; n}) in
       sym_eq_bits loc (sym_and_bits loc ne (Exp e) m) v
 
-let sym_or_bits loc w (x: sym) (y: sym) =
+let rec sym_or_bits loc w (x: sym) (y: sym) =
   match x, y with
   | Val x, Val y -> Val (VBits (prim_or_bits (to_bits loc x) (to_bits loc y)))
   | Val x, y when is_one_bits x -> Val x
   | x, Val y when is_one_bits y -> Val y
   | Val x, y when is_zero_bits x -> y
   | x, Val y when is_zero_bits y -> x
+  (* (a /\ b) \/ !a ~> b \/ !a *)
+  | Exp (Expr_TApply (FIdent ("and_bits", 0), _, [a; x])), Exp (Expr_TApply (FIdent ("not_bits", 0), _, [a'])) when a = a' ->
+      sym_or_bits loc w (sym_of_expr x) y
   | _ -> Exp (Expr_TApply (FIdent ("or_bits", 0), [w], [sym_expr x; sym_expr y]) )
 
 (** Construct a ITE expression from bitvector operations. Expects arguments to be 1 bit wide. *)
