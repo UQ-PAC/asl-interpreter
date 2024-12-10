@@ -31,12 +31,16 @@ run asli with these commands
   0xa8c80861
   "
   Decoding instruction A64 a8c80861
-  __array _R [ 1 ] = Mem.read.0 {{ 8 }} ( __array _R [ 3 ],8,0 ) ;
-  __array _R [ 2 ] = Mem.read.0 {{ 8 }} ( add_bits.0 {{ 64 }} ( __array _R [ 3 ],'0000000000000000000000000000000000000000000000000000000000001000' ),8,0 ) ;
+  constant bits ( 64 ) Exp16__5 = Mem.read.0 {{ 8 }} ( __array _R [ 3 ],8,0 ) ;
+  constant bits ( 64 ) Exp18__5 = Mem.read.0 {{ 8 }} ( add_bits.0 {{ 64 }} ( __array _R [ 3 ],'0000000000000000000000000000000000000000000000000000000000001000' ),8,0 ) ;
+  __array _R [ 1 ] = Exp16__5 ;
+  __array _R [ 2 ] = Exp18__5 ;
   __array _R [ 3 ] = add_bits.0 {{ 64 }} ( __array _R [ 3 ],'0000000000000000000000000000000000000000000000000000000010000000' ) ;
   ""
-  Stmt_Assign(LExpr_Array(LExpr_Var("_R"),1),Expr_TApply("Mem.read.0",[8],[Expr_Array(Expr_Var("_R"),3);8;0]))
-  Stmt_Assign(LExpr_Array(LExpr_Var("_R"),2),Expr_TApply("Mem.read.0",[8],[Expr_TApply("add_bits.0",[64],[Expr_Array(Expr_Var("_R"),3);'0000000000000000000000000000000000000000000000000000000000001000']);8;0]))
+  Stmt_ConstDecl(Type_Bits(64),"Exp16__5",Expr_TApply("Mem.read.0",[8],[Expr_Array(Expr_Var("_R"),3);8;0]))
+  Stmt_ConstDecl(Type_Bits(64),"Exp18__5",Expr_TApply("Mem.read.0",[8],[Expr_TApply("add_bits.0",[64],[Expr_Array(Expr_Var("_R"),3);'0000000000000000000000000000000000000000000000000000000000001000']);8;0]))
+  Stmt_Assign(LExpr_Array(LExpr_Var("_R"),1),Expr_Var("Exp16__5"))
+  Stmt_Assign(LExpr_Array(LExpr_Var("_R"),2),Expr_Var("Exp18__5"))
   Stmt_Assign(LExpr_Array(LExpr_Var("_R"),3),Expr_TApply("add_bits.0",[64],[Expr_Array(Expr_Var("_R"),3);'0000000000000000000000000000000000000000000000000000000010000000']))
   "
   0xa8880861

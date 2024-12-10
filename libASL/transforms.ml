@@ -1289,7 +1289,7 @@ module CopyProp = struct
     | Expr_Var v -> true
     | Expr_Field (e,_) -> candidateExpr e
     | Expr_Array (e,_) -> candidateExpr e
-    | Expr_TApply (f,_,_) -> (name_of_FIdent f = "Mem.read")
+    (*| Expr_TApply (f,_,_) -> (name_of_FIdent f = "Mem.read")*)
     | _ -> false
 
   let candidateIdent (i: ident) =
