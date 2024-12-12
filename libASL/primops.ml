@@ -104,7 +104,9 @@ let prim_round_up_real     (x: real): bigint =
         Z.add Z.one (Q.to_bigint x)
     end
 
-let prim_sqrt_real         (x: real): real = failwith "prim_sqrt_real"
+(* TODO: Not sure exactly what rounding/precision is expected here *)
+let prim_sqrt_real         (x: real): real =
+    Q.make (Z.sqrt (Q.num x)) (Z.sqrt (Q.den x))
 
 
 (****************************************************************)
@@ -213,6 +215,16 @@ let prim_insert (x: bitvector) (i: bigint) (w: bigint) (y: bitvector): bitvector
     let y' = Z.shift_left (z_extract y.v 0 w') i' in
     mkBits x.n (Z.logor (Z.logand nmsk x.v) (Z.logand msk y'))
 
+let prim_insert_int (x: Z.t) (i: bigint) (w: bigint) (y: bitvector): Z.t =
+    let i' = Z.to_int i in
+    let w' = Z.to_int w in
+    assert (0 <= i');
+    assert (0 <= w');
+    assert (w' = y.n);
+    let msk = (Z.sub (Z.shift_left Z.one (i'+w')) (Z.shift_left Z.one i')) in
+    let nmsk = Z.lognot msk in
+    let y' = Z.shift_left (z_extract y.v 0 w') i' in
+    (Z.logor (Z.logand nmsk x) (Z.logand msk y'))
 
 (****************************************************************)
 (** {2 Mask primops}                                            *)

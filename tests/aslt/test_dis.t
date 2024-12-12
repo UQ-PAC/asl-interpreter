@@ -97,35 +97,35 @@ run asli with these commands
   result__4 = '0000000000000000000000000000000000000000000000000000000000000000' ;
   if slt_bits.0 {{ 16 }} ( Cse15__5,'0000000000010000' ) then {
   assert and_bool.0 {{  }} ( TRUE,sle_bits.0 {{ 32 }} ( ZeroExtend.0 {{ 16,32 }} ( add_bits.0 {{ 16 }} ( Cse14__5,'0000000000001000' ),32 ),'00000000000000000000000010000000' ) ) ;
-  result__4 = ZeroExtend.0 {{ 8,64 }} ( lsr_bits.0 {{ 128,32 }} ( __array _Z [ 0 ],ZeroExtend.0 {{ 16,32 }} ( Cse14__5,32 ) ) [ 0 +: 8 ],64 ) ;
+  result__4 = ZeroExtend.0 {{ 8,64 }} ( lsr_bits.0 {{ 128 }} ( __array _Z [ 0 ],ZeroExtend.0 {{ 16,128 }} ( Cse14__5,128 ) ) [ 0 +: 8 ],64 ) ;
   }
   if slt_bits.0 {{ 16 }} ( Cse13__5,'0000000000010000' ) then {
   assert and_bool.0 {{  }} ( TRUE,sle_bits.0 {{ 32 }} ( ZeroExtend.0 {{ 16,32 }} ( add_bits.0 {{ 16 }} ( Cse12__5,'0000000000001000' ),32 ),'00000000000000000000000010000000' ) ) ;
-  result__4 = append_bits.0 {{ 48,16 }} ( result__4 [ 16 +: 48 ],append_bits.0 {{ 8,8 }} ( lsr_bits.0 {{ 128,32 }} ( __array _Z [ 0 ],ZeroExtend.0 {{ 16,32 }} ( Cse12__5,32 ) ) [ 0 +: 8 ],result__4 [ 0 +: 8 ] ) ) ;
+  result__4 = append_bits.0 {{ 48,16 }} ( result__4 [ 16 +: 48 ],append_bits.0 {{ 8,8 }} ( lsr_bits.0 {{ 128 }} ( __array _Z [ 0 ],ZeroExtend.0 {{ 16,128 }} ( Cse12__5,128 ) ) [ 0 +: 8 ],result__4 [ 0 +: 8 ] ) ) ;
   }
   if slt_bits.0 {{ 16 }} ( Cse11__5,'0000000000010000' ) then {
   assert and_bool.0 {{  }} ( TRUE,sle_bits.0 {{ 32 }} ( ZeroExtend.0 {{ 16,32 }} ( add_bits.0 {{ 16 }} ( Cse10__5,'0000000000001000' ),32 ),'00000000000000000000000010000000' ) ) ;
-  result__4 = append_bits.0 {{ 40,24 }} ( result__4 [ 24 +: 40 ],append_bits.0 {{ 8,16 }} ( lsr_bits.0 {{ 128,32 }} ( __array _Z [ 0 ],ZeroExtend.0 {{ 16,32 }} ( Cse10__5,32 ) ) [ 0 +: 8 ],result__4 [ 0 +: 16 ] ) ) ;
+  result__4 = append_bits.0 {{ 40,24 }} ( result__4 [ 24 +: 40 ],append_bits.0 {{ 8,16 }} ( lsr_bits.0 {{ 128 }} ( __array _Z [ 0 ],ZeroExtend.0 {{ 16,128 }} ( Cse10__5,128 ) ) [ 0 +: 8 ],result__4 [ 0 +: 16 ] ) ) ;
   }
   if slt_bits.0 {{ 16 }} ( Cse9__5,'0000000000010000' ) then {
   assert and_bool.0 {{  }} ( TRUE,sle_bits.0 {{ 32 }} ( ZeroExtend.0 {{ 16,32 }} ( add_bits.0 {{ 16 }} ( Cse8__5,'0000000000001000' ),32 ),'00000000000000000000000010000000' ) ) ;
-  result__4 = append_bits.0 {{ 32,32 }} ( result__4 [ 32 +: 32 ],append_bits.0 {{ 8,24 }} ( lsr_bits.0 {{ 128,32 }} ( __array _Z [ 0 ],ZeroExtend.0 {{ 16,32 }} ( Cse8__5,32 ) ) [ 0 +: 8 ],result__4 [ 0 +: 24 ] ) ) ;
+  result__4 = append_bits.0 {{ 32,32 }} ( result__4 [ 32 +: 32 ],append_bits.0 {{ 8,24 }} ( lsr_bits.0 {{ 128 }} ( __array _Z [ 0 ],ZeroExtend.0 {{ 16,128 }} ( Cse8__5,128 ) ) [ 0 +: 8 ],result__4 [ 0 +: 24 ] ) ) ;
   }
   if slt_bits.0 {{ 16 }} ( Cse7__5,'0000000000010000' ) then {
   assert and_bool.0 {{  }} ( TRUE,sle_bits.0 {{ 32 }} ( ZeroExtend.0 {{ 16,32 }} ( add_bits.0 {{ 16 }} ( Cse6__5,'0000000000001000' ),32 ),'00000000000000000000000010000000' ) ) ;
-  result__4 = append_bits.0 {{ 24,40 }} ( result__4 [ 40 +: 24 ],append_bits.0 {{ 8,32 }} ( lsr_bits.0 {{ 128,32 }} ( __array _Z [ 0 ],ZeroExtend.0 {{ 16,32 }} ( Cse6__5,32 ) ) [ 0 +: 8 ],result__4 [ 0 +: 32 ] ) ) ;
+  result__4 = append_bits.0 {{ 24,40 }} ( result__4 [ 40 +: 24 ],append_bits.0 {{ 8,32 }} ( lsr_bits.0 {{ 128 }} ( __array _Z [ 0 ],ZeroExtend.0 {{ 16,128 }} ( Cse6__5,128 ) ) [ 0 +: 8 ],result__4 [ 0 +: 32 ] ) ) ;
   }
   if slt_bits.0 {{ 16 }} ( Cse5__5,'0000000000010000' ) then {
   assert and_bool.0 {{  }} ( TRUE,sle_bits.0 {{ 32 }} ( ZeroExtend.0 {{ 16,32 }} ( add_bits.0 {{ 16 }} ( Cse4__5,'0000000000001000' ),32 ),'00000000000000000000000010000000' ) ) ;
-  result__4 = append_bits.0 {{ 16,48 }} ( result__4 [ 48 +: 16 ],append_bits.0 {{ 8,40 }} ( lsr_bits.0 {{ 128,32 }} ( __array _Z [ 0 ],ZeroExtend.0 {{ 16,32 }} ( Cse4__5,32 ) ) [ 0 +: 8 ],result__4 [ 0 +: 40 ] ) ) ;
+  result__4 = append_bits.0 {{ 16,48 }} ( result__4 [ 48 +: 16 ],append_bits.0 {{ 8,40 }} ( lsr_bits.0 {{ 128 }} ( __array _Z [ 0 ],ZeroExtend.0 {{ 16,128 }} ( Cse4__5,128 ) ) [ 0 +: 8 ],result__4 [ 0 +: 40 ] ) ) ;
   }
   if slt_bits.0 {{ 16 }} ( Cse3__5,'0000000000010000' ) then {
   assert and_bool.0 {{  }} ( TRUE,sle_bits.0 {{ 32 }} ( ZeroExtend.0 {{ 16,32 }} ( add_bits.0 {{ 16 }} ( Cse2__5,'0000000000001000' ),32 ),'00000000000000000000000010000000' ) ) ;
-  result__4 = append_bits.0 {{ 8,56 }} ( result__4 [ 56 +: 8 ],append_bits.0 {{ 8,48 }} ( lsr_bits.0 {{ 128,32 }} ( __array _Z [ 0 ],ZeroExtend.0 {{ 16,32 }} ( Cse2__5,32 ) ) [ 0 +: 8 ],result__4 [ 0 +: 48 ] ) ) ;
+  result__4 = append_bits.0 {{ 8,56 }} ( result__4 [ 56 +: 8 ],append_bits.0 {{ 8,48 }} ( lsr_bits.0 {{ 128 }} ( __array _Z [ 0 ],ZeroExtend.0 {{ 16,128 }} ( Cse2__5,128 ) ) [ 0 +: 8 ],result__4 [ 0 +: 48 ] ) ) ;
   }
   if slt_bits.0 {{ 16 }} ( Cse1__5,'0000000000010000' ) then {
   assert and_bool.0 {{  }} ( TRUE,sle_bits.0 {{ 32 }} ( ZeroExtend.0 {{ 16,32 }} ( add_bits.0 {{ 16 }} ( Cse0__5,'0000000000001000' ),32 ),'00000000000000000000000010000000' ) ) ;
-  result__4 = append_bits.0 {{ 8,56 }} ( lsr_bits.0 {{ 128,32 }} ( __array _Z [ 0 ],ZeroExtend.0 {{ 16,32 }} ( Cse0__5,32 ) ) [ 0 +: 8 ],result__4 [ 0 +: 56 ] ) ;
+  result__4 = append_bits.0 {{ 8,56 }} ( lsr_bits.0 {{ 128 }} ( __array _Z [ 0 ],ZeroExtend.0 {{ 16,128 }} ( Cse0__5,128 ) ) [ 0 +: 8 ],result__4 [ 0 +: 56 ] ) ;
   }
   __array _Z [ 0 ] = ZeroExtend.0 {{ 64,128 }} ( result__4,128 ) ;
   ""
@@ -149,35 +149,35 @@ run asli with these commands
   Stmt_Assign(LExpr_Var("result__4"),'0000000000000000000000000000000000000000000000000000000000000000')
   Stmt_If(Expr_TApply("slt_bits.0",[16],[Expr_Var("Cse15__5");'0000000000010000']),[
   Stmt_Assert(Expr_TApply("and_bool.0",[],[Expr_Var("TRUE");Expr_TApply("sle_bits.0",[32],[Expr_TApply("ZeroExtend.0",[16;32],[Expr_TApply("add_bits.0",[16],[Expr_Var("Cse14__5");'0000000000001000']);32]);'00000000000000000000000010000000'])]));
-  Stmt_Assign(LExpr_Var("result__4"),Expr_TApply("ZeroExtend.0",[8;64],[Expr_Slices(Expr_TApply("lsr_bits.0",[128;32],[Expr_Array(Expr_Var("_Z"),0);Expr_TApply("ZeroExtend.0",[16;32],[Expr_Var("Cse14__5");32])]),[Slice_LoWd(0,8)]);64]))
+  Stmt_Assign(LExpr_Var("result__4"),Expr_TApply("ZeroExtend.0",[8;64],[Expr_Slices(Expr_TApply("lsr_bits.0",[128],[Expr_Array(Expr_Var("_Z"),0);Expr_TApply("ZeroExtend.0",[16;128],[Expr_Var("Cse14__5");128])]),[Slice_LoWd(0,8)]);64]))
   ],[],[])
   Stmt_If(Expr_TApply("slt_bits.0",[16],[Expr_Var("Cse13__5");'0000000000010000']),[
   Stmt_Assert(Expr_TApply("and_bool.0",[],[Expr_Var("TRUE");Expr_TApply("sle_bits.0",[32],[Expr_TApply("ZeroExtend.0",[16;32],[Expr_TApply("add_bits.0",[16],[Expr_Var("Cse12__5");'0000000000001000']);32]);'00000000000000000000000010000000'])]));
-  Stmt_Assign(LExpr_Var("result__4"),Expr_TApply("append_bits.0",[48;16],[Expr_Slices(Expr_Var("result__4"),[Slice_LoWd(16,48)]);Expr_TApply("append_bits.0",[8;8],[Expr_Slices(Expr_TApply("lsr_bits.0",[128;32],[Expr_Array(Expr_Var("_Z"),0);Expr_TApply("ZeroExtend.0",[16;32],[Expr_Var("Cse12__5");32])]),[Slice_LoWd(0,8)]);Expr_Slices(Expr_Var("result__4"),[Slice_LoWd(0,8)])])]))
+  Stmt_Assign(LExpr_Var("result__4"),Expr_TApply("append_bits.0",[48;16],[Expr_Slices(Expr_Var("result__4"),[Slice_LoWd(16,48)]);Expr_TApply("append_bits.0",[8;8],[Expr_Slices(Expr_TApply("lsr_bits.0",[128],[Expr_Array(Expr_Var("_Z"),0);Expr_TApply("ZeroExtend.0",[16;128],[Expr_Var("Cse12__5");128])]),[Slice_LoWd(0,8)]);Expr_Slices(Expr_Var("result__4"),[Slice_LoWd(0,8)])])]))
   ],[],[])
   Stmt_If(Expr_TApply("slt_bits.0",[16],[Expr_Var("Cse11__5");'0000000000010000']),[
   Stmt_Assert(Expr_TApply("and_bool.0",[],[Expr_Var("TRUE");Expr_TApply("sle_bits.0",[32],[Expr_TApply("ZeroExtend.0",[16;32],[Expr_TApply("add_bits.0",[16],[Expr_Var("Cse10__5");'0000000000001000']);32]);'00000000000000000000000010000000'])]));
-  Stmt_Assign(LExpr_Var("result__4"),Expr_TApply("append_bits.0",[40;24],[Expr_Slices(Expr_Var("result__4"),[Slice_LoWd(24,40)]);Expr_TApply("append_bits.0",[8;16],[Expr_Slices(Expr_TApply("lsr_bits.0",[128;32],[Expr_Array(Expr_Var("_Z"),0);Expr_TApply("ZeroExtend.0",[16;32],[Expr_Var("Cse10__5");32])]),[Slice_LoWd(0,8)]);Expr_Slices(Expr_Var("result__4"),[Slice_LoWd(0,16)])])]))
+  Stmt_Assign(LExpr_Var("result__4"),Expr_TApply("append_bits.0",[40;24],[Expr_Slices(Expr_Var("result__4"),[Slice_LoWd(24,40)]);Expr_TApply("append_bits.0",[8;16],[Expr_Slices(Expr_TApply("lsr_bits.0",[128],[Expr_Array(Expr_Var("_Z"),0);Expr_TApply("ZeroExtend.0",[16;128],[Expr_Var("Cse10__5");128])]),[Slice_LoWd(0,8)]);Expr_Slices(Expr_Var("result__4"),[Slice_LoWd(0,16)])])]))
   ],[],[])
   Stmt_If(Expr_TApply("slt_bits.0",[16],[Expr_Var("Cse9__5");'0000000000010000']),[
   Stmt_Assert(Expr_TApply("and_bool.0",[],[Expr_Var("TRUE");Expr_TApply("sle_bits.0",[32],[Expr_TApply("ZeroExtend.0",[16;32],[Expr_TApply("add_bits.0",[16],[Expr_Var("Cse8__5");'0000000000001000']);32]);'00000000000000000000000010000000'])]));
-  Stmt_Assign(LExpr_Var("result__4"),Expr_TApply("append_bits.0",[32;32],[Expr_Slices(Expr_Var("result__4"),[Slice_LoWd(32,32)]);Expr_TApply("append_bits.0",[8;24],[Expr_Slices(Expr_TApply("lsr_bits.0",[128;32],[Expr_Array(Expr_Var("_Z"),0);Expr_TApply("ZeroExtend.0",[16;32],[Expr_Var("Cse8__5");32])]),[Slice_LoWd(0,8)]);Expr_Slices(Expr_Var("result__4"),[Slice_LoWd(0,24)])])]))
+  Stmt_Assign(LExpr_Var("result__4"),Expr_TApply("append_bits.0",[32;32],[Expr_Slices(Expr_Var("result__4"),[Slice_LoWd(32,32)]);Expr_TApply("append_bits.0",[8;24],[Expr_Slices(Expr_TApply("lsr_bits.0",[128],[Expr_Array(Expr_Var("_Z"),0);Expr_TApply("ZeroExtend.0",[16;128],[Expr_Var("Cse8__5");128])]),[Slice_LoWd(0,8)]);Expr_Slices(Expr_Var("result__4"),[Slice_LoWd(0,24)])])]))
   ],[],[])
   Stmt_If(Expr_TApply("slt_bits.0",[16],[Expr_Var("Cse7__5");'0000000000010000']),[
   Stmt_Assert(Expr_TApply("and_bool.0",[],[Expr_Var("TRUE");Expr_TApply("sle_bits.0",[32],[Expr_TApply("ZeroExtend.0",[16;32],[Expr_TApply("add_bits.0",[16],[Expr_Var("Cse6__5");'0000000000001000']);32]);'00000000000000000000000010000000'])]));
-  Stmt_Assign(LExpr_Var("result__4"),Expr_TApply("append_bits.0",[24;40],[Expr_Slices(Expr_Var("result__4"),[Slice_LoWd(40,24)]);Expr_TApply("append_bits.0",[8;32],[Expr_Slices(Expr_TApply("lsr_bits.0",[128;32],[Expr_Array(Expr_Var("_Z"),0);Expr_TApply("ZeroExtend.0",[16;32],[Expr_Var("Cse6__5");32])]),[Slice_LoWd(0,8)]);Expr_Slices(Expr_Var("result__4"),[Slice_LoWd(0,32)])])]))
+  Stmt_Assign(LExpr_Var("result__4"),Expr_TApply("append_bits.0",[24;40],[Expr_Slices(Expr_Var("result__4"),[Slice_LoWd(40,24)]);Expr_TApply("append_bits.0",[8;32],[Expr_Slices(Expr_TApply("lsr_bits.0",[128],[Expr_Array(Expr_Var("_Z"),0);Expr_TApply("ZeroExtend.0",[16;128],[Expr_Var("Cse6__5");128])]),[Slice_LoWd(0,8)]);Expr_Slices(Expr_Var("result__4"),[Slice_LoWd(0,32)])])]))
   ],[],[])
   Stmt_If(Expr_TApply("slt_bits.0",[16],[Expr_Var("Cse5__5");'0000000000010000']),[
   Stmt_Assert(Expr_TApply("and_bool.0",[],[Expr_Var("TRUE");Expr_TApply("sle_bits.0",[32],[Expr_TApply("ZeroExtend.0",[16;32],[Expr_TApply("add_bits.0",[16],[Expr_Var("Cse4__5");'0000000000001000']);32]);'00000000000000000000000010000000'])]));
-  Stmt_Assign(LExpr_Var("result__4"),Expr_TApply("append_bits.0",[16;48],[Expr_Slices(Expr_Var("result__4"),[Slice_LoWd(48,16)]);Expr_TApply("append_bits.0",[8;40],[Expr_Slices(Expr_TApply("lsr_bits.0",[128;32],[Expr_Array(Expr_Var("_Z"),0);Expr_TApply("ZeroExtend.0",[16;32],[Expr_Var("Cse4__5");32])]),[Slice_LoWd(0,8)]);Expr_Slices(Expr_Var("result__4"),[Slice_LoWd(0,40)])])]))
+  Stmt_Assign(LExpr_Var("result__4"),Expr_TApply("append_bits.0",[16;48],[Expr_Slices(Expr_Var("result__4"),[Slice_LoWd(48,16)]);Expr_TApply("append_bits.0",[8;40],[Expr_Slices(Expr_TApply("lsr_bits.0",[128],[Expr_Array(Expr_Var("_Z"),0);Expr_TApply("ZeroExtend.0",[16;128],[Expr_Var("Cse4__5");128])]),[Slice_LoWd(0,8)]);Expr_Slices(Expr_Var("result__4"),[Slice_LoWd(0,40)])])]))
   ],[],[])
   Stmt_If(Expr_TApply("slt_bits.0",[16],[Expr_Var("Cse3__5");'0000000000010000']),[
   Stmt_Assert(Expr_TApply("and_bool.0",[],[Expr_Var("TRUE");Expr_TApply("sle_bits.0",[32],[Expr_TApply("ZeroExtend.0",[16;32],[Expr_TApply("add_bits.0",[16],[Expr_Var("Cse2__5");'0000000000001000']);32]);'00000000000000000000000010000000'])]));
-  Stmt_Assign(LExpr_Var("result__4"),Expr_TApply("append_bits.0",[8;56],[Expr_Slices(Expr_Var("result__4"),[Slice_LoWd(56,8)]);Expr_TApply("append_bits.0",[8;48],[Expr_Slices(Expr_TApply("lsr_bits.0",[128;32],[Expr_Array(Expr_Var("_Z"),0);Expr_TApply("ZeroExtend.0",[16;32],[Expr_Var("Cse2__5");32])]),[Slice_LoWd(0,8)]);Expr_Slices(Expr_Var("result__4"),[Slice_LoWd(0,48)])])]))
+  Stmt_Assign(LExpr_Var("result__4"),Expr_TApply("append_bits.0",[8;56],[Expr_Slices(Expr_Var("result__4"),[Slice_LoWd(56,8)]);Expr_TApply("append_bits.0",[8;48],[Expr_Slices(Expr_TApply("lsr_bits.0",[128],[Expr_Array(Expr_Var("_Z"),0);Expr_TApply("ZeroExtend.0",[16;128],[Expr_Var("Cse2__5");128])]),[Slice_LoWd(0,8)]);Expr_Slices(Expr_Var("result__4"),[Slice_LoWd(0,48)])])]))
   ],[],[])
   Stmt_If(Expr_TApply("slt_bits.0",[16],[Expr_Var("Cse1__5");'0000000000010000']),[
   Stmt_Assert(Expr_TApply("and_bool.0",[],[Expr_Var("TRUE");Expr_TApply("sle_bits.0",[32],[Expr_TApply("ZeroExtend.0",[16;32],[Expr_TApply("add_bits.0",[16],[Expr_Var("Cse0__5");'0000000000001000']);32]);'00000000000000000000000010000000'])]));
-  Stmt_Assign(LExpr_Var("result__4"),Expr_TApply("append_bits.0",[8;56],[Expr_Slices(Expr_TApply("lsr_bits.0",[128;32],[Expr_Array(Expr_Var("_Z"),0);Expr_TApply("ZeroExtend.0",[16;32],[Expr_Var("Cse0__5");32])]),[Slice_LoWd(0,8)]);Expr_Slices(Expr_Var("result__4"),[Slice_LoWd(0,56)])]))
+  Stmt_Assign(LExpr_Var("result__4"),Expr_TApply("append_bits.0",[8;56],[Expr_Slices(Expr_TApply("lsr_bits.0",[128],[Expr_Array(Expr_Var("_Z"),0);Expr_TApply("ZeroExtend.0",[16;128],[Expr_Var("Cse0__5");128])]),[Slice_LoWd(0,8)]);Expr_Slices(Expr_Var("result__4"),[Slice_LoWd(0,56)])]))
   ],[],[])
   Stmt_Assign(LExpr_Array(LExpr_Var("_Z"),0),Expr_TApply("ZeroExtend.0",[64;128],[Expr_Var("result__4");128]))
   "
@@ -602,136 +602,96 @@ run asli with these commands
   constant bits ( 64 ) Cse42__5 = SignExtend.0 {{ 16,64 }} ( __array _Z [ 1 ] [ 48 +: 16 ],64 ) ;
   bits ( 16 ) SignedSatQ17__5 ;
   boolean SignedSatQ18__5 ;
-  if slt_bits.0 {{ 64 }} ( '0000000000000000000000000000000000000000000000000111111111111111',asr_bits.0 {{ 64,16 }} ( add_bits.0 {{ 64 }} ( mul_bits.0 {{ 64 }} ( SignExtend.0 {{ 32,64 }} ( mul_bits.0 {{ 32 }} ( '00000000000000000000000000000010',Cse43__5 ),64 ),Cse42__5 ),'0000000000000000000000000000000000000000000000001000000000000000' ),'0000000000010000' ) ) then {
+  if slt_bits.0 {{ 64 }} ( '0000000000000000000000000000000000000000000000000111111111111111',asr_bits.0 {{ 64 }} ( add_bits.0 {{ 64 }} ( mul_bits.0 {{ 64 }} ( SignExtend.0 {{ 32,64 }} ( mul_bits.0 {{ 32 }} ( '00000000000000000000000000000010',Cse43__5 ),64 ),Cse42__5 ),'0000000000000000000000000000000000000000000000001000000000000000' ),'0000000000000000000000000000000000000000000000000000000000010000' ) ) then {
   SignedSatQ17__5 = '0111111111111111' ;
   SignedSatQ18__5 = TRUE ;
   }  else {
-  if slt_bits.0 {{ 64 }} ( asr_bits.0 {{ 64,16 }} ( add_bits.0 {{ 64 }} ( mul_bits.0 {{ 64 }} ( SignExtend.0 {{ 32,64 }} ( mul_bits.0 {{ 32 }} ( '00000000000000000000000000000010',Cse43__5 ),64 ),Cse42__5 ),'0000000000000000000000000000000000000000000000001000000000000000' ),'0000000000010000' ),'1111111111111111111111111111111111111111111111111000000000000000' ) then {
-  SignedSatQ17__5 = '1000000000000000' ;
-  SignedSatQ18__5 = TRUE ;
-  }  else {
-  SignedSatQ17__5 = asr_bits.0 {{ 64,16 }} ( add_bits.0 {{ 64 }} ( mul_bits.0 {{ 64 }} ( SignExtend.0 {{ 32,64 }} ( mul_bits.0 {{ 32 }} ( '00000000000000000000000000000010',Cse43__5 ),64 ),Cse42__5 ),'0000000000000000000000000000000000000000000000001000000000000000' ),'0000000000010000' ) [ 0 +: 16 ] ;
+  SignedSatQ17__5 = asr_bits.0 {{ 64 }} ( add_bits.0 {{ 64 }} ( mul_bits.0 {{ 64 }} ( SignExtend.0 {{ 32,64 }} ( mul_bits.0 {{ 32 }} ( '00000000000000000000000000000010',Cse43__5 ),64 ),Cse42__5 ),'0000000000000000000000000000000000000000000000001000000000000000' ),'0000000000000000000000000000000000000000000000000000000000010000' ) [ 0 +: 16 ] ;
   SignedSatQ18__5 = FALSE ;
-  }
   }
   if SignedSatQ18__5 then {
   FPSR = append_bits.0 {{ 4,28 }} ( FPSR [ 28 +: 4 ],append_bits.0 {{ 1,27 }} ( '1',FPSR [ 0 +: 27 ] ) ) ;
   }
   bits ( 16 ) SignedSatQ31__5 ;
   boolean SignedSatQ32__5 ;
-  if slt_bits.0 {{ 64 }} ( '0000000000000000000000000000000000000000000000000111111111111111',asr_bits.0 {{ 64,16 }} ( add_bits.0 {{ 64 }} ( mul_bits.0 {{ 64 }} ( SignExtend.0 {{ 32,64 }} ( mul_bits.0 {{ 32 }} ( '00000000000000000000000000000010',Cse36__5 ),64 ),Cse42__5 ),'0000000000000000000000000000000000000000000000001000000000000000' ),'0000000000010000' ) ) then {
+  if slt_bits.0 {{ 64 }} ( '0000000000000000000000000000000000000000000000000111111111111111',asr_bits.0 {{ 64 }} ( add_bits.0 {{ 64 }} ( mul_bits.0 {{ 64 }} ( SignExtend.0 {{ 32,64 }} ( mul_bits.0 {{ 32 }} ( '00000000000000000000000000000010',Cse36__5 ),64 ),Cse42__5 ),'0000000000000000000000000000000000000000000000001000000000000000' ),'0000000000000000000000000000000000000000000000000000000000010000' ) ) then {
   SignedSatQ31__5 = '0111111111111111' ;
   SignedSatQ32__5 = TRUE ;
   }  else {
-  if slt_bits.0 {{ 64 }} ( asr_bits.0 {{ 64,16 }} ( add_bits.0 {{ 64 }} ( mul_bits.0 {{ 64 }} ( SignExtend.0 {{ 32,64 }} ( mul_bits.0 {{ 32 }} ( '00000000000000000000000000000010',Cse36__5 ),64 ),Cse42__5 ),'0000000000000000000000000000000000000000000000001000000000000000' ),'0000000000010000' ),'1111111111111111111111111111111111111111111111111000000000000000' ) then {
-  SignedSatQ31__5 = '1000000000000000' ;
-  SignedSatQ32__5 = TRUE ;
-  }  else {
-  SignedSatQ31__5 = asr_bits.0 {{ 64,16 }} ( add_bits.0 {{ 64 }} ( mul_bits.0 {{ 64 }} ( SignExtend.0 {{ 32,64 }} ( mul_bits.0 {{ 32 }} ( '00000000000000000000000000000010',Cse36__5 ),64 ),Cse42__5 ),'0000000000000000000000000000000000000000000000001000000000000000' ),'0000000000010000' ) [ 0 +: 16 ] ;
+  SignedSatQ31__5 = asr_bits.0 {{ 64 }} ( add_bits.0 {{ 64 }} ( mul_bits.0 {{ 64 }} ( SignExtend.0 {{ 32,64 }} ( mul_bits.0 {{ 32 }} ( '00000000000000000000000000000010',Cse36__5 ),64 ),Cse42__5 ),'0000000000000000000000000000000000000000000000001000000000000000' ),'0000000000000000000000000000000000000000000000000000000000010000' ) [ 0 +: 16 ] ;
   SignedSatQ32__5 = FALSE ;
-  }
   }
   if SignedSatQ32__5 then {
   FPSR = append_bits.0 {{ 4,28 }} ( FPSR [ 28 +: 4 ],append_bits.0 {{ 1,27 }} ( '1',FPSR [ 0 +: 27 ] ) ) ;
   }
   bits ( 16 ) SignedSatQ44__5 ;
   boolean SignedSatQ45__5 ;
-  if slt_bits.0 {{ 64 }} ( '0000000000000000000000000000000000000000000000000111111111111111',asr_bits.0 {{ 64,16 }} ( add_bits.0 {{ 64 }} ( mul_bits.0 {{ 64 }} ( SignExtend.0 {{ 32,64 }} ( mul_bits.0 {{ 32 }} ( '00000000000000000000000000000010',Cse30__5 ),64 ),Cse42__5 ),'0000000000000000000000000000000000000000000000001000000000000000' ),'0000000000010000' ) ) then {
+  if slt_bits.0 {{ 64 }} ( '0000000000000000000000000000000000000000000000000111111111111111',asr_bits.0 {{ 64 }} ( add_bits.0 {{ 64 }} ( mul_bits.0 {{ 64 }} ( SignExtend.0 {{ 32,64 }} ( mul_bits.0 {{ 32 }} ( '00000000000000000000000000000010',Cse30__5 ),64 ),Cse42__5 ),'0000000000000000000000000000000000000000000000001000000000000000' ),'0000000000000000000000000000000000000000000000000000000000010000' ) ) then {
   SignedSatQ44__5 = '0111111111111111' ;
   SignedSatQ45__5 = TRUE ;
   }  else {
-  if slt_bits.0 {{ 64 }} ( asr_bits.0 {{ 64,16 }} ( add_bits.0 {{ 64 }} ( mul_bits.0 {{ 64 }} ( SignExtend.0 {{ 32,64 }} ( mul_bits.0 {{ 32 }} ( '00000000000000000000000000000010',Cse30__5 ),64 ),Cse42__5 ),'0000000000000000000000000000000000000000000000001000000000000000' ),'0000000000010000' ),'1111111111111111111111111111111111111111111111111000000000000000' ) then {
-  SignedSatQ44__5 = '1000000000000000' ;
-  SignedSatQ45__5 = TRUE ;
-  }  else {
-  SignedSatQ44__5 = asr_bits.0 {{ 64,16 }} ( add_bits.0 {{ 64 }} ( mul_bits.0 {{ 64 }} ( SignExtend.0 {{ 32,64 }} ( mul_bits.0 {{ 32 }} ( '00000000000000000000000000000010',Cse30__5 ),64 ),Cse42__5 ),'0000000000000000000000000000000000000000000000001000000000000000' ),'0000000000010000' ) [ 0 +: 16 ] ;
+  SignedSatQ44__5 = asr_bits.0 {{ 64 }} ( add_bits.0 {{ 64 }} ( mul_bits.0 {{ 64 }} ( SignExtend.0 {{ 32,64 }} ( mul_bits.0 {{ 32 }} ( '00000000000000000000000000000010',Cse30__5 ),64 ),Cse42__5 ),'0000000000000000000000000000000000000000000000001000000000000000' ),'0000000000000000000000000000000000000000000000000000000000010000' ) [ 0 +: 16 ] ;
   SignedSatQ45__5 = FALSE ;
-  }
   }
   if SignedSatQ45__5 then {
   FPSR = append_bits.0 {{ 4,28 }} ( FPSR [ 28 +: 4 ],append_bits.0 {{ 1,27 }} ( '1',FPSR [ 0 +: 27 ] ) ) ;
   }
   bits ( 16 ) SignedSatQ57__5 ;
   boolean SignedSatQ58__5 ;
-  if slt_bits.0 {{ 64 }} ( '0000000000000000000000000000000000000000000000000111111111111111',asr_bits.0 {{ 64,16 }} ( add_bits.0 {{ 64 }} ( mul_bits.0 {{ 64 }} ( SignExtend.0 {{ 32,64 }} ( mul_bits.0 {{ 32 }} ( '00000000000000000000000000000010',Cse24__5 ),64 ),Cse42__5 ),'0000000000000000000000000000000000000000000000001000000000000000' ),'0000000000010000' ) ) then {
+  if slt_bits.0 {{ 64 }} ( '0000000000000000000000000000000000000000000000000111111111111111',asr_bits.0 {{ 64 }} ( add_bits.0 {{ 64 }} ( mul_bits.0 {{ 64 }} ( SignExtend.0 {{ 32,64 }} ( mul_bits.0 {{ 32 }} ( '00000000000000000000000000000010',Cse24__5 ),64 ),Cse42__5 ),'0000000000000000000000000000000000000000000000001000000000000000' ),'0000000000000000000000000000000000000000000000000000000000010000' ) ) then {
   SignedSatQ57__5 = '0111111111111111' ;
   SignedSatQ58__5 = TRUE ;
   }  else {
-  if slt_bits.0 {{ 64 }} ( asr_bits.0 {{ 64,16 }} ( add_bits.0 {{ 64 }} ( mul_bits.0 {{ 64 }} ( SignExtend.0 {{ 32,64 }} ( mul_bits.0 {{ 32 }} ( '00000000000000000000000000000010',Cse24__5 ),64 ),Cse42__5 ),'0000000000000000000000000000000000000000000000001000000000000000' ),'0000000000010000' ),'1111111111111111111111111111111111111111111111111000000000000000' ) then {
-  SignedSatQ57__5 = '1000000000000000' ;
-  SignedSatQ58__5 = TRUE ;
-  }  else {
-  SignedSatQ57__5 = asr_bits.0 {{ 64,16 }} ( add_bits.0 {{ 64 }} ( mul_bits.0 {{ 64 }} ( SignExtend.0 {{ 32,64 }} ( mul_bits.0 {{ 32 }} ( '00000000000000000000000000000010',Cse24__5 ),64 ),Cse42__5 ),'0000000000000000000000000000000000000000000000001000000000000000' ),'0000000000010000' ) [ 0 +: 16 ] ;
+  SignedSatQ57__5 = asr_bits.0 {{ 64 }} ( add_bits.0 {{ 64 }} ( mul_bits.0 {{ 64 }} ( SignExtend.0 {{ 32,64 }} ( mul_bits.0 {{ 32 }} ( '00000000000000000000000000000010',Cse24__5 ),64 ),Cse42__5 ),'0000000000000000000000000000000000000000000000001000000000000000' ),'0000000000000000000000000000000000000000000000000000000000010000' ) [ 0 +: 16 ] ;
   SignedSatQ58__5 = FALSE ;
-  }
   }
   if SignedSatQ58__5 then {
   FPSR = append_bits.0 {{ 4,28 }} ( FPSR [ 28 +: 4 ],append_bits.0 {{ 1,27 }} ( '1',FPSR [ 0 +: 27 ] ) ) ;
   }
   bits ( 16 ) SignedSatQ70__5 ;
   boolean SignedSatQ71__5 ;
-  if slt_bits.0 {{ 64 }} ( '0000000000000000000000000000000000000000000000000111111111111111',asr_bits.0 {{ 64,16 }} ( add_bits.0 {{ 64 }} ( mul_bits.0 {{ 64 }} ( SignExtend.0 {{ 32,64 }} ( mul_bits.0 {{ 32 }} ( '00000000000000000000000000000010',Cse18__5 ),64 ),Cse42__5 ),'0000000000000000000000000000000000000000000000001000000000000000' ),'0000000000010000' ) ) then {
+  if slt_bits.0 {{ 64 }} ( '0000000000000000000000000000000000000000000000000111111111111111',asr_bits.0 {{ 64 }} ( add_bits.0 {{ 64 }} ( mul_bits.0 {{ 64 }} ( SignExtend.0 {{ 32,64 }} ( mul_bits.0 {{ 32 }} ( '00000000000000000000000000000010',Cse18__5 ),64 ),Cse42__5 ),'0000000000000000000000000000000000000000000000001000000000000000' ),'0000000000000000000000000000000000000000000000000000000000010000' ) ) then {
   SignedSatQ70__5 = '0111111111111111' ;
   SignedSatQ71__5 = TRUE ;
   }  else {
-  if slt_bits.0 {{ 64 }} ( asr_bits.0 {{ 64,16 }} ( add_bits.0 {{ 64 }} ( mul_bits.0 {{ 64 }} ( SignExtend.0 {{ 32,64 }} ( mul_bits.0 {{ 32 }} ( '00000000000000000000000000000010',Cse18__5 ),64 ),Cse42__5 ),'0000000000000000000000000000000000000000000000001000000000000000' ),'0000000000010000' ),'1111111111111111111111111111111111111111111111111000000000000000' ) then {
-  SignedSatQ70__5 = '1000000000000000' ;
-  SignedSatQ71__5 = TRUE ;
-  }  else {
-  SignedSatQ70__5 = asr_bits.0 {{ 64,16 }} ( add_bits.0 {{ 64 }} ( mul_bits.0 {{ 64 }} ( SignExtend.0 {{ 32,64 }} ( mul_bits.0 {{ 32 }} ( '00000000000000000000000000000010',Cse18__5 ),64 ),Cse42__5 ),'0000000000000000000000000000000000000000000000001000000000000000' ),'0000000000010000' ) [ 0 +: 16 ] ;
+  SignedSatQ70__5 = asr_bits.0 {{ 64 }} ( add_bits.0 {{ 64 }} ( mul_bits.0 {{ 64 }} ( SignExtend.0 {{ 32,64 }} ( mul_bits.0 {{ 32 }} ( '00000000000000000000000000000010',Cse18__5 ),64 ),Cse42__5 ),'0000000000000000000000000000000000000000000000001000000000000000' ),'0000000000000000000000000000000000000000000000000000000000010000' ) [ 0 +: 16 ] ;
   SignedSatQ71__5 = FALSE ;
-  }
   }
   if SignedSatQ71__5 then {
   FPSR = append_bits.0 {{ 4,28 }} ( FPSR [ 28 +: 4 ],append_bits.0 {{ 1,27 }} ( '1',FPSR [ 0 +: 27 ] ) ) ;
   }
   bits ( 16 ) SignedSatQ83__5 ;
   boolean SignedSatQ84__5 ;
-  if slt_bits.0 {{ 64 }} ( '0000000000000000000000000000000000000000000000000111111111111111',asr_bits.0 {{ 64,16 }} ( add_bits.0 {{ 64 }} ( mul_bits.0 {{ 64 }} ( SignExtend.0 {{ 32,64 }} ( mul_bits.0 {{ 32 }} ( '00000000000000000000000000000010',Cse12__5 ),64 ),Cse42__5 ),'0000000000000000000000000000000000000000000000001000000000000000' ),'0000000000010000' ) ) then {
+  if slt_bits.0 {{ 64 }} ( '0000000000000000000000000000000000000000000000000111111111111111',asr_bits.0 {{ 64 }} ( add_bits.0 {{ 64 }} ( mul_bits.0 {{ 64 }} ( SignExtend.0 {{ 32,64 }} ( mul_bits.0 {{ 32 }} ( '00000000000000000000000000000010',Cse12__5 ),64 ),Cse42__5 ),'0000000000000000000000000000000000000000000000001000000000000000' ),'0000000000000000000000000000000000000000000000000000000000010000' ) ) then {
   SignedSatQ83__5 = '0111111111111111' ;
   SignedSatQ84__5 = TRUE ;
   }  else {
-  if slt_bits.0 {{ 64 }} ( asr_bits.0 {{ 64,16 }} ( add_bits.0 {{ 64 }} ( mul_bits.0 {{ 64 }} ( SignExtend.0 {{ 32,64 }} ( mul_bits.0 {{ 32 }} ( '00000000000000000000000000000010',Cse12__5 ),64 ),Cse42__5 ),'0000000000000000000000000000000000000000000000001000000000000000' ),'0000000000010000' ),'1111111111111111111111111111111111111111111111111000000000000000' ) then {
-  SignedSatQ83__5 = '1000000000000000' ;
-  SignedSatQ84__5 = TRUE ;
-  }  else {
-  SignedSatQ83__5 = asr_bits.0 {{ 64,16 }} ( add_bits.0 {{ 64 }} ( mul_bits.0 {{ 64 }} ( SignExtend.0 {{ 32,64 }} ( mul_bits.0 {{ 32 }} ( '00000000000000000000000000000010',Cse12__5 ),64 ),Cse42__5 ),'0000000000000000000000000000000000000000000000001000000000000000' ),'0000000000010000' ) [ 0 +: 16 ] ;
+  SignedSatQ83__5 = asr_bits.0 {{ 64 }} ( add_bits.0 {{ 64 }} ( mul_bits.0 {{ 64 }} ( SignExtend.0 {{ 32,64 }} ( mul_bits.0 {{ 32 }} ( '00000000000000000000000000000010',Cse12__5 ),64 ),Cse42__5 ),'0000000000000000000000000000000000000000000000001000000000000000' ),'0000000000000000000000000000000000000000000000000000000000010000' ) [ 0 +: 16 ] ;
   SignedSatQ84__5 = FALSE ;
-  }
   }
   if SignedSatQ84__5 then {
   FPSR = append_bits.0 {{ 4,28 }} ( FPSR [ 28 +: 4 ],append_bits.0 {{ 1,27 }} ( '1',FPSR [ 0 +: 27 ] ) ) ;
   }
   bits ( 16 ) SignedSatQ96__5 ;
   boolean SignedSatQ97__5 ;
-  if slt_bits.0 {{ 64 }} ( '0000000000000000000000000000000000000000000000000111111111111111',asr_bits.0 {{ 64,16 }} ( add_bits.0 {{ 64 }} ( mul_bits.0 {{ 64 }} ( SignExtend.0 {{ 32,64 }} ( mul_bits.0 {{ 32 }} ( '00000000000000000000000000000010',Cse6__5 ),64 ),Cse42__5 ),'0000000000000000000000000000000000000000000000001000000000000000' ),'0000000000010000' ) ) then {
+  if slt_bits.0 {{ 64 }} ( '0000000000000000000000000000000000000000000000000111111111111111',asr_bits.0 {{ 64 }} ( add_bits.0 {{ 64 }} ( mul_bits.0 {{ 64 }} ( SignExtend.0 {{ 32,64 }} ( mul_bits.0 {{ 32 }} ( '00000000000000000000000000000010',Cse6__5 ),64 ),Cse42__5 ),'0000000000000000000000000000000000000000000000001000000000000000' ),'0000000000000000000000000000000000000000000000000000000000010000' ) ) then {
   SignedSatQ96__5 = '0111111111111111' ;
   SignedSatQ97__5 = TRUE ;
   }  else {
-  if slt_bits.0 {{ 64 }} ( asr_bits.0 {{ 64,16 }} ( add_bits.0 {{ 64 }} ( mul_bits.0 {{ 64 }} ( SignExtend.0 {{ 32,64 }} ( mul_bits.0 {{ 32 }} ( '00000000000000000000000000000010',Cse6__5 ),64 ),Cse42__5 ),'0000000000000000000000000000000000000000000000001000000000000000' ),'0000000000010000' ),'1111111111111111111111111111111111111111111111111000000000000000' ) then {
-  SignedSatQ96__5 = '1000000000000000' ;
-  SignedSatQ97__5 = TRUE ;
-  }  else {
-  SignedSatQ96__5 = asr_bits.0 {{ 64,16 }} ( add_bits.0 {{ 64 }} ( mul_bits.0 {{ 64 }} ( SignExtend.0 {{ 32,64 }} ( mul_bits.0 {{ 32 }} ( '00000000000000000000000000000010',Cse6__5 ),64 ),Cse42__5 ),'0000000000000000000000000000000000000000000000001000000000000000' ),'0000000000010000' ) [ 0 +: 16 ] ;
+  SignedSatQ96__5 = asr_bits.0 {{ 64 }} ( add_bits.0 {{ 64 }} ( mul_bits.0 {{ 64 }} ( SignExtend.0 {{ 32,64 }} ( mul_bits.0 {{ 32 }} ( '00000000000000000000000000000010',Cse6__5 ),64 ),Cse42__5 ),'0000000000000000000000000000000000000000000000001000000000000000' ),'0000000000000000000000000000000000000000000000000000000000010000' ) [ 0 +: 16 ] ;
   SignedSatQ97__5 = FALSE ;
-  }
   }
   if SignedSatQ97__5 then {
   FPSR = append_bits.0 {{ 4,28 }} ( FPSR [ 28 +: 4 ],append_bits.0 {{ 1,27 }} ( '1',FPSR [ 0 +: 27 ] ) ) ;
   }
   bits ( 16 ) SignedSatQ109__5 ;
   boolean SignedSatQ110__5 ;
-  if slt_bits.0 {{ 64 }} ( '0000000000000000000000000000000000000000000000000111111111111111',asr_bits.0 {{ 64,16 }} ( add_bits.0 {{ 64 }} ( mul_bits.0 {{ 64 }} ( SignExtend.0 {{ 32,64 }} ( mul_bits.0 {{ 32 }} ( '00000000000000000000000000000010',Cse0__5 ),64 ),Cse42__5 ),'0000000000000000000000000000000000000000000000001000000000000000' ),'0000000000010000' ) ) then {
+  if slt_bits.0 {{ 64 }} ( '0000000000000000000000000000000000000000000000000111111111111111',asr_bits.0 {{ 64 }} ( add_bits.0 {{ 64 }} ( mul_bits.0 {{ 64 }} ( SignExtend.0 {{ 32,64 }} ( mul_bits.0 {{ 32 }} ( '00000000000000000000000000000010',Cse0__5 ),64 ),Cse42__5 ),'0000000000000000000000000000000000000000000000001000000000000000' ),'0000000000000000000000000000000000000000000000000000000000010000' ) ) then {
   SignedSatQ109__5 = '0111111111111111' ;
   SignedSatQ110__5 = TRUE ;
   }  else {
-  if slt_bits.0 {{ 64 }} ( asr_bits.0 {{ 64,16 }} ( add_bits.0 {{ 64 }} ( mul_bits.0 {{ 64 }} ( SignExtend.0 {{ 32,64 }} ( mul_bits.0 {{ 32 }} ( '00000000000000000000000000000010',Cse0__5 ),64 ),Cse42__5 ),'0000000000000000000000000000000000000000000000001000000000000000' ),'0000000000010000' ),'1111111111111111111111111111111111111111111111111000000000000000' ) then {
-  SignedSatQ109__5 = '1000000000000000' ;
-  SignedSatQ110__5 = TRUE ;
-  }  else {
-  SignedSatQ109__5 = asr_bits.0 {{ 64,16 }} ( add_bits.0 {{ 64 }} ( mul_bits.0 {{ 64 }} ( SignExtend.0 {{ 32,64 }} ( mul_bits.0 {{ 32 }} ( '00000000000000000000000000000010',Cse0__5 ),64 ),Cse42__5 ),'0000000000000000000000000000000000000000000000001000000000000000' ),'0000000000010000' ) [ 0 +: 16 ] ;
+  SignedSatQ109__5 = asr_bits.0 {{ 64 }} ( add_bits.0 {{ 64 }} ( mul_bits.0 {{ 64 }} ( SignExtend.0 {{ 32,64 }} ( mul_bits.0 {{ 32 }} ( '00000000000000000000000000000010',Cse0__5 ),64 ),Cse42__5 ),'0000000000000000000000000000000000000000000000001000000000000000' ),'0000000000000000000000000000000000000000000000000000000000010000' ) [ 0 +: 16 ] ;
   SignedSatQ110__5 = FALSE ;
-  }
   }
   if SignedSatQ110__5 then {
   FPSR = append_bits.0 {{ 4,28 }} ( FPSR [ 28 +: 4 ],append_bits.0 {{ 1,27 }} ( '1',FPSR [ 0 +: 27 ] ) ) ;
@@ -749,136 +709,96 @@ run asli with these commands
   Stmt_ConstDecl(Type_Bits(64),"Cse42__5",Expr_TApply("SignExtend.0",[16;64],[Expr_Slices(Expr_Array(Expr_Var("_Z"),1),[Slice_LoWd(48,16)]);64]))
   Stmt_VarDeclsNoInit(Type_Bits(16),["SignedSatQ17__5"])
   Stmt_VarDeclsNoInit(Type_Constructor("boolean"),["SignedSatQ18__5"])
-  Stmt_If(Expr_TApply("slt_bits.0",[64],['0000000000000000000000000000000000000000000000000111111111111111';Expr_TApply("asr_bits.0",[64;16],[Expr_TApply("add_bits.0",[64],[Expr_TApply("mul_bits.0",[64],[Expr_TApply("SignExtend.0",[32;64],[Expr_TApply("mul_bits.0",[32],['00000000000000000000000000000010';Expr_Var("Cse43__5")]);64]);Expr_Var("Cse42__5")]);'0000000000000000000000000000000000000000000000001000000000000000']);'0000000000010000'])]),[
+  Stmt_If(Expr_TApply("slt_bits.0",[64],['0000000000000000000000000000000000000000000000000111111111111111';Expr_TApply("asr_bits.0",[64],[Expr_TApply("add_bits.0",[64],[Expr_TApply("mul_bits.0",[64],[Expr_TApply("SignExtend.0",[32;64],[Expr_TApply("mul_bits.0",[32],['00000000000000000000000000000010';Expr_Var("Cse43__5")]);64]);Expr_Var("Cse42__5")]);'0000000000000000000000000000000000000000000000001000000000000000']);'0000000000000000000000000000000000000000000000000000000000010000'])]),[
   Stmt_Assign(LExpr_Var("SignedSatQ17__5"),'0111111111111111');
   Stmt_Assign(LExpr_Var("SignedSatQ18__5"),Expr_Var("TRUE"))
   ],[],[
-  Stmt_If(Expr_TApply("slt_bits.0",[64],[Expr_TApply("asr_bits.0",[64;16],[Expr_TApply("add_bits.0",[64],[Expr_TApply("mul_bits.0",[64],[Expr_TApply("SignExtend.0",[32;64],[Expr_TApply("mul_bits.0",[32],['00000000000000000000000000000010';Expr_Var("Cse43__5")]);64]);Expr_Var("Cse42__5")]);'0000000000000000000000000000000000000000000000001000000000000000']);'0000000000010000']);'1111111111111111111111111111111111111111111111111000000000000000']),[
-  Stmt_Assign(LExpr_Var("SignedSatQ17__5"),'1000000000000000');
-  Stmt_Assign(LExpr_Var("SignedSatQ18__5"),Expr_Var("TRUE"))
-  ],[],[
-  Stmt_Assign(LExpr_Var("SignedSatQ17__5"),Expr_Slices(Expr_TApply("asr_bits.0",[64;16],[Expr_TApply("add_bits.0",[64],[Expr_TApply("mul_bits.0",[64],[Expr_TApply("SignExtend.0",[32;64],[Expr_TApply("mul_bits.0",[32],['00000000000000000000000000000010';Expr_Var("Cse43__5")]);64]);Expr_Var("Cse42__5")]);'0000000000000000000000000000000000000000000000001000000000000000']);'0000000000010000']),[Slice_LoWd(0,16)]));
+  Stmt_Assign(LExpr_Var("SignedSatQ17__5"),Expr_Slices(Expr_TApply("asr_bits.0",[64],[Expr_TApply("add_bits.0",[64],[Expr_TApply("mul_bits.0",[64],[Expr_TApply("SignExtend.0",[32;64],[Expr_TApply("mul_bits.0",[32],['00000000000000000000000000000010';Expr_Var("Cse43__5")]);64]);Expr_Var("Cse42__5")]);'0000000000000000000000000000000000000000000000001000000000000000']);'0000000000000000000000000000000000000000000000000000000000010000']),[Slice_LoWd(0,16)]));
   Stmt_Assign(LExpr_Var("SignedSatQ18__5"),Expr_Var("FALSE"))
-  ])
   ])
   Stmt_If(Expr_Var("SignedSatQ18__5"),[
   Stmt_Assign(LExpr_Var("FPSR"),Expr_TApply("append_bits.0",[4;28],[Expr_Slices(Expr_Var("FPSR"),[Slice_LoWd(28,4)]);Expr_TApply("append_bits.0",[1;27],['1';Expr_Slices(Expr_Var("FPSR"),[Slice_LoWd(0,27)])])]))
   ],[],[])
   Stmt_VarDeclsNoInit(Type_Bits(16),["SignedSatQ31__5"])
   Stmt_VarDeclsNoInit(Type_Constructor("boolean"),["SignedSatQ32__5"])
-  Stmt_If(Expr_TApply("slt_bits.0",[64],['0000000000000000000000000000000000000000000000000111111111111111';Expr_TApply("asr_bits.0",[64;16],[Expr_TApply("add_bits.0",[64],[Expr_TApply("mul_bits.0",[64],[Expr_TApply("SignExtend.0",[32;64],[Expr_TApply("mul_bits.0",[32],['00000000000000000000000000000010';Expr_Var("Cse36__5")]);64]);Expr_Var("Cse42__5")]);'0000000000000000000000000000000000000000000000001000000000000000']);'0000000000010000'])]),[
+  Stmt_If(Expr_TApply("slt_bits.0",[64],['0000000000000000000000000000000000000000000000000111111111111111';Expr_TApply("asr_bits.0",[64],[Expr_TApply("add_bits.0",[64],[Expr_TApply("mul_bits.0",[64],[Expr_TApply("SignExtend.0",[32;64],[Expr_TApply("mul_bits.0",[32],['00000000000000000000000000000010';Expr_Var("Cse36__5")]);64]);Expr_Var("Cse42__5")]);'0000000000000000000000000000000000000000000000001000000000000000']);'0000000000000000000000000000000000000000000000000000000000010000'])]),[
   Stmt_Assign(LExpr_Var("SignedSatQ31__5"),'0111111111111111');
   Stmt_Assign(LExpr_Var("SignedSatQ32__5"),Expr_Var("TRUE"))
   ],[],[
-  Stmt_If(Expr_TApply("slt_bits.0",[64],[Expr_TApply("asr_bits.0",[64;16],[Expr_TApply("add_bits.0",[64],[Expr_TApply("mul_bits.0",[64],[Expr_TApply("SignExtend.0",[32;64],[Expr_TApply("mul_bits.0",[32],['00000000000000000000000000000010';Expr_Var("Cse36__5")]);64]);Expr_Var("Cse42__5")]);'0000000000000000000000000000000000000000000000001000000000000000']);'0000000000010000']);'1111111111111111111111111111111111111111111111111000000000000000']),[
-  Stmt_Assign(LExpr_Var("SignedSatQ31__5"),'1000000000000000');
-  Stmt_Assign(LExpr_Var("SignedSatQ32__5"),Expr_Var("TRUE"))
-  ],[],[
-  Stmt_Assign(LExpr_Var("SignedSatQ31__5"),Expr_Slices(Expr_TApply("asr_bits.0",[64;16],[Expr_TApply("add_bits.0",[64],[Expr_TApply("mul_bits.0",[64],[Expr_TApply("SignExtend.0",[32;64],[Expr_TApply("mul_bits.0",[32],['00000000000000000000000000000010';Expr_Var("Cse36__5")]);64]);Expr_Var("Cse42__5")]);'0000000000000000000000000000000000000000000000001000000000000000']);'0000000000010000']),[Slice_LoWd(0,16)]));
+  Stmt_Assign(LExpr_Var("SignedSatQ31__5"),Expr_Slices(Expr_TApply("asr_bits.0",[64],[Expr_TApply("add_bits.0",[64],[Expr_TApply("mul_bits.0",[64],[Expr_TApply("SignExtend.0",[32;64],[Expr_TApply("mul_bits.0",[32],['00000000000000000000000000000010';Expr_Var("Cse36__5")]);64]);Expr_Var("Cse42__5")]);'0000000000000000000000000000000000000000000000001000000000000000']);'0000000000000000000000000000000000000000000000000000000000010000']),[Slice_LoWd(0,16)]));
   Stmt_Assign(LExpr_Var("SignedSatQ32__5"),Expr_Var("FALSE"))
-  ])
   ])
   Stmt_If(Expr_Var("SignedSatQ32__5"),[
   Stmt_Assign(LExpr_Var("FPSR"),Expr_TApply("append_bits.0",[4;28],[Expr_Slices(Expr_Var("FPSR"),[Slice_LoWd(28,4)]);Expr_TApply("append_bits.0",[1;27],['1';Expr_Slices(Expr_Var("FPSR"),[Slice_LoWd(0,27)])])]))
   ],[],[])
   Stmt_VarDeclsNoInit(Type_Bits(16),["SignedSatQ44__5"])
   Stmt_VarDeclsNoInit(Type_Constructor("boolean"),["SignedSatQ45__5"])
-  Stmt_If(Expr_TApply("slt_bits.0",[64],['0000000000000000000000000000000000000000000000000111111111111111';Expr_TApply("asr_bits.0",[64;16],[Expr_TApply("add_bits.0",[64],[Expr_TApply("mul_bits.0",[64],[Expr_TApply("SignExtend.0",[32;64],[Expr_TApply("mul_bits.0",[32],['00000000000000000000000000000010';Expr_Var("Cse30__5")]);64]);Expr_Var("Cse42__5")]);'0000000000000000000000000000000000000000000000001000000000000000']);'0000000000010000'])]),[
+  Stmt_If(Expr_TApply("slt_bits.0",[64],['0000000000000000000000000000000000000000000000000111111111111111';Expr_TApply("asr_bits.0",[64],[Expr_TApply("add_bits.0",[64],[Expr_TApply("mul_bits.0",[64],[Expr_TApply("SignExtend.0",[32;64],[Expr_TApply("mul_bits.0",[32],['00000000000000000000000000000010';Expr_Var("Cse30__5")]);64]);Expr_Var("Cse42__5")]);'0000000000000000000000000000000000000000000000001000000000000000']);'0000000000000000000000000000000000000000000000000000000000010000'])]),[
   Stmt_Assign(LExpr_Var("SignedSatQ44__5"),'0111111111111111');
   Stmt_Assign(LExpr_Var("SignedSatQ45__5"),Expr_Var("TRUE"))
   ],[],[
-  Stmt_If(Expr_TApply("slt_bits.0",[64],[Expr_TApply("asr_bits.0",[64;16],[Expr_TApply("add_bits.0",[64],[Expr_TApply("mul_bits.0",[64],[Expr_TApply("SignExtend.0",[32;64],[Expr_TApply("mul_bits.0",[32],['00000000000000000000000000000010';Expr_Var("Cse30__5")]);64]);Expr_Var("Cse42__5")]);'0000000000000000000000000000000000000000000000001000000000000000']);'0000000000010000']);'1111111111111111111111111111111111111111111111111000000000000000']),[
-  Stmt_Assign(LExpr_Var("SignedSatQ44__5"),'1000000000000000');
-  Stmt_Assign(LExpr_Var("SignedSatQ45__5"),Expr_Var("TRUE"))
-  ],[],[
-  Stmt_Assign(LExpr_Var("SignedSatQ44__5"),Expr_Slices(Expr_TApply("asr_bits.0",[64;16],[Expr_TApply("add_bits.0",[64],[Expr_TApply("mul_bits.0",[64],[Expr_TApply("SignExtend.0",[32;64],[Expr_TApply("mul_bits.0",[32],['00000000000000000000000000000010';Expr_Var("Cse30__5")]);64]);Expr_Var("Cse42__5")]);'0000000000000000000000000000000000000000000000001000000000000000']);'0000000000010000']),[Slice_LoWd(0,16)]));
+  Stmt_Assign(LExpr_Var("SignedSatQ44__5"),Expr_Slices(Expr_TApply("asr_bits.0",[64],[Expr_TApply("add_bits.0",[64],[Expr_TApply("mul_bits.0",[64],[Expr_TApply("SignExtend.0",[32;64],[Expr_TApply("mul_bits.0",[32],['00000000000000000000000000000010';Expr_Var("Cse30__5")]);64]);Expr_Var("Cse42__5")]);'0000000000000000000000000000000000000000000000001000000000000000']);'0000000000000000000000000000000000000000000000000000000000010000']),[Slice_LoWd(0,16)]));
   Stmt_Assign(LExpr_Var("SignedSatQ45__5"),Expr_Var("FALSE"))
-  ])
   ])
   Stmt_If(Expr_Var("SignedSatQ45__5"),[
   Stmt_Assign(LExpr_Var("FPSR"),Expr_TApply("append_bits.0",[4;28],[Expr_Slices(Expr_Var("FPSR"),[Slice_LoWd(28,4)]);Expr_TApply("append_bits.0",[1;27],['1';Expr_Slices(Expr_Var("FPSR"),[Slice_LoWd(0,27)])])]))
   ],[],[])
   Stmt_VarDeclsNoInit(Type_Bits(16),["SignedSatQ57__5"])
   Stmt_VarDeclsNoInit(Type_Constructor("boolean"),["SignedSatQ58__5"])
-  Stmt_If(Expr_TApply("slt_bits.0",[64],['0000000000000000000000000000000000000000000000000111111111111111';Expr_TApply("asr_bits.0",[64;16],[Expr_TApply("add_bits.0",[64],[Expr_TApply("mul_bits.0",[64],[Expr_TApply("SignExtend.0",[32;64],[Expr_TApply("mul_bits.0",[32],['00000000000000000000000000000010';Expr_Var("Cse24__5")]);64]);Expr_Var("Cse42__5")]);'0000000000000000000000000000000000000000000000001000000000000000']);'0000000000010000'])]),[
+  Stmt_If(Expr_TApply("slt_bits.0",[64],['0000000000000000000000000000000000000000000000000111111111111111';Expr_TApply("asr_bits.0",[64],[Expr_TApply("add_bits.0",[64],[Expr_TApply("mul_bits.0",[64],[Expr_TApply("SignExtend.0",[32;64],[Expr_TApply("mul_bits.0",[32],['00000000000000000000000000000010';Expr_Var("Cse24__5")]);64]);Expr_Var("Cse42__5")]);'0000000000000000000000000000000000000000000000001000000000000000']);'0000000000000000000000000000000000000000000000000000000000010000'])]),[
   Stmt_Assign(LExpr_Var("SignedSatQ57__5"),'0111111111111111');
   Stmt_Assign(LExpr_Var("SignedSatQ58__5"),Expr_Var("TRUE"))
   ],[],[
-  Stmt_If(Expr_TApply("slt_bits.0",[64],[Expr_TApply("asr_bits.0",[64;16],[Expr_TApply("add_bits.0",[64],[Expr_TApply("mul_bits.0",[64],[Expr_TApply("SignExtend.0",[32;64],[Expr_TApply("mul_bits.0",[32],['00000000000000000000000000000010';Expr_Var("Cse24__5")]);64]);Expr_Var("Cse42__5")]);'0000000000000000000000000000000000000000000000001000000000000000']);'0000000000010000']);'1111111111111111111111111111111111111111111111111000000000000000']),[
-  Stmt_Assign(LExpr_Var("SignedSatQ57__5"),'1000000000000000');
-  Stmt_Assign(LExpr_Var("SignedSatQ58__5"),Expr_Var("TRUE"))
-  ],[],[
-  Stmt_Assign(LExpr_Var("SignedSatQ57__5"),Expr_Slices(Expr_TApply("asr_bits.0",[64;16],[Expr_TApply("add_bits.0",[64],[Expr_TApply("mul_bits.0",[64],[Expr_TApply("SignExtend.0",[32;64],[Expr_TApply("mul_bits.0",[32],['00000000000000000000000000000010';Expr_Var("Cse24__5")]);64]);Expr_Var("Cse42__5")]);'0000000000000000000000000000000000000000000000001000000000000000']);'0000000000010000']),[Slice_LoWd(0,16)]));
+  Stmt_Assign(LExpr_Var("SignedSatQ57__5"),Expr_Slices(Expr_TApply("asr_bits.0",[64],[Expr_TApply("add_bits.0",[64],[Expr_TApply("mul_bits.0",[64],[Expr_TApply("SignExtend.0",[32;64],[Expr_TApply("mul_bits.0",[32],['00000000000000000000000000000010';Expr_Var("Cse24__5")]);64]);Expr_Var("Cse42__5")]);'0000000000000000000000000000000000000000000000001000000000000000']);'0000000000000000000000000000000000000000000000000000000000010000']),[Slice_LoWd(0,16)]));
   Stmt_Assign(LExpr_Var("SignedSatQ58__5"),Expr_Var("FALSE"))
-  ])
   ])
   Stmt_If(Expr_Var("SignedSatQ58__5"),[
   Stmt_Assign(LExpr_Var("FPSR"),Expr_TApply("append_bits.0",[4;28],[Expr_Slices(Expr_Var("FPSR"),[Slice_LoWd(28,4)]);Expr_TApply("append_bits.0",[1;27],['1';Expr_Slices(Expr_Var("FPSR"),[Slice_LoWd(0,27)])])]))
   ],[],[])
   Stmt_VarDeclsNoInit(Type_Bits(16),["SignedSatQ70__5"])
   Stmt_VarDeclsNoInit(Type_Constructor("boolean"),["SignedSatQ71__5"])
-  Stmt_If(Expr_TApply("slt_bits.0",[64],['0000000000000000000000000000000000000000000000000111111111111111';Expr_TApply("asr_bits.0",[64;16],[Expr_TApply("add_bits.0",[64],[Expr_TApply("mul_bits.0",[64],[Expr_TApply("SignExtend.0",[32;64],[Expr_TApply("mul_bits.0",[32],['00000000000000000000000000000010';Expr_Var("Cse18__5")]);64]);Expr_Var("Cse42__5")]);'0000000000000000000000000000000000000000000000001000000000000000']);'0000000000010000'])]),[
+  Stmt_If(Expr_TApply("slt_bits.0",[64],['0000000000000000000000000000000000000000000000000111111111111111';Expr_TApply("asr_bits.0",[64],[Expr_TApply("add_bits.0",[64],[Expr_TApply("mul_bits.0",[64],[Expr_TApply("SignExtend.0",[32;64],[Expr_TApply("mul_bits.0",[32],['00000000000000000000000000000010';Expr_Var("Cse18__5")]);64]);Expr_Var("Cse42__5")]);'0000000000000000000000000000000000000000000000001000000000000000']);'0000000000000000000000000000000000000000000000000000000000010000'])]),[
   Stmt_Assign(LExpr_Var("SignedSatQ70__5"),'0111111111111111');
   Stmt_Assign(LExpr_Var("SignedSatQ71__5"),Expr_Var("TRUE"))
   ],[],[
-  Stmt_If(Expr_TApply("slt_bits.0",[64],[Expr_TApply("asr_bits.0",[64;16],[Expr_TApply("add_bits.0",[64],[Expr_TApply("mul_bits.0",[64],[Expr_TApply("SignExtend.0",[32;64],[Expr_TApply("mul_bits.0",[32],['00000000000000000000000000000010';Expr_Var("Cse18__5")]);64]);Expr_Var("Cse42__5")]);'0000000000000000000000000000000000000000000000001000000000000000']);'0000000000010000']);'1111111111111111111111111111111111111111111111111000000000000000']),[
-  Stmt_Assign(LExpr_Var("SignedSatQ70__5"),'1000000000000000');
-  Stmt_Assign(LExpr_Var("SignedSatQ71__5"),Expr_Var("TRUE"))
-  ],[],[
-  Stmt_Assign(LExpr_Var("SignedSatQ70__5"),Expr_Slices(Expr_TApply("asr_bits.0",[64;16],[Expr_TApply("add_bits.0",[64],[Expr_TApply("mul_bits.0",[64],[Expr_TApply("SignExtend.0",[32;64],[Expr_TApply("mul_bits.0",[32],['00000000000000000000000000000010';Expr_Var("Cse18__5")]);64]);Expr_Var("Cse42__5")]);'0000000000000000000000000000000000000000000000001000000000000000']);'0000000000010000']),[Slice_LoWd(0,16)]));
+  Stmt_Assign(LExpr_Var("SignedSatQ70__5"),Expr_Slices(Expr_TApply("asr_bits.0",[64],[Expr_TApply("add_bits.0",[64],[Expr_TApply("mul_bits.0",[64],[Expr_TApply("SignExtend.0",[32;64],[Expr_TApply("mul_bits.0",[32],['00000000000000000000000000000010';Expr_Var("Cse18__5")]);64]);Expr_Var("Cse42__5")]);'0000000000000000000000000000000000000000000000001000000000000000']);'0000000000000000000000000000000000000000000000000000000000010000']),[Slice_LoWd(0,16)]));
   Stmt_Assign(LExpr_Var("SignedSatQ71__5"),Expr_Var("FALSE"))
-  ])
   ])
   Stmt_If(Expr_Var("SignedSatQ71__5"),[
   Stmt_Assign(LExpr_Var("FPSR"),Expr_TApply("append_bits.0",[4;28],[Expr_Slices(Expr_Var("FPSR"),[Slice_LoWd(28,4)]);Expr_TApply("append_bits.0",[1;27],['1';Expr_Slices(Expr_Var("FPSR"),[Slice_LoWd(0,27)])])]))
   ],[],[])
   Stmt_VarDeclsNoInit(Type_Bits(16),["SignedSatQ83__5"])
   Stmt_VarDeclsNoInit(Type_Constructor("boolean"),["SignedSatQ84__5"])
-  Stmt_If(Expr_TApply("slt_bits.0",[64],['0000000000000000000000000000000000000000000000000111111111111111';Expr_TApply("asr_bits.0",[64;16],[Expr_TApply("add_bits.0",[64],[Expr_TApply("mul_bits.0",[64],[Expr_TApply("SignExtend.0",[32;64],[Expr_TApply("mul_bits.0",[32],['00000000000000000000000000000010';Expr_Var("Cse12__5")]);64]);Expr_Var("Cse42__5")]);'0000000000000000000000000000000000000000000000001000000000000000']);'0000000000010000'])]),[
+  Stmt_If(Expr_TApply("slt_bits.0",[64],['0000000000000000000000000000000000000000000000000111111111111111';Expr_TApply("asr_bits.0",[64],[Expr_TApply("add_bits.0",[64],[Expr_TApply("mul_bits.0",[64],[Expr_TApply("SignExtend.0",[32;64],[Expr_TApply("mul_bits.0",[32],['00000000000000000000000000000010';Expr_Var("Cse12__5")]);64]);Expr_Var("Cse42__5")]);'0000000000000000000000000000000000000000000000001000000000000000']);'0000000000000000000000000000000000000000000000000000000000010000'])]),[
   Stmt_Assign(LExpr_Var("SignedSatQ83__5"),'0111111111111111');
   Stmt_Assign(LExpr_Var("SignedSatQ84__5"),Expr_Var("TRUE"))
   ],[],[
-  Stmt_If(Expr_TApply("slt_bits.0",[64],[Expr_TApply("asr_bits.0",[64;16],[Expr_TApply("add_bits.0",[64],[Expr_TApply("mul_bits.0",[64],[Expr_TApply("SignExtend.0",[32;64],[Expr_TApply("mul_bits.0",[32],['00000000000000000000000000000010';Expr_Var("Cse12__5")]);64]);Expr_Var("Cse42__5")]);'0000000000000000000000000000000000000000000000001000000000000000']);'0000000000010000']);'1111111111111111111111111111111111111111111111111000000000000000']),[
-  Stmt_Assign(LExpr_Var("SignedSatQ83__5"),'1000000000000000');
-  Stmt_Assign(LExpr_Var("SignedSatQ84__5"),Expr_Var("TRUE"))
-  ],[],[
-  Stmt_Assign(LExpr_Var("SignedSatQ83__5"),Expr_Slices(Expr_TApply("asr_bits.0",[64;16],[Expr_TApply("add_bits.0",[64],[Expr_TApply("mul_bits.0",[64],[Expr_TApply("SignExtend.0",[32;64],[Expr_TApply("mul_bits.0",[32],['00000000000000000000000000000010';Expr_Var("Cse12__5")]);64]);Expr_Var("Cse42__5")]);'0000000000000000000000000000000000000000000000001000000000000000']);'0000000000010000']),[Slice_LoWd(0,16)]));
+  Stmt_Assign(LExpr_Var("SignedSatQ83__5"),Expr_Slices(Expr_TApply("asr_bits.0",[64],[Expr_TApply("add_bits.0",[64],[Expr_TApply("mul_bits.0",[64],[Expr_TApply("SignExtend.0",[32;64],[Expr_TApply("mul_bits.0",[32],['00000000000000000000000000000010';Expr_Var("Cse12__5")]);64]);Expr_Var("Cse42__5")]);'0000000000000000000000000000000000000000000000001000000000000000']);'0000000000000000000000000000000000000000000000000000000000010000']),[Slice_LoWd(0,16)]));
   Stmt_Assign(LExpr_Var("SignedSatQ84__5"),Expr_Var("FALSE"))
-  ])
   ])
   Stmt_If(Expr_Var("SignedSatQ84__5"),[
   Stmt_Assign(LExpr_Var("FPSR"),Expr_TApply("append_bits.0",[4;28],[Expr_Slices(Expr_Var("FPSR"),[Slice_LoWd(28,4)]);Expr_TApply("append_bits.0",[1;27],['1';Expr_Slices(Expr_Var("FPSR"),[Slice_LoWd(0,27)])])]))
   ],[],[])
   Stmt_VarDeclsNoInit(Type_Bits(16),["SignedSatQ96__5"])
   Stmt_VarDeclsNoInit(Type_Constructor("boolean"),["SignedSatQ97__5"])
-  Stmt_If(Expr_TApply("slt_bits.0",[64],['0000000000000000000000000000000000000000000000000111111111111111';Expr_TApply("asr_bits.0",[64;16],[Expr_TApply("add_bits.0",[64],[Expr_TApply("mul_bits.0",[64],[Expr_TApply("SignExtend.0",[32;64],[Expr_TApply("mul_bits.0",[32],['00000000000000000000000000000010';Expr_Var("Cse6__5")]);64]);Expr_Var("Cse42__5")]);'0000000000000000000000000000000000000000000000001000000000000000']);'0000000000010000'])]),[
+  Stmt_If(Expr_TApply("slt_bits.0",[64],['0000000000000000000000000000000000000000000000000111111111111111';Expr_TApply("asr_bits.0",[64],[Expr_TApply("add_bits.0",[64],[Expr_TApply("mul_bits.0",[64],[Expr_TApply("SignExtend.0",[32;64],[Expr_TApply("mul_bits.0",[32],['00000000000000000000000000000010';Expr_Var("Cse6__5")]);64]);Expr_Var("Cse42__5")]);'0000000000000000000000000000000000000000000000001000000000000000']);'0000000000000000000000000000000000000000000000000000000000010000'])]),[
   Stmt_Assign(LExpr_Var("SignedSatQ96__5"),'0111111111111111');
   Stmt_Assign(LExpr_Var("SignedSatQ97__5"),Expr_Var("TRUE"))
   ],[],[
-  Stmt_If(Expr_TApply("slt_bits.0",[64],[Expr_TApply("asr_bits.0",[64;16],[Expr_TApply("add_bits.0",[64],[Expr_TApply("mul_bits.0",[64],[Expr_TApply("SignExtend.0",[32;64],[Expr_TApply("mul_bits.0",[32],['00000000000000000000000000000010';Expr_Var("Cse6__5")]);64]);Expr_Var("Cse42__5")]);'0000000000000000000000000000000000000000000000001000000000000000']);'0000000000010000']);'1111111111111111111111111111111111111111111111111000000000000000']),[
-  Stmt_Assign(LExpr_Var("SignedSatQ96__5"),'1000000000000000');
-  Stmt_Assign(LExpr_Var("SignedSatQ97__5"),Expr_Var("TRUE"))
-  ],[],[
-  Stmt_Assign(LExpr_Var("SignedSatQ96__5"),Expr_Slices(Expr_TApply("asr_bits.0",[64;16],[Expr_TApply("add_bits.0",[64],[Expr_TApply("mul_bits.0",[64],[Expr_TApply("SignExtend.0",[32;64],[Expr_TApply("mul_bits.0",[32],['00000000000000000000000000000010';Expr_Var("Cse6__5")]);64]);Expr_Var("Cse42__5")]);'0000000000000000000000000000000000000000000000001000000000000000']);'0000000000010000']),[Slice_LoWd(0,16)]));
+  Stmt_Assign(LExpr_Var("SignedSatQ96__5"),Expr_Slices(Expr_TApply("asr_bits.0",[64],[Expr_TApply("add_bits.0",[64],[Expr_TApply("mul_bits.0",[64],[Expr_TApply("SignExtend.0",[32;64],[Expr_TApply("mul_bits.0",[32],['00000000000000000000000000000010';Expr_Var("Cse6__5")]);64]);Expr_Var("Cse42__5")]);'0000000000000000000000000000000000000000000000001000000000000000']);'0000000000000000000000000000000000000000000000000000000000010000']),[Slice_LoWd(0,16)]));
   Stmt_Assign(LExpr_Var("SignedSatQ97__5"),Expr_Var("FALSE"))
-  ])
   ])
   Stmt_If(Expr_Var("SignedSatQ97__5"),[
   Stmt_Assign(LExpr_Var("FPSR"),Expr_TApply("append_bits.0",[4;28],[Expr_Slices(Expr_Var("FPSR"),[Slice_LoWd(28,4)]);Expr_TApply("append_bits.0",[1;27],['1';Expr_Slices(Expr_Var("FPSR"),[Slice_LoWd(0,27)])])]))
   ],[],[])
   Stmt_VarDeclsNoInit(Type_Bits(16),["SignedSatQ109__5"])
   Stmt_VarDeclsNoInit(Type_Constructor("boolean"),["SignedSatQ110__5"])
-  Stmt_If(Expr_TApply("slt_bits.0",[64],['0000000000000000000000000000000000000000000000000111111111111111';Expr_TApply("asr_bits.0",[64;16],[Expr_TApply("add_bits.0",[64],[Expr_TApply("mul_bits.0",[64],[Expr_TApply("SignExtend.0",[32;64],[Expr_TApply("mul_bits.0",[32],['00000000000000000000000000000010';Expr_Var("Cse0__5")]);64]);Expr_Var("Cse42__5")]);'0000000000000000000000000000000000000000000000001000000000000000']);'0000000000010000'])]),[
+  Stmt_If(Expr_TApply("slt_bits.0",[64],['0000000000000000000000000000000000000000000000000111111111111111';Expr_TApply("asr_bits.0",[64],[Expr_TApply("add_bits.0",[64],[Expr_TApply("mul_bits.0",[64],[Expr_TApply("SignExtend.0",[32;64],[Expr_TApply("mul_bits.0",[32],['00000000000000000000000000000010';Expr_Var("Cse0__5")]);64]);Expr_Var("Cse42__5")]);'0000000000000000000000000000000000000000000000001000000000000000']);'0000000000000000000000000000000000000000000000000000000000010000'])]),[
   Stmt_Assign(LExpr_Var("SignedSatQ109__5"),'0111111111111111');
   Stmt_Assign(LExpr_Var("SignedSatQ110__5"),Expr_Var("TRUE"))
   ],[],[
-  Stmt_If(Expr_TApply("slt_bits.0",[64],[Expr_TApply("asr_bits.0",[64;16],[Expr_TApply("add_bits.0",[64],[Expr_TApply("mul_bits.0",[64],[Expr_TApply("SignExtend.0",[32;64],[Expr_TApply("mul_bits.0",[32],['00000000000000000000000000000010';Expr_Var("Cse0__5")]);64]);Expr_Var("Cse42__5")]);'0000000000000000000000000000000000000000000000001000000000000000']);'0000000000010000']);'1111111111111111111111111111111111111111111111111000000000000000']),[
-  Stmt_Assign(LExpr_Var("SignedSatQ109__5"),'1000000000000000');
-  Stmt_Assign(LExpr_Var("SignedSatQ110__5"),Expr_Var("TRUE"))
-  ],[],[
-  Stmt_Assign(LExpr_Var("SignedSatQ109__5"),Expr_Slices(Expr_TApply("asr_bits.0",[64;16],[Expr_TApply("add_bits.0",[64],[Expr_TApply("mul_bits.0",[64],[Expr_TApply("SignExtend.0",[32;64],[Expr_TApply("mul_bits.0",[32],['00000000000000000000000000000010';Expr_Var("Cse0__5")]);64]);Expr_Var("Cse42__5")]);'0000000000000000000000000000000000000000000000001000000000000000']);'0000000000010000']),[Slice_LoWd(0,16)]));
+  Stmt_Assign(LExpr_Var("SignedSatQ109__5"),Expr_Slices(Expr_TApply("asr_bits.0",[64],[Expr_TApply("add_bits.0",[64],[Expr_TApply("mul_bits.0",[64],[Expr_TApply("SignExtend.0",[32;64],[Expr_TApply("mul_bits.0",[32],['00000000000000000000000000000010';Expr_Var("Cse0__5")]);64]);Expr_Var("Cse42__5")]);'0000000000000000000000000000000000000000000000001000000000000000']);'0000000000000000000000000000000000000000000000000000000000010000']),[Slice_LoWd(0,16)]));
   Stmt_Assign(LExpr_Var("SignedSatQ110__5"),Expr_Var("FALSE"))
-  ])
   ])
   Stmt_If(Expr_Var("SignedSatQ110__5"),[
   Stmt_Assign(LExpr_Var("FPSR"),Expr_TApply("append_bits.0",[4;28],[Expr_Slices(Expr_Var("FPSR"),[Slice_LoWd(28,4)]);Expr_TApply("append_bits.0",[1;27],['1';Expr_Slices(Expr_Var("FPSR"),[Slice_LoWd(0,27)])])]))

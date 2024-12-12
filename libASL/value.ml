@@ -307,7 +307,7 @@ let eval_prim (f: string) (tvs: value list) (vs: value list): value option =
     | ("round_tozero_real", [      ], [VReal x             ])     -> Some (VInt    (prim_round_tozero_real x))
     | ("round_down_real",   [      ], [VReal x             ])     -> Some (VInt    (prim_round_down_real x))
     | ("round_up_real",     [      ], [VReal x             ])     -> Some (VInt    (prim_round_up_real x))
-    | ("sqrt_real",         [      ], [VReal x; VReal y    ])     -> Some (VReal   (prim_sqrt_real x))
+    | ("sqrt_real",         [      ], [VReal x             ])     -> Some (VReal   (prim_sqrt_real x))
     | ("cvt_int_bits",      [_     ], [VInt  x; VInt  n    ])     -> Some (VBits   (prim_cvt_int_bits n x))
     | ("cvt_bits_sint",     [VInt n], [VBits x             ])     -> Some (VInt    (prim_cvt_bits_sint x))
     | ("cvt_bits_uint",     [VInt n], [VBits x             ])     -> Some (VInt    (prim_cvt_bits_uint x))
@@ -387,7 +387,7 @@ let eval_prim (f: string) (tvs: value list) (vs: value list): value option =
 let prims_pure = [
     "eq_enum"; "eq_enum"; "ne_enum"; "ne_enum"; "eq_bool"; "ne_bool"; "equiv_bool"; "not_bool"; "eq_int"; "ne_int"; "le_int";
     "lt_int"; "ge_int"; "gt_int"; "is_pow2_int"; "neg_int"; "add_int"; "sub_int"; "shl_int"; "shr_int"; "mul_int"; "zdiv_int";
-    "zrem_int"; "sdiv_int"; "fdiv_int"; "frem_int"; "mod_pow2_int"; "align_int"; "pow2_int"; "pow_int_int"; "cvt_int_real"; "eq_real";
+    "zrem_int"; "fdiv_int"; "frem_int"; "mod_pow2_int"; "align_int"; "pow2_int"; "pow_int_int"; "cvt_int_real"; "eq_real";
     "ne_real"; "le_real"; "lt_real"; "ge_real"; "gt_real"; "add_real"; "neg_real"; "sub_real"; "mul_real"; "divide_real";
     "pow2_real"; "round_tozero_real"; "round_down_real"; "round_up_real"; "sqrt_real"; "cvt_int_bits"; "cvt_bits_sint";
     "cvt_bits_uint"; "in_mask"; "notin_mask"; "eq_bits"; "ne_bits"; "add_bits"; "sub_bits"; "mul_bits"; "and_bits"; "or_bits";
@@ -424,6 +424,11 @@ let insert_bits (loc: AST.l) (x: value) (i: value) (w: value) (y: value): value 
 
 let insert_bits' (loc: AST.l) (x: value) (i: int) (w: int) (y: value): value =
     VBits (prim_insert (to_bits loc x) (Z.of_int i) (Z.of_int w) (to_bits loc y))
+
+let insert_bits'' (loc: AST.l) (x: value) (i: value) (w: value) (y: value): value =
+    (match x with
+    | VInt(x')  -> VInt (prim_insert_int x' (to_integer loc i) (to_integer loc w) (to_bits loc y))
+    | _ -> insert_bits loc x i w y)
 
 let rec eval_eq (loc: AST.l) (x: value) (y: value): bool =
     (match (x, y) with

@@ -37,14 +37,14 @@ let to_string (d: PPrint.document): string =
 let rec take (n: int) (xs: 'a list) =
     match xs with
     | _ when n < 0 -> failwith "take: negative"
-    | [] when n = 0 -> []
+    | l when n = 0 -> []
     | [] -> failwith "take: list too short"
     | x::rest -> x :: take (n-1) rest
 
 let rec drop (n: int) (xs: 'a list) =
     match xs with
     | _ when n < 0 -> failwith "drop: negative"
-    | [] when n = 0 -> []
+    | l when n = 0 -> l
     | [] -> failwith "drop: list too short"
     | _::rest -> drop (n-1) rest
 
