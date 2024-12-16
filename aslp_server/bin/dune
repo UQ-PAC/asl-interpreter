@@ -1,5 +1,6 @@
 (executable
  (public_name aslp_server)
+ (modes exe byte)
  (name main)
  (modules main)
  (libraries asli.libASL lwt.unix yojson cohttp-lwt cohttp-lwt-unix pprint))

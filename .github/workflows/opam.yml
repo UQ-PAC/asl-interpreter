@@ -30,6 +30,6 @@ jobs:
 
     - run: opam install . --deps-only --with-test
       working-directory: aslp_server
-    - run: opam exec -- dune build aslp_server --profile release
+    - run: opam exec -- dune build --profile release
       working-directory: aslp_server
 

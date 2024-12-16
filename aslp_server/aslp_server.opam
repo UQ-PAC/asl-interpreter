@@ -10,7 +10,7 @@ doc: "https://github.com/UQ-PAC/aslp"
 bug-reports: "https://github.com/UQ-PAC/aslp/issues"
 depends: [
   "ocaml"
-  "dune" {>= "3.16"}
+  "dune" {>= "2.8"}
   "cohttp-lwt-unix"
   "yojson"
   "asli"
