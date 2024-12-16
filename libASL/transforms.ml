@@ -21,6 +21,7 @@ let pure_prims =
 
 let infer_type (e: expr): ty option =
   match e with
+  | Expr_LitBits bv -> (Some(Type_Bits(Expr_LitInt (string_of_int (String.length bv)))))
   | Expr_Slices(x, [Slice_LoWd(l,w)]) -> Some(Type_Bits(w))
   | Expr_TApply((FIdent(name, _) | Ident(name)), [], _) -> begin
     match name with
@@ -1183,11 +1184,12 @@ module IntToBits = struct
         in
         let narrow_args () = Expr_TApply (f, [expr_of_int wd'], List.map narrow es) in
 
-        (* for add and sub expressions, we only need the lowest n bits in order
+        (* for some arithmetic expressions, we only need the lowest n bits in order
            to have n bits of precision in the output. *)
         (match name_of_FIdent f with
         | "add_bits" -> ChangeDoChildrenPost (narrow_args (), fun x -> Expr_Slices (x, [sl]))
         | "sub_bits" -> ChangeDoChildrenPost (narrow_args (), fun x -> Expr_Slices (x, [sl]))
+        | "mul_bits" -> ChangeDoChildrenPost (narrow_args (), fun x -> Expr_Slices (x, [sl]))
         | _ -> ChangeDoChildrenPost (narrow inner, fun x -> Expr_Slices (x, [sl]))
         )
       | _ -> DoChildren
@@ -1287,7 +1289,7 @@ module CopyProp = struct
     | Expr_Var v -> true
     | Expr_Field (e,_) -> candidateExpr e
     | Expr_Array (e,_) -> candidateExpr e
-    | Expr_TApply (f,_,_) -> (name_of_FIdent f = "Mem.read")
+    (*| Expr_TApply (f,_,_) -> (name_of_FIdent f = "Mem.read")*)
     | _ -> false
 
   let candidateIdent (i: ident) =
@@ -1678,6 +1680,108 @@ module CaseSimp = struct
     let xs = visit_stmts stmt_visitor xs in
     xs
 end
+
+(* Transform the following to remove control flow:
+
+  if cond then         ITESimp_0 := cond
+    X1 := E1           X1 := (ITESimp_0 & E1) | (!ITESimp_0 & F1)
+    ...                ...
+    XN := EN           XN := (ITESimp_0 & EN) | (!ITESimp_0 & F1)
+  else            ~>
+    X1 := F1
+    ...
+    XN := F2
+
+  Where:
+    - XNs are written on both edges in the same order.
+    - XNs are single bit variables.
+    - ENs and FNs are pure.
+
+  TODO:
+    - Could generalise to mismatched XNs, as long as self-assign is safe.
+      Not clear if this is okay semantically.
+    - Could generalise to arbitrary bitvectors, if worthwhile.
+      Resulting mask might be worse than branch however.
+    - Generalised order is difficult given dependencies.
+  *)
+module BitITESimp = struct
+  let one = Expr_LitInt "1"
+  let type_bit = Type_Bits one
+
+  (* Test if we can freely perform the operation, even if it wouldn't
+     have been performed in the original branching version *)
+  let rec is_pure e =
+    match e with
+    | Expr_Var _ -> true
+    | Expr_LitBits _ -> true
+    | Expr_LitInt _ -> true
+    | Expr_Slices(e, [Slice_LoWd(lo, wd)]) ->
+        is_pure e && is_pure lo && is_pure wd
+    | Expr_TApply(f, tes, es) ->
+        List.mem f pure_prims &&
+        List.for_all is_pure tes &&
+        List.for_all is_pure es
+    | Expr_Field(e,_) -> is_pure e
+    | Expr_Array(e,i) -> is_pure e && is_pure i
+    | _ -> false
+
+  (* Walk both branches in sync, collect necessary information *)
+  let rec match_body t f =
+    match t, f with
+    | Stmt_Assign(ti,te,loc)::ts, Stmt_Assign(fi,fe,_)::fs
+        when ti = fi && is_pure te && is_pure fe &&
+          infer_type te = Some type_bit ->
+            Option.map (fun rest -> ((ti,te,fe,loc)::rest)) (match_body ts fs)
+    | [], [] -> Some []
+    | _ -> None
+
+  (* Utility to convert a bool test into a bit value, with some cleanup *)
+  let rec bool_to_bit c =
+    match c with
+    | Expr_TApply (FIdent("and_bool", 0), [], ls) ->
+        Expr_TApply (FIdent("and_bits", 0), [one], List.map bool_to_bit ls)
+    | Expr_TApply (FIdent("eq_bits", 0), _, [e; Expr_LitBits "1"])
+    | Expr_TApply (FIdent("eq_bits", 0), _, [Expr_LitBits "1"; e]) -> e
+    | Expr_TApply (FIdent("eq_bits", 0), _, [e; Expr_LitBits "0"])
+    | Expr_TApply (FIdent("eq_bits", 0), _, [Expr_LitBits "0"; e]) ->
+        Expr_TApply (FIdent ("not_bits", 0), [one], [e])
+    | _ -> Expr_TApply (FIdent("cvt_bool_bv", 0), [], [c])
+
+  (* Generate the assignment for a paired expression *)
+  let build_stmt cond (i,e,e',loc) =
+    let e' = sym_or_bits loc one
+        (sym_and_bits loc one cond (sym_of_expr e))
+        (sym_and_bits loc one (sym_not_bits loc one cond) (sym_of_expr e')) in
+    Stmt_Assign (i, sym_expr e', loc)
+
+  (* Given the analysis has succeeded, build the equivalent series of assignments *)
+  let build_assigns cond assigns loc nv =
+    let cond_write = Stmt_ConstDecl(type_bit, nv, bool_to_bit cond, loc) in
+    let cond_load = Exp (Expr_Var nv) in
+    (cond_write::List.map (build_stmt cond_load) assigns)
+
+  class visit_if = object
+    inherit Asl_visitor.nopAslVisitor
+    val mutable next_var = 0
+    method! vstmt (s: stmt): stmt list visitAction =
+      match s with
+      | Stmt_If (cond, t, [], f, loc) ->
+          (match match_body t f with
+          | None -> DoChildren
+          | Some assigns ->
+              let nv = Ident ("ITESimp_" ^ string_of_int next_var) in
+              next_var <- next_var + 1;
+              ChangeTo (build_assigns cond assigns loc nv))
+      | _ -> DoChildren
+  end
+
+  let do_transform (xs: stmt list): stmt list =
+    let stmt_visitor = new visit_if in
+    let xs = visit_stmts stmt_visitor xs in
+    xs
+end
+
+
 
 (* Rewrite expressions with temporary dynamic width bitvectors into equivalent versions with only static bitvectors *)
 module RemoveTempBVs = struct

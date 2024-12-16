@@ -183,6 +183,11 @@ let sym_of_tuple (loc: AST.l) (v: sym): sym list  =
   | Exp (Expr_Tuple vs) -> (List.map (fun v -> Exp v) vs)
   | _ -> raise (EvalError (loc, "tuple expected. Got "^ pp_sym v))
 
+let eval_lit (x: sym) =
+  match x with
+  | Val _ -> x
+  | Exp e -> sym_of_expr e
+
 (* Types *)
 
 let type_bool = Type_Constructor(Ident "boolean")
@@ -247,7 +252,19 @@ let expr_true    = Expr_Var (Ident "TRUE")
 let expr_false   = Expr_Var (Ident "FALSE")
 let sym_zeros n  = Val (VBits (prim_zeros_bits (Z.of_int n)))
 
-let sym_eq_int   = prim_binop "eq_int"
+let rec sym_eq_int loc x y =
+  let x = eval_lit x in
+  let y = eval_lit y in
+  match x, y with
+  | Val x, Val y -> Val (VBool (prim_eq_int (to_integer loc x) (to_integer loc y)))
+  (* (x = x) = True *)
+  | Exp x, Exp y when x = y -> Val (VBool (true))
+  (* (x = x + v) = (v = 0) *)
+  | Exp x, Exp (Expr_TApply (FIdent ("add_int", 0), [], [x'; y])) when x = x' ->
+      sym_eq_int loc (Exp y) (Val (VInt Z.zero))
+  (* TODO: Could benefit from add_int/sub_int reductions by phrasing as x - y = 0 *)
+  | _ -> Exp (Expr_TApply (FIdent ("eq_int", 0), [], [sym_expr x; sym_expr y]) )
+
 let sym_le_int   = prim_binop "le_int"
 
 let sym_eq_bits  = prim_binop "eq_bits"
@@ -287,12 +304,7 @@ let vint_eq cmp = function
   | _ -> false
 
 let is_zero = vint_eq Z.zero
-let is_one = vint_eq Z.one 
-
-let eval_lit (x: sym) =
-  match x with
-  | Val _ -> x
-  | Exp e -> sym_of_expr e
+let is_one = vint_eq Z.one
 
 (* Hook into add_int calls to enforce (expr + val) form and apply simple identities. *)
 let sym_add_int loc (x: sym) (y: sym) =
@@ -344,12 +356,26 @@ let rec sym_sub_int loc (x: sym) (y: sym) =
       let n = Z.of_string v in
       let e = Expr_LitInt (Z.to_string (Z.sub n y)) in
       Exp (Expr_TApply (FIdent ("add_int", 0), [], [x1; e]))
-  (* Elim term *) 
+  (* Elim term *)
   | (Exp x, Exp y) when is_pure_exp y ->
       (match find_elim_term loc x (fun v -> if y = v then Some (Val (VInt Z.zero)) else None) with
       | Some e -> e
       | _ -> t)
   | _ -> t
+
+let rec sym_mul_int (loc: l) (x: sym) (y: sym) =
+  match x, y with
+  | Val x, Val y -> Val (VInt (prim_mul_int (to_integer loc x) (to_integer loc y)))
+  (* x * 1 = x *)
+  | Val x, y
+  | y, Val x when is_one x -> y
+  (* (x + c) * c' = x * c' + c * c' *)
+  | Exp (Expr_TApply (FIdent ("add_int", 0), [], [x; Expr_LitInt lit])), Val (VInt c') ->
+      let c = Z.of_string lit in
+      let offset = Val (VInt (Z.mul c c')) in
+      let base = sym_mul_int loc (Exp x) y in
+      sym_add_int loc base offset
+  | _ -> Exp (Expr_TApply (FIdent ("mul_int", 0), [], [sym_expr x; sym_expr y]))
 
 (*** Symbolic Boolean Operations ***)
 
@@ -411,6 +437,13 @@ let sym_and_bits loc w (x: sym) (y: sym) =
   | x, Val y when is_one_bits y -> x
   | _ -> Exp (Expr_TApply (FIdent ("and_bits", 0), [w], [sym_expr x; sym_expr y]) )
 
+let sym_add_bits loc w (x: sym) (y: sym) =
+  match x, y with
+  | Val x, Val y -> Val (VBits (prim_add_bits (to_bits loc x) (to_bits loc y)))
+  | Val x, y when is_zero_bits x -> y
+  | x, Val y when is_zero_bits y -> x
+  | _ -> Exp (Expr_TApply (FIdent ("add_bits", 0), [w], [sym_expr x; sym_expr y]) )
+
 let sym_inmask loc v mask =
   match v with
   | Val x -> Val (VBool (prim_in_mask (to_bits loc x) mask))
@@ -421,13 +454,16 @@ let sym_inmask loc v mask =
       let v = Val (VBits {v = mask.v; n}) in
       sym_eq_bits loc (sym_and_bits loc ne (Exp e) m) v
 
-let sym_or_bits loc w (x: sym) (y: sym) =
+let rec sym_or_bits loc w (x: sym) (y: sym) =
   match x, y with
   | Val x, Val y -> Val (VBits (prim_or_bits (to_bits loc x) (to_bits loc y)))
   | Val x, y when is_one_bits x -> Val x
   | x, Val y when is_one_bits y -> Val y
   | Val x, y when is_zero_bits x -> y
   | x, Val y when is_zero_bits y -> x
+  (* (a /\ b) \/ !a ~> b \/ !a *)
+  | Exp (Expr_TApply (FIdent ("and_bits", 0), _, [a; x])), Exp (Expr_TApply (FIdent ("not_bits", 0), _, [a'])) when a = a' ->
+      sym_or_bits loc w (sym_of_expr x) y
   | _ -> Exp (Expr_TApply (FIdent ("or_bits", 0), [w], [sym_expr x; sym_expr y]) )
 
 (** Construct a ITE expression from bitvector operations. Expects arguments to be 1 bit wide. *)
@@ -458,7 +494,7 @@ let rec sym_append_bits (loc: l) (xw: int) (yw: int) (x: sym) (y: sym): sym =
 
   (* Match append of top-bit replicate expressions, turn into sign extend *)
   | (Exp (Expr_TApply (FIdent ("replicate_bits", 0), [Expr_LitInt "1"; w], [e;_])), Exp r) when sym_slice loc (Exp r) (yw - 1) 1 = Exp e ->
-      Exp (Expr_TApply (FIdent ("SignExtend", 0), [int_expr yw;int_expr (xw+yw)], [r; int_expr (xw + yw)])) 
+      Exp (Expr_TApply (FIdent ("SignExtend", 0), [int_expr yw;int_expr (xw+yw)], [r; int_expr (xw + yw)]))
 
   | (x,y) ->
     Exp (expr_prim' "append_bits" [expr_of_int xw; expr_of_int yw] [sym_expr x;sym_expr y])
@@ -484,6 +520,7 @@ and sym_replicate (xw: int) (x: sym) (n: int): sym =
     distributes slices across bitvector append operations.
   *)
 and sym_slice (loc: l) (x: sym) (lo: int) (wd: int): sym =
+  let x = eval_lit x in
   match x with
   | Val v -> Val (extract_bits'' loc v (VInt (Z.of_int lo)) (VInt (Z.of_int wd)))
   | Exp e ->
@@ -529,6 +566,16 @@ and sym_slice (loc: l) (x: sym) (lo: int) (wd: int): sym =
           (sym_slice loc (Exp x1) lo wd)
           (sym_slice loc (Exp x2) lo wd)
 
+    (* (x + y)[wd +: 0] = (x[wd +: 0] + y[wd +: 0]) *)
+    | (Expr_TApply (FIdent ("add_int", 0), [], [x1; x2])) when lo = 0 ->
+        sym_add_bits loc (int_expr wd)
+          (sym_slice loc (Exp x1) lo wd)
+          (sym_slice loc (Exp x2) lo wd)
+
+    (* UInt{wd}(x)[wd +: 0] = x[wd +: 0] *)
+    | (Expr_TApply (FIdent ("cvt_bits_uint", 0), [Expr_LitInt w'], [x1])) when lo = 0 && int_of_string w' = wd ->
+        Exp x1
+
     | (Expr_TApply (FIdent ("append_bits", 0), [Expr_LitInt t1; Expr_LitInt t2], [x1; x2])) ->
       let t2 = int_of_string t2 in
       if t2 < 0 then
@@ -571,7 +618,7 @@ let sym_zero_extend num_zeros old_width e =
       Exp (expr_prim' "ZeroExtend" [expr_of_int old_width; n'] [sym_expr e; n'])
 
 let sym_sign_extend num_zeros old_width (e: sym): sym =
-  match e with 
+  match e with
   | Exp (Expr_TApply (FIdent ("ZeroExtend",0), [Expr_LitInt oldsize; Expr_LitInt newsize], [x; _])) ->
     let size' = string_of_int (num_zeros + int_of_string newsize) in
     Exp (Expr_TApply (FIdent ("ZeroExtend",0), [Expr_LitInt oldsize; Expr_LitInt size'], [x; Expr_LitInt size']))
@@ -687,25 +734,6 @@ let is_insert_mask (b: bitvector): (int * int) option =
       end
   | _ -> None
 
-(*
-let rec elem_read_collapse vw ew v j =
-  match v with
-  | Expr_TApply (FIdent ("Elem.set", 0), [Expr_LitInt vw'; Expr_LitInt ew'], [v; Expr_LitInt i; _; e])
-      when vw = Z.of_string vw' && ew = Z.of_string ew' && Z.of_string i = j ->
-        e
-  | Expr_TApply (FIdent ("Elem.set", 0), [Expr_LitInt vw'; Expr_LitInt ew'], [v; Expr_LitInt i; _; e])
-      when vw = Z.of_string vw' && ew = Z.of_string ew' && Z.of_string i <> j ->
-        elem_read_collapse vw ew v j
-  | Expr_Slices (v, [Slice_LoWd(Expr_LitInt lo, Expr_LitInt wd)]) 
-      when Z.equal (Z.rem (Z.of_string lo) ew) Z.zero ->
-        elem_read_collapse (Z.add vw vw) ew v (Z.add j (Z.div (Z.of_string lo) ew))
-  | _ -> 
-    (Expr_TApply (FIdent ("Elem.read", 0), [Expr_LitInt (Z.to_string vw); Expr_LitInt (Z.to_string ew)], [v; Expr_LitInt (Z.to_string j); Expr_LitInt (Z.to_string ew)]))
-*)
-  (*| ("Elem.read", [Val (VInt vw); Val (VInt ew)], [Exp v; Val (VInt j); _]) ->
-      let e = elem_read_collapse vw ew v j in
-      Some (Exp e)*)
-
 let sym_prim_simplify (name: string) (tes: sym list) (es: sym list): sym option =
   let loc = Unknown in
 
@@ -715,19 +743,11 @@ let sym_prim_simplify (name: string) (tes: sym list) (es: sym list): sym option 
     sym_insert_bits loc (Z.to_int w) outer (sym_of_int lo) (sym_of_int wd) mid in
 
   (match (name, tes, es) with
-  | ("add_int",     _,                [x1; x2]) ->
-      Some (sym_add_int loc x1 x2)
-
-  | ("sub_int",     _,                [x1; x2]) -> 
-      Some (sym_sub_int loc x1 x2)
-
-  | ("mul_int",     _,                [Val x1; x2])       when is_one x1 -> Some x2
-  | ("mul_int",     _,                [x1; Val x2])       when is_one x2 -> Some x1
-  | ("mul_int",     _,                [Exp (Expr_TApply (FIdent ("add_int", 0), [], [x1; Expr_LitInt v])); Val (VInt v2)]) ->
-      let v = Z.of_string v in
-      let c = Val (VInt (Z.mul v v2)) in
-      let e = Exp (Expr_TApply (FIdent ("mul_int", 0), [], [x1; Expr_LitInt (Z.to_string v2)])) in
-      Some (sym_add_int loc e c)
+  | ("add_int",  [ ], [x1; x2]) -> Some (sym_add_int loc x1 x2)
+  | ("sub_int",  [ ], [x1; x2]) -> Some (sym_sub_int loc x1 x2)
+  | ("mul_int",  [ ], [x1; x2]) -> Some (sym_mul_int loc x1 x2)
+  | ("eq_int",   [ ], [x1; x2]) -> Some (sym_eq_int loc x1 x2)
+  | ("add_bits", [w], [x1; x2]) -> Some (sym_add_bits loc (sym_expr w) x1 x2)
 
   | ("append_bits", [Val t1; _],      [_; x2])            when is_zero t1 -> Some x2
   | ("append_bits", [_; Val t2],      [x1; _])            when is_zero t2 -> Some x1
@@ -752,9 +772,8 @@ let sym_prim_simplify (name: string) (tes: sym list) (es: sym list): sym option 
 
   | ("eq_enum",     _,                [x; Val (VBool true)])
   | ("eq_enum",     _,                [Val (VBool true); x]) -> Some x
-
-  | ("add_bits",    _,                [Val x1; x2])       when is_zero_bits x1 -> Some x2
-  | ("add_bits",    _,                [x1; Val x2])       when is_zero_bits x2 -> Some x1
+  | ("eq_enum",     _,                [x; Val (VBool false)])
+  | ("eq_enum",     _,                [Val (VBool false); x]) -> Some (sym_not_bool loc x)
 
   | ("or_bits",     _,                [Val x1; x2])       when is_zero_bits x1 -> Some x2
   | ("or_bits",     _,                [x1; Val x2])       when is_zero_bits x2 -> Some x1
