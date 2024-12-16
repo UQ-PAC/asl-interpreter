@@ -19,12 +19,17 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+
     - uses: ocaml/setup-ocaml@v2
       with:
         ocaml-compiler: 4.14
     - run: opam install dune
+
     - run: opam install . --deps-only --with-test
     - run: opam exec -- dune build --profile release
-    - run: opam install aslp_server --deps-only --with-test
+
+    - run: opam install . --deps-only --with-test
+      working-directory: aslp_server
     - run: opam exec -- dune build aslp_server --profile release
+      working-directory: aslp_server
 
