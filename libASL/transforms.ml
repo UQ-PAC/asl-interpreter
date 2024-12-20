@@ -1465,7 +1465,19 @@ module CommonSubExprElim = struct
   *)
   exception CSEError of string
 
-  class gather_expressions = object
+  class gather_consts = object
+    inherit nopAslVisitor
+    val mutable consts : IdentSet.t = IdentSet.empty
+    method! vstmt s =
+      (match s with
+      | Stmt_ConstDecl(_, n, _, _) ->
+          consts <- IdentSet.add n consts;
+          SkipChildren
+      | _ -> DoChildren)
+    method get_info = consts
+  end
+
+  class gather_expressions consts = object
     inherit Asl_visitor.nopAslVisitor
 
     val mutable exprs: expr list = ([]: expr list);
@@ -1481,7 +1493,7 @@ module CommonSubExprElim = struct
       let () = match e with
       (* For now, only gather TApply's that we've seen more than once
          See eval_prim in value.ml for the list of what that covers. *)
-      | Expr_TApply(f,_,_) when List.mem f (Symbolic.prims_pure ()) ->
+      | Expr_TApply(f,_,_) when Symbolic.is_pure e && IdentSet.subset (fv_expr e) consts ->
           (match infer_type e with
           | Some (Type_Bits _) ->
               if (List.mem e cand_exprs) && not (List.mem e exprs) then
@@ -1585,7 +1597,10 @@ module CommonSubExprElim = struct
     )
 
   let do_transform (xs: stmt list): stmt list =
-    let expression_visitor = new gather_expressions in
+    let const_visitor = new gather_consts in
+    let _ = visit_stmts const_visitor xs in
+
+    let expression_visitor = new gather_expressions (const_visitor#get_info) in
     let expression_replacer = new replace_all_instances in
 
     let xs = visit_stmts expression_visitor xs in
