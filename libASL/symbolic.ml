@@ -377,6 +377,13 @@ let rec sym_mul_int (loc: l) (x: sym) (y: sym) =
       sym_add_int loc base offset
   | _ -> Exp (Expr_TApply (FIdent ("mul_int", 0), [], [sym_expr x; sym_expr y]))
 
+let sym_zdiv_int (loc: l) (x: sym) (y: sym) =
+  match x, y with
+  | Val x, Val y -> Val (VInt (prim_zdiv_int (to_integer loc x) (to_integer loc y)))
+  (* x / 1 = x *)
+  | _, Val (VInt i) when i = Z.one -> x
+  | _ -> Exp (Expr_TApply (FIdent ("zdiv_int", 0), [], [sym_expr x; sym_expr y]))
+
 (*** Symbolic Boolean Operations ***)
 
 let sym_not_bool loc (x: sym) =
@@ -643,12 +650,6 @@ let sym_lsl_bits loc w x y =
   | _ ->
       sym_prim (FIdent ("LSL", 0)) [sym_of_int w] [x;y]
 
-let zdiv_int x y =
-  match x, y with
-  | Val (VInt i), Val (VInt j) -> Val (VInt (Z.div i j))
-  | _, Val (VInt i) when i = Z.one -> x
-  | _ -> Exp (Expr_TApply (FIdent ("sdiv_int", 0), [], [sym_expr x; sym_expr y]))
-
 (** Overwrite bits from position lo up to (lo+wd) exclusive of old with the value v.
     Needs to know the widths of both old and v to perform the operation.
     Assumes width of v is equal to wd.
@@ -668,7 +669,7 @@ let sym_insert_bits loc (old_width: int) (old: sym) (lo: sym) (wd: sym) (v: sym)
           (sym_append_bits loc wd lo v (sym_slice loc old 0 lo))
   | (_, _, Val wd', _) when Primops.prim_zrem_int (Z.of_int old_width) (to_integer Unknown wd') = Z.zero && !use_vectoriser ->
       (* Elem.set *)
-      let pos = zdiv_int lo wd in
+      let pos = sym_zdiv_int loc lo wd in
       Exp ( Expr_TApply (FIdent("Elem.set", 0), [expr_of_int old_width ; sym_expr wd],
           List.map sym_expr [old ; pos ; wd ; v]) )
   | (_, Val (VInt l), _, _) when l = Z.zero && !use_vectoriser ->

@@ -3185,8 +3185,6 @@ module LoopClassify = struct
     | "mul_int", 0, [], [Index (base,mul);Constant offset]
     | "mul_int", 0, [], [Constant offset;Index (base,mul)] ->
         Index (mul_int base offset, mul_int mul offset)
-    | "sdiv_int", 0, [], [Index(base,mul);Constant div] ->
-        Index (div_int base div, div_int mul div)
 
     (* Supported operations over BVIndex TODO: These don't really handle overflow properly *)
     | "cvt_bits_sint", 0, [Constant w], [BVIndex(b,m,_)] ->
