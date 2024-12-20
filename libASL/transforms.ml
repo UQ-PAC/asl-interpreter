@@ -7,18 +7,6 @@ open Symbolic
 open Value
 
 (* TODO: Central definition of prims in result + sanity test pass *)
-let pure_prims =
-  (List.map (fun f -> FIdent(f,0)) Value.prims_pure) @
-  [
-    FIdent("SignExtend",0);
-    FIdent("ZeroExtend",0);
-    FIdent("asr_bits",0);
-    FIdent("lsr_bits",0);
-    FIdent("lsl_bits",0);
-    FIdent("slt_bits",0);
-    FIdent("sle_bits",0);
-  ]
-
 let infer_type (e: expr): ty option =
   match e with
   | Expr_LitBits bv -> (Some(Type_Bits(Expr_LitInt (string_of_int (String.length bv)))))
@@ -134,6 +122,10 @@ module RemoveUnused = struct
     | Expr_TApply (FIdent ("or_bool", 0), [], [a;b]) -> is_true a || is_true b
     | _ -> false
 
+  let pure_fns () = IdentSet.of_list (Symbolic.prims_pure ())
+  let contains_impure s = not (IdentSet.subset (calls_of_stmts [s]) (pure_fns ()))
+  let expr_contains_impure e = not (IdentSet.subset (calls_of_expr e) (pure_fns ()))
+
   let rec remove_unused (globals: IdentSet.t) xs = fst (remove_unused' globals IdentSet.empty xs)
 
   and remove_unused' globals (used: IdentSet.t) (xs: stmt list): (stmt list * IdentSet.t) =
@@ -151,16 +143,17 @@ module RemoveUnused = struct
         | [] -> pass
         | _ -> emit (Stmt_VarDeclsNoInit(ty, vs', loc)))
       | Stmt_VarDecl(ty, v, i, loc) ->
-        if IdentSet.mem v used
+        if IdentSet.mem v used || contains_impure stmt
           then emit stmt
           else pass
       | Stmt_ConstDecl(ty, v, i, loc) ->
-        if IdentSet.mem v used
+        if IdentSet.mem v used || contains_impure stmt
           then emit stmt
           else pass
       | Stmt_Assign(le, r, loc) ->
         let lvs = assigned_vars_of_stmts [stmt] in
-        if not (IdentSet.disjoint lvs used) || not (IdentSet.disjoint lvs globals)
+        if not (IdentSet.disjoint lvs used) || not (IdentSet.disjoint lvs globals) ||
+            contains_impure stmt
           then emit stmt
           else pass
 
@@ -185,7 +178,7 @@ module RemoveUnused = struct
         let used = List.fold_right (fun (_,u) -> IdentSet.union u) elsif' (IdentSet.union tused fused) in
         let used = IdentSet.union used (fv_expr c) in
         (match (tstmts',fstmts',elsif') with
-        | [], [], [] -> pass
+        | [], [], [] when not (expr_contains_impure c) -> pass
         | _, _, _ -> (Stmt_If(c, tstmts', List.map fst elsif', fstmts', loc)::acc,used))
 
       | Stmt_For(var, start, dir, stop, body, loc) ->
@@ -1488,7 +1481,7 @@ module CommonSubExprElim = struct
       let () = match e with
       (* For now, only gather TApply's that we've seen more than once
          See eval_prim in value.ml for the list of what that covers. *)
-      | Expr_TApply(f,_,_) when List.mem f pure_prims ->
+      | Expr_TApply(f,_,_) when List.mem f (Symbolic.prims_pure ()) ->
           (match infer_type e with
           | Some (Type_Bits _) ->
               if (List.mem e cand_exprs) && not (List.mem e exprs) then
@@ -1708,28 +1701,11 @@ module BitITESimp = struct
   let one = Expr_LitInt "1"
   let type_bit = Type_Bits one
 
-  (* Test if we can freely perform the operation, even if it wouldn't
-     have been performed in the original branching version *)
-  let rec is_pure e =
-    match e with
-    | Expr_Var _ -> true
-    | Expr_LitBits _ -> true
-    | Expr_LitInt _ -> true
-    | Expr_Slices(e, [Slice_LoWd(lo, wd)]) ->
-        is_pure e && is_pure lo && is_pure wd
-    | Expr_TApply(f, tes, es) ->
-        List.mem f pure_prims &&
-        List.for_all is_pure tes &&
-        List.for_all is_pure es
-    | Expr_Field(e,_) -> is_pure e
-    | Expr_Array(e,i) -> is_pure e && is_pure i
-    | _ -> false
-
   (* Walk both branches in sync, collect necessary information *)
   let rec match_body t f =
     match t, f with
     | Stmt_Assign(ti,te,loc)::ts, Stmt_Assign(fi,fe,_)::fs
-        when ti = fi && is_pure te && is_pure fe &&
+        when ti = fi && Symbolic.is_pure te && Symbolic.is_pure fe &&
           infer_type te = Some type_bit ->
             Option.map (fun rest -> ((ti,te,fe,loc)::rest)) (match_body ts fs)
     | [], [] -> Some []

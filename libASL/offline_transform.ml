@@ -172,24 +172,14 @@ let join_state (a: state) (b: state): state =
   }
 
 (* Produce a runtime value if any arg is runtime *)
-let pure_prims =
-  Value.prims_pure @
-  (List.map fst (Dis.no_inline_pure ())) @ [
-    "lsr_bits";
-    "sle_bits";
-    "lsl_bits";
-    "asr_bits";
-    "slt_bits";
-    "sdiv_bits";
-  ]
+let pure_prims = Symbolic.prims_pure ()
 
 (* Prims that will always produce runtime *)
-let impure_prims =
-  List.map fst Dis.no_inline
+let impure_prims = Symbolic.prims_impure ()
 
 let prim_ops (f: ident) (targs: taint list) (args: taint list): taint option =
-  if List.mem (name_of_FIdent f) pure_prims then Some (join_taint_l (targs @ args))
-  else if List.mem (name_of_FIdent f) impure_prims then Some RunTime
+  if List.mem f pure_prims then Some (join_taint_l (targs @ args))
+  else if List.mem f impure_prims then Some RunTime
   else None
 
 (* Transfer function for a call, pulling a primop def or looking up registered fn signature.

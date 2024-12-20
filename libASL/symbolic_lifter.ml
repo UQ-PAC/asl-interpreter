@@ -152,13 +152,10 @@ let unsupported f = IdentSet.mem f unsupported_set
 
 let get_inlining_frontier =
   (* Collect all functions dis will not inline *)
-  let l1 = IdentSet.of_list (List.map (fun (f,i) -> FIdent (f,i)) Dis.no_inline) in
-  let l2 = IdentSet.of_list (List.map (fun (f,i) -> FIdent (f,i)) (Dis.no_inline_pure ())) in
-  (* Collect all prims *)
-  let l3 = IdentSet.of_list (List.map (fun f -> FIdent (f,0)) Value.prims_pure) in
-  let l4 = IdentSet.of_list (List.map (fun f -> FIdent (f,0)) Value.prims_impure) in
+  let l1 = IdentSet.of_list (Symbolic.prims_impure ()) in
+  let l2 = IdentSet.of_list (Symbolic.prims_pure ()) in
   (* Union with the unsupported function set *)
-  IdentSet.union l1 (IdentSet.union l2 (IdentSet.union l3 (IdentSet.union l4 unsupported_set)))
+  IdentSet.union l1 l2
 
 (* Count individual stmts present after disassembly *)
 let rec stmt_count s =

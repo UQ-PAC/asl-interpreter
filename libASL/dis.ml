@@ -67,60 +67,6 @@ let () = Printexc.register_printer
         Some ("LibASL.Value.EvalError(\"" ^ e ^ "\") at " ^ pp_loc loc)
     | _ -> None)
 
-(* Don't inline these functions, as we assume their behaviours conform to some spec *)
-let no_inline = [
-  "FPConvert",0;
-  "FPRoundInt",0;
-  "FPRoundIntN",0;
-  "FPToFixed",0;
-  "FixedToFP",0;
-  "FPCompare",0;
-  "FPCompareEQ",0;
-  "FPCompareGE",0;
-  "FPCompareGT",0;
-  "FPToFixedJS_impl",0;
-  "FPSqrt",0;
-  "FPAdd",0;
-  "FPMul",0;
-  "FPDiv",0;
-  "FPMulAdd",0;
-  "FPMulAddH",0;
-  "FPMulX",0;
-  "FPMax",0;
-  "FPMin",0;
-  "FPMaxNum",0;
-  "FPMinNum",0;
-  "FPSub",0;
-  "FPRecpX",0;
-  "FPRecipStepFused",0;
-  "FPRSqrtStepFused",0;
-  "FPRoundBase",0;
-  "FPConvertBF",0;
-  "BFRound",0;
-  "BFAdd",0;
-  "BFMul",0;
-  "FPRecipEstimate",0;
-  "Mem.read",0;
-  "Mem.set",0;
-  "AtomicStart",0;
-  "AtomicEnd",0;
-  "AArch64.MemTag.read",0;
-  "AArch64.MemTag.set",0;
-]
-
-let no_inline_pure () = [
-  "LSL",0;
-  "LSR",0;
-  "ASR",0;
-  "SignExtend",0;
-  "ZeroExtend",0;
-] @ (if !Symbolic.use_vectoriser then [
-  "Elem.set",0;
-  "Elem.read",0;
-] else [])
-
-
-
 (** A variable's stack level and original identifier name.
     The "stack level" is how many scopes deep it is.
     For example, globals are level 0 and this increases
@@ -942,15 +888,9 @@ and dis_expr' (loc: l) (x: AST.expr): sym rws =
     | Expr_LitString(s) -> DisEnv.pure (Val (from_stringLit s))
     )
 
-and no_inline_pure_ids () = List.map (fun (x,y) -> FIdent(x,y))
-  (no_inline_pure ())
-
-and no_inline_ids = List.map (fun (x,y) -> FIdent (x,y))
-  no_inline
-
 (** Disassemble call to function *)
 and dis_funcall (loc: l) (f: ident) (tvs: sym list) (vs: sym list): sym rws =
-    if List.mem f (no_inline_pure_ids ()) &&
+    if List.mem f (Symbolic.prims_pure ()) &&
       ((List.exists (function Exp _ -> true | _ -> false) tvs) ||
         (List.exists (function Exp _ -> true | _ -> false) vs)) then
       let expr = Exp (Expr_TApply (f, List.map sym_expr tvs, List.map sym_expr vs)) in
@@ -979,7 +919,7 @@ and dis_call (loc: l) (f: ident) (tes: sym list) (es: sym list): sym option rws 
 and dis_call' (loc: l) (f: ident) (tes: sym list) (es: sym list): sym option rws =
     let@ fn = DisEnv.getFun loc f in
     (match fn with
-    | Some (rty, _, targs, _, _, _) when List.mem f no_inline_ids ->
+    | Some (rty, _, targs, _, _, _) when List.mem f (Symbolic.prims_impure ()) ->
         (* impure functions are not visited. *)
         (match sym_prim_simplify (name_of_FIdent f) tes es with
         | Some x -> DisEnv.pure (Some x)

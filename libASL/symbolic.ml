@@ -920,3 +920,90 @@ let rec expr_access_chain (x: expr) (a: access_chain list): expr =
   | (Index i)::a -> expr_access_chain (Expr_Array(x,val_expr i)) a
   | (SymIndex e)::a -> expr_access_chain (Expr_Array(x,e)) a
   | [] -> x)
+
+(****************************************************************)
+(** {2 Function and Expression Purity}                          *)
+(****************************************************************)
+
+(** Primitives that can be evaluated, reordered, duplicated and eliminated.
+    Semantically, should have no influence on the evaluation trace. *)
+let prims_pure () =
+  (List.map (fun f -> FIdent(f,0)) Value.prims_pure) @
+  [
+    FIdent("LSL",0);
+    FIdent("LSR",0);
+    FIdent("ASR",0);
+    FIdent("SignExtend",0);
+    FIdent("ZeroExtend",0);
+    FIdent("asr_bits",0);
+    FIdent("lsr_bits",0);
+    FIdent("lsl_bits",0);
+    FIdent("slt_bits",0);
+    FIdent("sle_bits",0);
+    FIdent("sdiv_bits",0);
+  ] @ (if !use_vectoriser then [
+    FIdent("Elem.set",0);
+    FIdent("Elem.read",0);
+  ] else [])
+
+(** Primitives that are placed into the evaluation trace. They must be
+    preserved in the output, retaining their ordering with respect to each other
+    and any accesses to global state. *)
+let prims_impure () =
+  (List.map (fun f -> FIdent(f,0)) Value.prims_impure) @
+  [
+    FIdent("FPConvert",0);
+    FIdent("FPRoundInt",0);
+    FIdent("FPRoundIntN",0);
+    FIdent("FPToFixed",0);
+    FIdent("FixedToFP",0);
+    FIdent("FPCompare",0);
+    FIdent("FPCompareEQ",0);
+    FIdent("FPCompareGE",0);
+    FIdent("FPCompareGT",0);
+    FIdent("FPToFixedJS_impl",0);
+    FIdent("FPSqrt",0);
+    FIdent("FPAdd",0);
+    FIdent("FPMul",0);
+    FIdent("FPDiv",0);
+    FIdent("FPMulAdd",0);
+    FIdent("FPMulAddH",0);
+    FIdent("FPMulX",0);
+    FIdent("FPMax",0);
+    FIdent("FPMin",0);
+    FIdent("FPMaxNum",0);
+    FIdent("FPMinNum",0);
+    FIdent("FPSub",0);
+    FIdent("FPRecpX",0);
+    FIdent("FPRecipStepFused",0);
+    FIdent("FPRSqrtStepFused",0);
+    FIdent("FPRoundBase",0);
+    FIdent("FPConvertBF",0);
+    FIdent("BFRound",0);
+    FIdent("BFAdd",0);
+    FIdent("BFMul",0);
+    FIdent("FPRecipEstimate",0);
+    FIdent("Mem.read",0);
+    FIdent("Mem.set",0);
+    FIdent("AtomicStart",0);
+    FIdent("AtomicEnd",0);
+    FIdent("AArch64.MemTag.read",0);
+    FIdent("AArch64.MemTag.set",0);
+  ]
+
+(** Test if an expression is only over constants, variables and pure operations. Does not
+    determine whether a variable access can be considered pure. *)
+let rec is_pure e =
+  match e with
+  | Expr_Var _ -> true
+  | Expr_LitBits _ -> true
+  | Expr_LitInt _ -> true
+  | Expr_Slices(e, [Slice_LoWd(lo, wd)]) ->
+      is_pure e && is_pure lo && is_pure wd
+  | Expr_TApply(f, tes, es) ->
+      List.mem f (prims_pure ()) &&
+      List.for_all is_pure tes &&
+      List.for_all is_pure es
+  | Expr_Field(e,_) -> is_pure e
+  | Expr_Array(e,i) -> is_pure e && is_pure i
+  | _ -> false
