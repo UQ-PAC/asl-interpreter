@@ -990,6 +990,10 @@ let prims_impure () =
     FIdent("AtomicEnd",0);
     FIdent("AArch64.MemTag.read",0);
     FIdent("AArch64.MemTag.set",0);
+    FIdent("SetTagCheckedInstruction",0);
+    FIdent("SpeculativeStoreBypassBarrierToPA",0);
+    FIdent("SpeculationBarrier",0);
+    FIdent("SpeculativeStoreBypassBarrierToVA",0);
   ]
 
 (** Test if an expression is only over constants, variables and pure operations. Does not

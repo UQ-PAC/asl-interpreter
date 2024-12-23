@@ -135,9 +135,9 @@ module RemoveUnsupported = struct
       | Stmt_Dep_ImpDef (_, loc)
       | Stmt_See (_, loc)
       | Stmt_Throw (_, loc)
-      | Stmt_DecodeExecute (_, _, loc) -> ChangeTo (assert_false loc)
-
-      | _ -> failwith @@ "Unknown stmt: " ^ (pp_stmt e))
+      | Stmt_DecodeExecute (_, _, loc)
+      | Stmt_Try (_, _, _, _, loc)
+      | Stmt_Repeat (_, _, loc) -> ChangeTo (assert_false loc))
   end
 
   let run unsupported env body =

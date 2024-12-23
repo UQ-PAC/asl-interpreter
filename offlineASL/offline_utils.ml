@@ -191,6 +191,8 @@ let f_AtomicEnd () =
   push_stmt (Stmt_TCall (FIdent ("AtomicEnd", 0), [], [], Unknown))
 let f_gen_AArch64_MemTag_set x y z: unit =
   failwith "MemTag_set unsupported"
+let f_gen_AArch64_MemTag_read x y =
+  failwith "MemTag_read unsupported"
 
 (* Prim bool ops *)
 let f_gen_and_bool e1 e2 =

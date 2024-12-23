@@ -111,6 +111,7 @@ public:
                                  rt_expr acctype) = 0;
   virtual void f_gen_AArch64_MemTag_set(rt_expr address, rt_expr acctype,
                                         rt_expr value) = 0;
+  virtual rt_expr f_gen_AArch64_MemTag_read(rt_expr address, rt_expr acctype) = 0;
 
   virtual void f_AtomicStart() = 0;
   virtual void f_AtomicEnd() = 0;

@@ -106,6 +106,7 @@ class NotImplementedLifter extends LiftState[RExpr, String, BitVec] {
   def f_gen_slt_bits(targ0: BigInt, arg0: RTSym, arg1: RTSym): RTSym = throw NotImplementedError()
   def f_gen_sub_bits(targ0: BigInt, arg0: RTSym, arg1: RTSym): RTSym = throw NotImplementedError()
   def f_gen_AArch64_MemTag_set(arg0: RTSym, arg1: RTSym, arg2: RTSym): RTSym = throw NotImplementedError()
+  def f_gen_AArch64_MemTag_read(arg0: RTSym, arg1: RTSym): RTSym = throw NotImplementedError()
   def f_gen_Mem_read(targ0: BigInt, arg0: RTSym, arg1: RTSym, arg2: RTSym): RTSym = throw NotImplementedError()
   def f_gen_slice(e: RTSym, lo: BigInt, wd: BigInt): RTSym = throw NotImplementedError()
   def f_gen_replicate_bits(targ0: BigInt, targ1: BigInt, arg0: RTSym, arg1: BV): RTSym = throw NotImplementedError()
