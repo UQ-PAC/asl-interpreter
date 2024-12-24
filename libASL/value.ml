@@ -387,7 +387,7 @@ let eval_prim (f: string) (tvs: value list) (vs: value list): value option =
 let prims_pure = [
     "eq_enum"; "eq_enum"; "ne_enum"; "ne_enum"; "eq_bool"; "ne_bool"; "equiv_bool"; "not_bool"; "eq_int"; "ne_int"; "le_int";
     "lt_int"; "ge_int"; "gt_int"; "is_pow2_int"; "neg_int"; "add_int"; "sub_int"; "shl_int"; "shr_int"; "mul_int"; "zdiv_int";
-    "zrem_int"; "sdiv_int"; "fdiv_int"; "frem_int"; "mod_pow2_int"; "align_int"; "pow2_int"; "pow_int_int"; "cvt_int_real"; "eq_real";
+    "zrem_int"; "fdiv_int"; "frem_int"; "mod_pow2_int"; "align_int"; "pow2_int"; "pow_int_int"; "cvt_int_real"; "eq_real";
     "ne_real"; "le_real"; "lt_real"; "ge_real"; "gt_real"; "add_real"; "neg_real"; "sub_real"; "mul_real"; "divide_real";
     "pow2_real"; "round_tozero_real"; "round_down_real"; "round_up_real"; "sqrt_real"; "cvt_int_bits"; "cvt_bits_sint";
     "cvt_bits_uint"; "in_mask"; "notin_mask"; "eq_bits"; "ne_bits"; "add_bits"; "sub_bits"; "mul_bits"; "and_bits"; "or_bits";

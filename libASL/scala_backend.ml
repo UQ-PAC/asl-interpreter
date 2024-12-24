@@ -60,7 +60,7 @@ module StringSet = Set.Make(String)
         "f_gen_lsr_bits"; "f_gen_mul_bits"; "f_gen_ne_bits"; "f_gen_not_bits";
         "f_gen_not_bool"; "f_gen_or_bits"; "f_gen_or_bool"; "f_gen_sdiv_bits";
         "f_gen_sle_bits"; "f_gen_slt_bits"; "f_gen_sub_bits";
-        "f_gen_AArch64_MemTag_set"; "f_gen_Mem_read"; "f_gen_slice";
+        "f_gen_AArch64_MemTag_read"; "f_gen_AArch64_MemTag_set"; "f_gen_Mem_read"; "f_gen_slice";
         "f_gen_replicate_bits"; "f_gen_append_bits"; "f_gen_array_load";
         "f_gen_array_store"; "f_gen_Mem_set"; "f_gen_assert";
         "f_switch_context"; "f_true_branch"; "f_false_branch"; "f_merge_branch"])

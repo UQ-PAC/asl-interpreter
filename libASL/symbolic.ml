@@ -377,6 +377,13 @@ let rec sym_mul_int (loc: l) (x: sym) (y: sym) =
       sym_add_int loc base offset
   | _ -> Exp (Expr_TApply (FIdent ("mul_int", 0), [], [sym_expr x; sym_expr y]))
 
+let sym_zdiv_int (loc: l) (x: sym) (y: sym) =
+  match x, y with
+  | Val x, Val y -> Val (VInt (prim_zdiv_int (to_integer loc x) (to_integer loc y)))
+  (* x / 1 = x *)
+  | _, Val (VInt i) when i = Z.one -> x
+  | _ -> Exp (Expr_TApply (FIdent ("zdiv_int", 0), [], [sym_expr x; sym_expr y]))
+
 (*** Symbolic Boolean Operations ***)
 
 let sym_not_bool loc (x: sym) =
@@ -643,12 +650,6 @@ let sym_lsl_bits loc w x y =
   | _ ->
       sym_prim (FIdent ("LSL", 0)) [sym_of_int w] [x;y]
 
-let zdiv_int x y =
-  match x, y with
-  | Val (VInt i), Val (VInt j) -> Val (VInt (Z.div i j))
-  | _, Val (VInt i) when i = Z.one -> x
-  | _ -> Exp (Expr_TApply (FIdent ("sdiv_int", 0), [], [sym_expr x; sym_expr y]))
-
 (** Overwrite bits from position lo up to (lo+wd) exclusive of old with the value v.
     Needs to know the widths of both old and v to perform the operation.
     Assumes width of v is equal to wd.
@@ -668,7 +669,7 @@ let sym_insert_bits loc (old_width: int) (old: sym) (lo: sym) (wd: sym) (v: sym)
           (sym_append_bits loc wd lo v (sym_slice loc old 0 lo))
   | (_, _, Val wd', _) when Primops.prim_zrem_int (Z.of_int old_width) (to_integer Unknown wd') = Z.zero && !use_vectoriser ->
       (* Elem.set *)
-      let pos = zdiv_int lo wd in
+      let pos = sym_zdiv_int loc lo wd in
       Exp ( Expr_TApply (FIdent("Elem.set", 0), [expr_of_int old_width ; sym_expr wd],
           List.map sym_expr [old ; pos ; wd ; v]) )
   | (_, Val (VInt l), _, _) when l = Z.zero && !use_vectoriser ->
@@ -920,3 +921,94 @@ let rec expr_access_chain (x: expr) (a: access_chain list): expr =
   | (Index i)::a -> expr_access_chain (Expr_Array(x,val_expr i)) a
   | (SymIndex e)::a -> expr_access_chain (Expr_Array(x,e)) a
   | [] -> x)
+
+(****************************************************************)
+(** {2 Function and Expression Purity}                          *)
+(****************************************************************)
+
+(** Primitives that can be evaluated, reordered, duplicated and eliminated.
+    Semantically, should have no influence on the evaluation trace. *)
+let prims_pure () =
+  (List.map (fun f -> FIdent(f,0)) Value.prims_pure) @
+  [
+    FIdent("LSL",0);
+    FIdent("LSR",0);
+    FIdent("ASR",0);
+    FIdent("SignExtend",0);
+    FIdent("ZeroExtend",0);
+    FIdent("asr_bits",0);
+    FIdent("lsr_bits",0);
+    FIdent("lsl_bits",0);
+    FIdent("slt_bits",0);
+    FIdent("sle_bits",0);
+    FIdent("sdiv_bits",0);
+  ] @ (if !use_vectoriser then [
+    FIdent("Elem.set",0);
+    FIdent("Elem.read",0);
+  ] else [])
+
+(** Primitives that are placed into the evaluation trace. They must be
+    preserved in the output, retaining their ordering with respect to each other
+    and any accesses to global state. *)
+let prims_impure () =
+  (List.map (fun f -> FIdent(f,0)) Value.prims_impure) @
+  [
+    FIdent("FPConvert",0);
+    FIdent("FPRoundInt",0);
+    FIdent("FPRoundIntN",0);
+    FIdent("FPToFixed",0);
+    FIdent("FixedToFP",0);
+    FIdent("FPCompare",0);
+    FIdent("FPCompareEQ",0);
+    FIdent("FPCompareGE",0);
+    FIdent("FPCompareGT",0);
+    FIdent("FPToFixedJS_impl",0);
+    FIdent("FPSqrt",0);
+    FIdent("FPAdd",0);
+    FIdent("FPMul",0);
+    FIdent("FPDiv",0);
+    FIdent("FPMulAdd",0);
+    FIdent("FPMulAddH",0);
+    FIdent("FPMulX",0);
+    FIdent("FPMax",0);
+    FIdent("FPMin",0);
+    FIdent("FPMaxNum",0);
+    FIdent("FPMinNum",0);
+    FIdent("FPSub",0);
+    FIdent("FPRecpX",0);
+    FIdent("FPRecipStepFused",0);
+    FIdent("FPRSqrtStepFused",0);
+    FIdent("FPRoundBase",0);
+    FIdent("FPConvertBF",0);
+    FIdent("BFRound",0);
+    FIdent("BFAdd",0);
+    FIdent("BFMul",0);
+    FIdent("FPRecipEstimate",0);
+    FIdent("Mem.read",0);
+    FIdent("Mem.set",0);
+    FIdent("AtomicStart",0);
+    FIdent("AtomicEnd",0);
+    FIdent("AArch64.MemTag.read",0);
+    FIdent("AArch64.MemTag.set",0);
+    FIdent("SetTagCheckedInstruction",0);
+    FIdent("SpeculativeStoreBypassBarrierToPA",0);
+    FIdent("SpeculationBarrier",0);
+    FIdent("SpeculativeStoreBypassBarrierToVA",0);
+  ]
+
+(** Test if an expression is only over constants, variables and pure operations. Does not
+    determine whether a variable access can be considered pure. *)
+let rec is_pure e =
+  match e with
+  | Expr_Var _ -> true
+  | Expr_LitBits _ -> true
+  | Expr_LitInt _ -> true
+  | Expr_Slices(e, [Slice_LoWd(lo, wd)]) ->
+      is_pure e && is_pure lo && is_pure wd
+  | Expr_TApply(f, tes, es) ->
+      List.mem f (prims_pure ()) &&
+      List.for_all is_pure tes &&
+      List.for_all is_pure es
+  | Expr_Field(e,_) -> is_pure e
+  | Expr_Array(e,i) -> is_pure e && is_pure i
+  | _ -> false

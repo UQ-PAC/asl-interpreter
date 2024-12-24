@@ -37,7 +37,7 @@ let is_pure_expr f =
   match f with
   | FIdent(f, 0) when String.starts_with ~prefix f ->
       let f' = String.sub f 4 (String.length f - 4) in
-      List.mem f' Offline_transform.pure_prims
+      List.mem (FIdent(f',0)) Offline_transform.pure_prims
   | _ -> false
 
 let is_var_decl f =

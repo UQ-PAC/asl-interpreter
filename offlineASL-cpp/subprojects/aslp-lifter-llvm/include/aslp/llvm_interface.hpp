@@ -340,6 +340,7 @@ public:
     return builder->CreateLoad(intty(int_expr(width)), ptr);
   }
   void f_gen_AArch64_MemTag_set(rt_expr address, rt_expr acctype, rt_expr value) override { assert(0); }
+  rt_expr f_gen_AArch64_MemTag_read(rt_expr address, rt_expr acctype) override { assert(0); }
 
   void f_AtomicStart() override { assert(0); }
   void f_AtomicEnd() override { assert(0); }
