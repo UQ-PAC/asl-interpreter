@@ -31,8 +31,8 @@ public:
 class aslp_client
 {
 private:
-  const std::string server_addr;
   pid_t server_pid;
+  const std::string server_addr;
   int server_port;
   void shutdown();
 
@@ -47,8 +47,8 @@ public:
    */
   aslp_client(pid_t pid, std::string addr, int port)
       : server_pid(pid)
-      , server_port(port)
       , server_addr(std::move(addr))
+      , server_port(port)
   {
   }
 
