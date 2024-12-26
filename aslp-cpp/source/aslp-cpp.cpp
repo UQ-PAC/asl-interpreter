@@ -125,8 +125,9 @@ auto aslp_client::start(const std::string& addr, int server_port)
     auto command = std::format(
         "opam exec -- aslp-server --host {} --port {}", addr, server_port);
     std::cerr << command << std::endl;
-    std::system(command.c_str());
-    std::cerr << "Child process exited." << std::endl;
+    int retcode = std::system(command.c_str());
+    std::cerr << "Child process exited with code: " << retcode << std::endl;
+    std::exit(retcode);
     return {nullptr};
   }
 
