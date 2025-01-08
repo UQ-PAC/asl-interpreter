@@ -4,7 +4,9 @@ open Cohttp_eio
 open List
 open Asl_ast
 
-let persistent_env = Option.get (Arm_env.aarch64_evaluation_environment ())
+(* Lifter wrapper *)
+
+let persistent_env = lazy (Option.get (Arm_env.aarch64_evaluation_environment ()))
 let count = Atomic.make 0
 
 let eval_instr (opcode : string) : string * string =
@@ -13,7 +15,7 @@ let eval_instr (opcode : string) : string * string =
   in
   let _address = None in
 
-  let env' = persistent_env in
+  let env' = Lazy.force persistent_env in
   let lenv = Dis.build_env env' in
   let decoder = Eval.Env.getDecoder env' (Ident "A64") in
   let enc, stmts =
@@ -59,29 +61,46 @@ let get_resp (opcode : string) : Cohttp.Code.status_code * string =
   if String.equal opcode "die" then exit 0;
   get_reply opcode
 
-let mutex = Eio.Mutex.create ()
+(* Cache *)
 
 type 'a work = Decode of (string * ('a, exn) result Eio.Promise.u)
-
-let has_work = Eio.Condition.create ()
 
 module DisCache = Lru_cache.Make (Core.String)
 
 let cache : (Code.status_code * string) DisCache.t =
   DisCache.create ~max_size:5000 ()
 
-let cache_mutex = Eio.Mutex.create ()
+(* Paralellism Structure
+
+   We have one cohttp request handler domain and an executor pool of 
+   workers doing opcode lifting across possibly multiple domains. 
+
+   Basic benchmarks show that cohttp-eio is able to handle 
+   >100000 request/second when not doing any work, so in our case
+   we are sufficiently compute-bound that multithreading the 
+   request handler has no impact.
+*)
 
 let submit_req_executor_pool pool opcode =
-  (* CACHE IS NOT THREADSAFE, only call this from one domain *)
+  (* CACHE IS NOT THREADSAFE, only call this from one domain
+     (the single request handler domain).
+
+    We put the cache on the request handler side rather
+    than the lifter side to
+
+    a) avoid duplicating essentially the same cache for each domain and
+    b) avoid synchonisation/queuing overhead for requests when they 
+       just hit the cache.
+    *)
   let default () =
     Atomic.incr count;
     Eio.Executor_pool.submit_exn pool ~weight:0.001 (fun () -> get_resp opcode)
   in
   DisCache.find_or_add cache opcode ~default
 
+(* Request handling *)
 let server socket addr port get_resp =
-  Printf.printf "Started aslp-server at http://%s:%d\n" addr port;
+  Eio.traceln "Started aslp-server at http://%s:%d\n" addr port;
   flush stdout;
 
   let oldflags = Flags.get_flags () in
@@ -114,7 +133,7 @@ let server socket addr port get_resp =
 
 let port_opt : int ref = ref 8000
 let addr_opt : string ref = ref "127.0.0.1"
-let threads_opt : int ref = ref 2
+let threads_opt : int ref = ref 4
 let killserver = ref false
 
 let speclist =
@@ -122,7 +141,7 @@ let speclist =
     ("--host", Arg.Set_string addr_opt, "Server ip address (default 127.0.0.1)");
     ("--port", Arg.Set_int port_opt, "Server port (default 8000)");
     ("--threads", Arg.Set_int threads_opt, "Number of lifter worker threads");
-    ("--killserver", Arg.Set killserver, "Number of lifter worker threads");
+    ("--killserver", Arg.Set killserver, "Tell the server to shut down");
   ]
 
 let rec periodic t () =
@@ -152,6 +171,8 @@ let () =
     in
 
     let work sw =
+      (* force the env before starting the server *)
+      let _ = Lazy.force persistent_env in
       Eio.Fiber.fork ~sw (periodic env#clock);
       let pool =
         Eio.Executor_pool.create ~sw env#domain_mgr ~domain_count:!threads_opt
