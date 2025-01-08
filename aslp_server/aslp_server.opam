@@ -9,7 +9,7 @@ homepage: "https://github.com/UQ-PAC/aslp"
 doc: "https://github.com/UQ-PAC/aslp"
 bug-reports: "https://github.com/UQ-PAC/aslp/issues"
 depends: [
-  "ocaml" {>= "5.1"}
+  "ocaml" {>= "5.0"}
   "dune" {>= "2.8"}
   "eio"
   "cohttp-eio"

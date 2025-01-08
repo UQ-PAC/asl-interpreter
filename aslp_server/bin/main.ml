@@ -56,6 +56,7 @@ let try_set_flags xs : (unit, Cohttp.Code.status_code * string) Result.t =
   | _ -> Result.ok ()
 
 let get_resp (opcode : string) : Cohttp.Code.status_code * string =
+  if String.equal opcode "die" then exit 0;
   get_reply opcode
 
 let mutex = Eio.Mutex.create ()
@@ -114,12 +115,14 @@ let server socket addr port get_resp =
 let port_opt : int ref = ref 8000
 let addr_opt : string ref = ref "127.0.0.1"
 let threads_opt : int ref = ref 2
+let killserver = ref false
 
 let speclist =
   [
     ("--host", Arg.Set_string addr_opt, "Server ip address (default 127.0.0.1)");
     ("--port", Arg.Set_int port_opt, "Server port (default 8000)");
     ("--threads", Arg.Set_int threads_opt, "Number of lifter worker threads");
+    ("--killserver", Arg.Set killserver, "Number of lifter worker threads");
   ]
 
 let rec periodic t () =
@@ -134,6 +137,20 @@ let () =
     let unix_addr = Unix.inet_addr_of_string !addr_opt in
     let e = Eio_unix.Net.Ipaddr.of_unix unix_addr in
     let addr = `Tcp (e, !port_opt) in
+
+    let killwork sw =
+      let client = Client.make ~https:None env#net in
+      let _ =
+        try
+          Client.get ~sw client
+            (Uri.of_string
+               (Printf.sprintf "http://%s:%d/?opcode=die" !addr_opt !port_opt))
+          |> ignore
+        with | Failure x -> Eio.traceln "%s" x  
+      in
+      ()
+    in
+
     let work sw =
       Eio.Fiber.fork ~sw (periodic env#clock);
       let pool =
@@ -149,6 +166,6 @@ let () =
         ~if_closed:(fun () -> ());
       server socket !addr_opt !port_opt decode
     in
-    Eio.Switch.run work
+    if !killserver then Eio.Switch.run killwork else Eio.Switch.run work
   in
   Eio_main.run main
