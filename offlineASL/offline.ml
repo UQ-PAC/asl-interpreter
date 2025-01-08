@@ -6,7 +6,7 @@ open Decode_tests
 let f_A64_decoder v_enc : unit = 
   failwith "unsupported"
 
-let run enc =
+let run ?pc enc =
   reset_ir ();
   f_A64_decoder enc;
   get_ir ()
