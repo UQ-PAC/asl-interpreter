@@ -8,7 +8,6 @@
 #include <iostream>
 #include <memory>
 #include <optional>
-#include <ranges>
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
@@ -113,14 +112,13 @@ auto get_proc_children_transitive(pid_t proc) -> std::vector<pid_t>
   return get_proc_children(pids, proc, /*recursive=*/true);
 }
 
-auto aslp_client::start(const std::string& addr, int server_port)
-    -> std::unique_ptr<aslp_client>
+auto aslp_client::start(const std::string& addr,
+                        int server_port) -> std::unique_ptr<aslp_client>
 {
   auto pid = fork();
 
   if (pid != 0) {
-    return std::make_unique<aslp_client> (
-        pid, addr, server_port);
+    return std::make_unique<aslp_client>(pid, addr, server_port);
   } else {
     auto command = std::format(
         "opam exec -- aslp-server --host {} --port {}", addr, server_port);
@@ -138,19 +136,15 @@ void aslp_connection::wait_active()
 {
   auto req = client->Get("/");
 
-  std::cout << "Waiting for server to start.";
   while (req.error() != httplib::Error::Success) {
-    std::cout << "." << std::flush;
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     req = client->Get("/");
   }
-  std::cout << "\n";
 }
 
 aslp_opcode_result_t aslp_connection::get_opcode(uint32_t opcode)
 {
   auto codestr = std::format("{:#x}", opcode);
-  std::cout << codestr << "\n";
   auto params = httplib::Params({{"opcode", codestr}});
   for (const auto& pair : extra_params) {
     params.insert(pair);
