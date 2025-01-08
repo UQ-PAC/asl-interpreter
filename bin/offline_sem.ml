@@ -2,14 +2,17 @@ open LibASL
 open Asl_ast
 open Asl_utils
 
-let run (opcode: string) =
+let run (opcode: string) (pc: int option) =
   let op = Z.of_string opcode in
   let bv = Primops.prim_cvt_int_bits (Z.of_int 32) op in
-  let stmts = OfflineASL.Offline.run bv in
+  let stmts = OfflineASL.Offline.run ?pc bv in
   List.iter (fun s -> Printf.printf "%s\n" (pp_stmt s)) stmts
 
 let opt_instr = ref []
-let options = Arg.align ([])
+let opt_pc = ref (-1) 
+let options = Arg.align ([
+    ( "--pc", Arg.Set_int opt_pc , "set program counter (does nothing if lifter generated does not support it)");
+])
 let usage_msg = ""
 
 let _ =
@@ -18,6 +21,7 @@ let _ =
     usage_msg
 
 let main () = 
-  List.map (fun instr -> run instr) !opt_instr
+  let pc = if (!opt_pc <> -1) then Some !opt_pc else None in
+  List.map (fun instr -> run instr pc) !opt_instr 
 
 let _ = main()

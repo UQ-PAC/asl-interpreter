@@ -33,8 +33,6 @@ let get_reply (jsonin: string) : Cohttp.Code.status_code * string =
   (*let json  = Yojson.Safe.from_string jsonin in *)
   let make_reply code tail =
     (code, Yojson.Safe.to_string (`Assoc (["instruction", `String jsonin] @ tail))) in
-  Printf.printf "Disassembling '%s'\n" jsonin;
-  flush stdout;
   match (eval_instr jsonin) with
   | exception e -> make_reply `Internal_server_error ["error", `String (Printexc.to_string e)]
   | enc, x -> make_reply `OK [ "encoding", `String enc; "semantics", `String x; ]

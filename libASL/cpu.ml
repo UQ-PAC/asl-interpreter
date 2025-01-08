@@ -67,15 +67,16 @@ let mkCPU (env : Eval.Env.t) (denv: Dis.env): cpu =
         (* Build the symbolic lifter *)
         let (decoder_id,decoder_fnsig,tests,instrs) = Symbolic_lifter.run_marshal include_pc iset pat env in
 
-        let run_gen_backend : gen_function =
+        let run_gen_backend  =
             match backend with
-            | Ocaml -> Ocaml_backend.run
-            | Cpp -> Cpp_backend.run
-            | Scala -> Scala_backend.run
+            | Ocaml -> Ocaml_backend.OcamlBackend.run
+            | Cpp -> Cpp_backend.CppBackend.run
+            | Scala -> Scala_backend.ScalaBackend.run
         in
+        let config : Gen_backend.conf = {use_pc=include_pc; output_directory=dir} in
 
         (* Build backend program *)
-        run_gen_backend decoder_id decoder_fnsig tests instrs dir
+        run_gen_backend ~config decoder_id decoder_fnsig tests instrs
 
     in
     {

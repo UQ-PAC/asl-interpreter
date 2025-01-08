@@ -5,7 +5,7 @@ open Asl_utils
 
 open AST
 open Asl_visitor
-open Value
+open Gen_backend
 
 (* For splitting up functions we use type to indicate which parameters are passed by reference. *)
 
@@ -845,3 +845,6 @@ let run (dfn : ident) (dfnsig : ty option * 'a * ident list * ident list * 'b * 
   write_decoder_file dfn (lift_fsig dfnsig) files dir st |> ignore ; 
   ()
 
+module ScalaBackend : Backend = struct
+  let run ~(config:conf) dfn dfnsig tests fns = run dfn dfnsig tests fns config.output_directory
+end
