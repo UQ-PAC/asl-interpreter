@@ -9,11 +9,13 @@ homepage: "https://github.com/UQ-PAC/aslp"
 doc: "https://github.com/UQ-PAC/aslp"
 bug-reports: "https://github.com/UQ-PAC/aslp/issues"
 depends: [
-  "ocaml"
+  "ocaml" {>= "5.1"}
   "dune" {>= "2.8"}
-  "cohttp-lwt-unix"
+  "eio"
+  "cohttp-eio"
   "yojson"
   "asli"
+  "janestreet_lru_cache"
   "odoc" {with-doc}
 ]
 build: [

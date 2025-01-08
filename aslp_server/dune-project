@@ -18,10 +18,14 @@
  (name aslp_server)
  (synopsis "REST server for ASLp")
  (description "")
- (depends ocaml dune
-    "cohttp-lwt-unix"
+ (depends 
+   ("ocaml" (>= "5.0"))
+     dune
+    "eio"
+    "cohttp-eio"
     "yojson"
     "asli"
+    janestreet_lru_cache
  )
  )
 
