@@ -279,6 +279,7 @@ let rec flatten x acc =
 type config = {
   eval_env: Eval.Env.t;
   unroll_bound: Z.t;
+  validate_rasl: bool;
 }
 
 module DisEnv = struct
@@ -1499,10 +1500,8 @@ let enum_types env i =
     | _ -> None
 
 (* Actually perform dis *)
-let dis_core (env: Eval.Env.t) (unroll_bound) ((lenv,globals): env) (decode: decode_case) (op: Primops.bigint): string * stmt list =
+let dis_core ~(config:config) ((lenv,globals): env) (decode: decode_case) (op: Primops.bigint): string * stmt list =
     let DecoderCase_Case (_,_,loc) = decode in
-    let config = { eval_env = env ; unroll_bound } in
-
     let (enc,lenv',stmts) = (dis_decode_case loc decode op) config lenv in
     let varentries = List.(concat @@ map (fun vars -> StringMap.(bindings (map fst vars))) lenv.locals) in
     let bindings = Asl_utils.Bindings.of_seq @@ List.to_seq @@ List.map (fun (x,y) -> (Ident x,y)) varentries in
@@ -1511,7 +1510,7 @@ let dis_core (env: Eval.Env.t) (unroll_bound) ((lenv,globals): env) (decode: dec
     let stmts' = Transforms.RemoveUnused.remove_unused globals @@ stmts in
     let stmts' = Transforms.RedundantSlice.do_transform Bindings.empty stmts' in
     let stmts' = Transforms.FixRedefinitions.run (globals : IdentSet.t) stmts' in
-    let stmts' = Transforms.StatefulIntToBits.run (enum_types env) stmts' in
+    let stmts' = Transforms.StatefulIntToBits.run (enum_types config.eval_env) stmts' in
     let stmts' = Transforms.IntToBits.ints_to_bits stmts' in
     let stmts' = Transforms.CommonSubExprElim.do_transform stmts' in
     let stmts' = Transforms.CopyProp.copyProp stmts' in
@@ -1528,6 +1527,16 @@ let dis_core (env: Eval.Env.t) (unroll_bound) ((lenv,globals): env) (decode: dec
         List.iter (fun s -> Printf.printf "%s\n" (pp_stmt s)) stmts';
         Printf.printf "===========\n";
     end;
+
+    (try 
+        let suppress = not config.validate_rasl in
+        RASL_check.LoadStatementInvariantExc.check_stmts_exc ~suppress stmts';
+        RASL_check.AllowedIntrinsicsExc.check_stmts_exc ~suppress stmts' 
+    with 
+        | (RASL_check.RASLInvariantFailed _) as ex -> raise (DisTrace (lenv'.trace, ex))
+    )
+    ;
+
     enc, stmts'
 
 
@@ -1535,18 +1544,19 @@ let dis_core (env: Eval.Env.t) (unroll_bound) ((lenv,globals): env) (decode: dec
    This is a complete hack, but it is nicer to make the loop unrolling decision during
    partial evaluation, rather than having to unroll after we know vectorization failed.
  *)
-let dis_decode_entry_with_inst (env: Eval.Env.t) ((lenv,globals): env) (decode: decode_case) (op: Primops.bigint): string * stmt list =
+let dis_decode_entry_with_inst (env: Eval.Env.t) ((lenv,globals): env) (decode: decode_case) validate_rasl (op: Primops.bigint): string * stmt list =
   let max_upper_bound = Z.of_int64 Int64.max_int in
+  let config = { eval_env = env ; unroll_bound=max_upper_bound ; validate_rasl } in
   match !Symbolic.use_vectoriser with
-  | false -> dis_core env max_upper_bound (lenv,globals) decode op
+  | false -> dis_core ~config (lenv,globals) decode op
   | true ->
-    let enc,stmts' = dis_core env Z.one (lenv,globals) decode op in
+          let enc,stmts' = dis_core ~config:{config with unroll_bound= Z.one} (lenv,globals) decode op in
     let (res,stmts') = Transforms.LoopClassify.run stmts' env in
     if res then (enc,stmts') else
-      dis_core env max_upper_bound (lenv,globals) decode op
+      dis_core ~config (lenv,globals) decode op
 
-let dis_decode_entry (env: Eval.Env.t) ((lenv,globals): env) (decode: decode_case) (op: Primops.bigint): stmt list =
-  snd @@ dis_decode_entry_with_inst env (lenv,globals) decode op
+let dis_decode_entry (env: Eval.Env.t) ((lenv,globals): env) validate_rasl (decode: decode_case) (op: Primops.bigint): stmt list =
+  snd @@ dis_decode_entry_with_inst env (lenv,globals) decode validate_rasl op
 
 let build_env (env: Eval.Env.t): env =
     let env = Eval.Env.freeze env in
@@ -1585,10 +1595,10 @@ let setPC (env: Eval.Env.t) (lenv,g: env) (address: Z.t): env =
     let addr = VBits (Primops.mkBits width address) in
     LocalEnv.setVar loc (Var(0, pc)) (Val addr) lenv,g
 
-let retrieveDisassembly ?(address:string option) (env: Eval.Env.t) (lenv: env) (opcode: string) : stmt list =
+let retrieveDisassembly ?(validate_rasl=false) ?(address:string option) (env: Eval.Env.t) (lenv: env) (opcode: string) : stmt list =
     let decoder = Eval.Env.getDecoder env (Ident "A64") in
     let DecoderCase_Case (_,_,loc) = decoder in
     let lenv = match address with
     | Some v -> setPC env lenv (Z.of_string v)
     | None -> lenv in
-    dis_decode_entry env lenv decoder (Z.of_string opcode)
+    dis_decode_entry env lenv validate_rasl decoder  (Z.of_string opcode) 

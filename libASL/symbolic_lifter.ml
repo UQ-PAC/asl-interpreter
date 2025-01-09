@@ -287,7 +287,7 @@ let dis_wrapper fn fnsig env =
   let (lenv,globals) = Dis.build_env env in
   let body = fnsig_get_body fnsig in
   let args = fnsig_get_typed_args fnsig in
-  let config = {Dis.eval_env = env ; unroll_bound = Z.of_int64 Int64.max_int} in
+  let config = {Dis.eval_env = env ; unroll_bound = Z.of_int64 Int64.max_int; validate_rasl=false} in
   try
     (* Setup initial environment based on function arguments *)
     let lenv =
