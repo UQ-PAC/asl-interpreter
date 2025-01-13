@@ -25,7 +25,6 @@ let opt_print_version = ref false
 let opt_no_default_aarch64 = ref false
 let opt_export_aarch64_dir = ref ""
 let opt_verbose = ref false
-let opt_check_rasl = ref false
 
 
 let () = 
@@ -134,7 +133,7 @@ let rec process_command (tcenv: TC.Env.t) (cpu: Cpu.cpu) (fname: string) (input0
 
                     (try
                         (* Generate and evaluate partially evaluated instruction *)
-                        let disStmts = Dis.dis_decode_entry disEnv lenv (!opt_check_rasl) decoder op in
+                        let disStmts = Dis.dis_decode_entry disEnv lenv decoder op in
                         List.iter (eval_stmt disEvalEnv) disStmts;
 
                         if Eval.Env.compare evalEnv disEvalEnv then
@@ -191,7 +190,7 @@ let rec process_command (tcenv: TC.Env.t) (cpu: Cpu.cpu) (fname: string) (input0
         let cpu' = Cpu.mkCPU cpu.env cpu.denv in
         let op = Z.of_string opcode in
         Printf.printf "Decoding instruction %s %s\n" iset (Z.format "%x" op);
-        cpu'.sem ~validate_rasl:(!opt_check_rasl) iset op
+        cpu'.sem iset op
     | ":ast" :: iset :: opcode :: rest when List.length rest <= 1 ->
         let op = Z.of_string opcode in
         let decoder = Eval.Env.getDecoder cpu.env (Ident iset) in
@@ -199,7 +198,7 @@ let rec process_command (tcenv: TC.Env.t) (cpu: Cpu.cpu) (fname: string) (input0
         let chan = Option.value chan_opt ~default:stdout in
         List.iter
             (fun s -> Printf.fprintf chan "%s\n" (Utils.to_string (PP.pp_raw_stmt s)))
-            (Dis.dis_decode_entry cpu.env cpu.denv (!opt_check_rasl) decoder op);
+            (Dis.dis_decode_entry cpu.env cpu.denv decoder op);
         Option.iter close_out chan_opt
     | ":gen" :: iset :: id :: rest when List.length rest <= 3 ->
         let pc_option = Option.value List.(nth_opt rest 1) ~default:"false" in
@@ -230,7 +229,7 @@ let rec process_command (tcenv: TC.Env.t) (cpu: Cpu.cpu) (fname: string) (input0
         let cpu' = Cpu.mkCPU (Eval.Env.copy cpu.env) cpu.denv in
         let op = Z.of_string opcode in
         let decoder = Eval.Env.getDecoder cpu'.env (Ident iset) in
-        let stmts = Dis.dis_decode_entry cpu'.env cpu.denv (!opt_check_rasl) decoder op in
+        let stmts = Dis.dis_decode_entry cpu'.env cpu.denv decoder op in
         let chan = open_out_bin fname in
         Printf.printf "Dumping instruction semantics for %s %s" iset (Z.format "%x" op);
         Printf.printf " to file %s\n" fname;
@@ -302,7 +301,6 @@ let rec repl (tcenv: TC.Env.t) (cpu: Cpu.cpu): unit =
 
 let options = Arg.align ([
     ( "-x", Arg.Set_int Dis.debug_level,      "       Partial evaluation debugging (requires debug level argument >= 0)");
-    ( "--check", Arg.Set opt_check_rasl,   "       Produce an error when rASL does not conform to expected properties");
     ( "-v", Arg.Set opt_verbose,              "       Verbose output");
     ( "--no-aarch64", Arg.Set opt_no_default_aarch64 ,    "       Disable bundled AArch64 semantics");
     ( "--export-aarch64", Arg.Set_string opt_export_aarch64_dir,  "       Export bundled AArch64 MRA to the given directory");

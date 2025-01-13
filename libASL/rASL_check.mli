@@ -5,7 +5,7 @@ module Env = Eval.Env
 open AST
 
 type error_info = {
-  at_statment: stmt option; 
+  at_statement: stmt option; 
   violation: [`LoadSingle | `DisallowedIntrinsic of string];
 }
 

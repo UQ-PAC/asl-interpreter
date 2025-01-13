@@ -1,5 +1,6 @@
 note: concatenate to avoid aslp startup overhead
-  $ for op in $(grep '^0x' ./ops.txt); do printf '%s\n' "\"\n$op\n\"" ":sem A64 $op" '""' ":ast A64 $op"; done > commands
+  $ echo ':set +dis:check_rasl' > commands
+  $ for op in $(grep '^0x' ./ops.txt); do printf '%s\n' "\"\n$op\n\"" ":sem A64 $op" '""' ":ast A64 $op"; done >> commands
 
 run asli with these commands
   $ asli < commands

@@ -380,7 +380,8 @@ let op_dis (env: Env.t) (iset: string) (op: Primops.bigint): stmt list opresult 
   let lenv = Dis.build_env env in
   let decoder = Eval.Env.getDecoder env (Ident iset) in
   try
-    let stmts = Dis.dis_decode_entry env lenv true decoder op in
+    Dis.check_rasl := true;
+    let stmts = Dis.dis_decode_entry env lenv decoder op in
     Result.Ok stmts
   with
     | e -> Result.Error (Op_DisFail e)

@@ -25,7 +25,7 @@ type cpu = {
     setPC    : Primops.bigint -> unit;
     elfwrite : Int64.t -> char -> unit;
     opcode   : string -> Primops.bigint -> unit;
-    sem      : validate_rasl:bool -> string -> Primops.bigint -> unit;
+    sem      : string -> Primops.bigint -> unit;
     gen      : string -> string -> bool -> gen_backend -> string -> unit;
 }
 
@@ -55,11 +55,11 @@ let mkCPU (env : Eval.Env.t) (denv: Dis.env): cpu =
         let decoder = Eval.Env.getDecoder env (Ident iset) in
         Eval.eval_decode_case AST.Unknown env decoder opcode
 
-    and sem ~(validate_rasl:bool) (iset: string) (opcode: Primops.bigint): unit =
+    and sem (iset: string) (opcode: Primops.bigint): unit =
         let decoder = Eval.Env.getDecoder env (Ident iset) in
         List.iter
             (fun s -> Printf.printf "%s\n" (pp_stmt s))
-            (Dis.dis_decode_entry env denv validate_rasl decoder opcode)
+            (Dis.dis_decode_entry env denv decoder opcode)
 
     and gen (iset: string) (pat: string) (include_pc: bool) (backend: gen_backend) (dir: string): unit =
         if not (Sys.file_exists dir) then failwith ("Can't find target dir " ^ dir);

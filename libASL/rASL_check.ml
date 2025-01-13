@@ -13,17 +13,17 @@ open Asl_visitor
  ****************************************************************)
 
 type error_info = {
-  at_statment: stmt option; 
+  at_statement: stmt option; 
   violation: [`LoadSingle | `DisallowedIntrinsic of string];
 }
 
 let show_violation = function 
   | `LoadSingle -> "Loads are limited to rhs of constdecl"
-  | `DisallowedIntrinsic s -> "Illegal intrinsic :'" ^ s ^ "'"
+  | `DisallowedIntrinsic s -> "Illegal intrinsic: '" ^ s ^ "'"
 
 let show_error_info (e: error_info) = 
   Printf.sprintf "%s at %s" (show_violation e.violation) 
-    ((Option.map (fun s -> pp_stmt s) e.at_statment) |> function | Some x -> x | None -> "")
+    ((Option.map (fun s -> pp_stmt s) e.at_statement) |> function | Some x -> x | None -> "")
 
 exception RASLInvariantFailed of (error_info list)
 
@@ -47,10 +47,11 @@ end
 module MakeInvCheckerExc(E : InvChecker) : InvCheckerExc = struct 
   include E
 
-  let check_stmts_exc ?(suppress=false) s = if (not suppress) then check_stmts s |> 
-    function 
-      | [] -> ()
-      | es -> raise (RASLInvariantFailed es)
+  let check_stmts_exc ?(suppress=false) s =
+    if suppress then ()
+    else match check_stmts s with
+    | [] -> ()
+    | es -> raise (RASLInvariantFailed es)
 end
 
 module LoadStatmentInvariant : InvChecker = struct 
@@ -65,7 +66,7 @@ module LoadStatmentInvariant : InvChecker = struct
 
     method!vexpr e = match e with 
         | Expr_TApply(f, _, _) when (name_of_FIdent f = "Mem.read") ->  (
-          violating <- {at_statment=curstmt; violation=`LoadSingle}::violating ;
+          violating <- {at_statement=curstmt; violation=`LoadSingle}::violating ;
           SkipChildren
         )
         | _ -> DoChildren
@@ -184,7 +185,7 @@ module AllowedIntrinsics: InvChecker = struct
     method!vexpr e = match e with 
         | Expr_TApply(f, _, _) when (not @@ StringSet.mem (name_of_FIdent f) allowed_intrinsics) ->  (
           let f = (name_of_FIdent f) in
-          violating <- {at_statment=curstmt; violation=(`DisallowedIntrinsic f)}::violating ;
+          violating <- {at_statement=curstmt; violation=(`DisallowedIntrinsic f)}::violating ;
           DoChildren
         )
         | _ -> DoChildren
@@ -192,10 +193,9 @@ module AllowedIntrinsics: InvChecker = struct
     method!vstmt s = 
       curstmt <- Some s ; 
       match s with 
-      | Stmt_ConstDecl(t, ident, Expr_TApply(f, _, _), loc) when (name_of_FIdent f = "Mem.read") -> SkipChildren
       | Stmt_TCall(f, _, _, _) when (not @@ StringSet.mem (name_of_FIdent f) allowed_intrinsics) -> 
           let f = (name_of_FIdent f) in
-          violating <- {at_statment=curstmt; violation=(`DisallowedIntrinsic f)}::violating ;
+          violating <- {at_statement=curstmt; violation=(`DisallowedIntrinsic f)}::violating ;
           DoChildren
       | _ -> DoChildren
 

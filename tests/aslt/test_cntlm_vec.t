@@ -1,5 +1,6 @@
 
   $ echo ':set +dis:vectors' > commands
+  $ echo ':set +dis:check_rasl' >> commands
   $ for op in $(grep '^0x' ./cntlm-vec-ops.txt); do printf '%s\n' "\"$op\"" ":sem A64 $op"; done >> commands
 
   $ asli < commands > stmts
