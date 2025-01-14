@@ -98,81 +98,19 @@ module AllowedIntrinsics: InvChecker = struct
   (*
   Ensure the only intrinsic function calls are appear in the following list.
    *)
+
+  let impure = List.to_seq (Symbolic.prims_impure ())
+  let pure = List.to_seq @@  [
+        FIdent("ite",0);
+        FIdent("ite_vec",0);
+        FIdent("Elem.set",0);
+        FIdent("Elem.read",0);
+  ]  @ (Symbolic.prims_pure ())
+
   let allowed_intrinsics =
-    StringSet.of_list
-      [
-        "Mem.read";
-        "Mem.set";
-        "Elem.read";
-        "Elem.set";
-        "AtomicEnd";
-        "AtomicStart";
-        "FPAdd";
-        "FPDiv";
-        "FPMul";
-        "FPMulX";
-        "FPMulAdd";
-        "FPMulAddH";
-        "FPSub";
-        "FPSqrt";
-        "FPRSqrtStepFused";
-        "FPCompare";
-        "FPCompareGT";
-        "FPCompareGE";
-        "FPCompareEQ";
-        "FPMax";
-        "FPMin";
-        "FPMaxNum";
-        "FPMinNum";
-        "FPToFixedJS_impl";
-        "FPRecipEstimate";
-        "FPRecipStepFused";
-        "FPRecpX";
-        "BFAdd";
-        "BFMul";
-        "FPCompare";
-        "FixedToFP";
-        "FPToFixed";
-        "FPConvert";
-        "FPConvertBF";
-        "FPRoundInt";
-        "FPRoundIntN";
-        "not_bool";
-        "and_bool";
-        "or_bool";
-        "cvt_bool_bv";
-        "SignExtend";
-        "ZeroExtend";
-        "add_bits";
-        "and_bits";
-        "append_bits";
-        "asr_bits";
-        "lsl_bits";
-        "lsr_bits";
-        "cvt_bits_uint";
-        "eor_bits";
-        "eq_bits";
-        "ne_bits";
-        "ite";
-        "mul_bits";
-        "not_bits";
-        "or_bits";
-        "sdiv_bits";
-        "sub_bits";
-        "sle_bits";
-        "slt_bits";
-        "replicate_bits";
-        "select_vec";
-        "ite_vec";
-        "eq_vec";
-        "add_vec";
-        "sub_vec";
-        "asr_vec";
-        "trunc_vec";
-        "zcast_vec";
-        "shuffle_vec";
-        "scast_vec";
-      ]
+    IdentSet.add_seq pure @@
+    IdentSet.add_seq impure @@
+    IdentSet.of_list []
 
   class allowed_intrinsics (vars) = object (self)
     inherit Asl_visitor.nopAslVisitor
@@ -183,7 +121,7 @@ module AllowedIntrinsics: InvChecker = struct
     method get_violating () = violating
 
     method!vexpr e = match e with 
-        | Expr_TApply(f, _, _) when (not @@ StringSet.mem (name_of_FIdent f) allowed_intrinsics) ->  (
+        | Expr_TApply(f, _, _) when (not @@ IdentSet.mem f allowed_intrinsics) ->  (
           let f = (name_of_FIdent f) in
           violating <- {at_statement=curstmt; violation=(`DisallowedIntrinsic f)}::violating ;
           DoChildren
@@ -193,7 +131,7 @@ module AllowedIntrinsics: InvChecker = struct
     method!vstmt s = 
       curstmt <- Some s ; 
       match s with 
-      | Stmt_TCall(f, _, _, _) when (not @@ StringSet.mem (name_of_FIdent f) allowed_intrinsics) -> 
+      | Stmt_TCall(f, _, _, _) when (not @@ IdentSet.mem f allowed_intrinsics) -> 
           let f = (name_of_FIdent f) in
           violating <- {at_statement=curstmt; violation=(`DisallowedIntrinsic f)}::violating ;
           DoChildren

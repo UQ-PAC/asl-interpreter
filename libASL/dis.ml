@@ -1532,15 +1532,7 @@ let dis_core ~(config:config) ((lenv,globals): env) (decode: decode_case) (op: P
         Printf.printf "===========\n";
     end;
 
-    let suppress = not !check_rasl in
-    let do_validate () =
-        try
-            RASL_check.LoadStatementInvariantExc.check_stmts_exc ~suppress stmts';
-            RASL_check.AllowedIntrinsicsExc.check_stmts_exc ~suppress stmts';
-        with
-            RASL_check.RASLInvariantFailed _ as ex -> raise (DisTrace (lenv'.trace, ex))
-    in
-    if not suppress then do_validate ();
+    RASL_check.LoadStatementInvariantExc.check_stmts_exc ~suppress:(not !check_rasl) stmts';
 
     enc, stmts'
 
@@ -1552,13 +1544,14 @@ let dis_core ~(config:config) ((lenv,globals): env) (decode: decode_case) (op: P
 let dis_decode_entry_with_inst (env: Eval.Env.t) ((lenv,globals): env) (decode: decode_case) (op: Primops.bigint): string * stmt list =
   let max_upper_bound = Z.of_int64 Int64.max_int in
   let config = { eval_env = env ; unroll_bound=max_upper_bound } in
-  match !Symbolic.use_vectoriser with
-  | false -> dis_core ~config (lenv,globals) decode op
-  | true ->
-          let enc,stmts' = dis_core ~config:{config with unroll_bound= Z.one} (lenv,globals) decode op in
-    let (res,stmts') = Transforms.LoopClassify.run stmts' env in
-    if res then (enc,stmts') else
-      dis_core ~config (lenv,globals) decode op
+  let stmts = match !Symbolic.use_vectoriser with
+    | false -> dis_core ~config (lenv,globals) decode op
+    | true -> let enc,stmts' = dis_core ~config:{config with unroll_bound= Z.one} (lenv,globals) decode op in
+        let (res,stmts') = Transforms.LoopClassify.run stmts' env in
+        if res then (enc,stmts') else
+        dis_core ~config (lenv,globals) decode op
+    in RASL_check.AllowedIntrinsicsExc.check_stmts_exc ~suppress:(not !check_rasl) (snd stmts); 
+    stmts
 
 let dis_decode_entry (env: Eval.Env.t) ((lenv,globals): env) (decode: decode_case) (op: Primops.bigint): stmt list =
   snd @@ dis_decode_entry_with_inst env (lenv,globals) decode op
