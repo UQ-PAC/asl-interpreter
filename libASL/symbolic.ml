@@ -958,8 +958,6 @@ let prims_pure () =
     FIdent("or_bool",0);
     FIdent("cvt_bool_bv",0);
     FIdent("cvt_bits_uint",0);
-    FIdent("cvt_bits_sint",0);
-    FIdent("cvt_uint_bits",0);
     FIdent("cvt_int_bits",0);
     FIdent("select_vec",0);
     FIdent("eq_vec",0);
