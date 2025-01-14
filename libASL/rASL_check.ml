@@ -97,22 +97,72 @@ module AllowedIntrinsics: InvChecker = struct
 
   (*
   Ensure the only intrinsic function calls are appear in the following list.
+  Note that this list is distinct to Symbolic.prims_pure, as late transform
+  passes ensure only a limited set of pure primitives are produced.
    *)
+  let prims_pure_out () =
+    [
+      FIdent("LSL",0);
+      FIdent("LSR",0);
+      FIdent("ASR",0);
+      FIdent("SignExtend",0);
+      FIdent("ZeroExtend",0);
+      FIdent("asr_bits",0);
+      FIdent("lsr_bits",0);
+      FIdent("lsl_bits",0);
+      FIdent("slt_bits",0);
+      FIdent("sle_bits",0);
+      FIdent("sdiv_bits",0);
+      FIdent("ite",0);
+      FIdent("eq_bool",0);
+      FIdent("ne_bool",0);
+      FIdent("not_bool",0);
+      FIdent("and_bool",0);
+      FIdent("or_bool",0);
+      FIdent("implies_bool",0);
+      FIdent("cvt_bits_sint",0);
+      FIdent("cvt_bits_uint",0);
+      FIdent("eq_bits",0);
+      FIdent("ne_bits",0);
+      FIdent("add_bits",0);
+      FIdent("sub_bits",0);
+      FIdent("mul_bits",0);
+      FIdent("and_bits",0);
+      FIdent("or_bits",0);
+      FIdent("eor_bits",0);
+      FIdent("not_bits",0);
+      FIdent("replicate_bits",0);
+      FIdent("append_bits",0);
+      FIdent("cvt_bv_bool",0);
+      FIdent("cvt_bool_bv",0);
+    ] @ (if !Symbolic.use_vectoriser then [
+      FIdent("Elem.set",0);
+      FIdent("Elem.read",0);
+      FIdent("add_vec",0);
+      FIdent("sub_vec",0);
+      FIdent("mul_vec",0);
+      FIdent("sdiv_vec",0);
+      FIdent("lsr_vec",0);
+      FIdent("asr_vec",0);
+      FIdent("lsl_vec",0);
+      FIdent("ite_vec",0);
+      FIdent("sle_vec",0);
+      FIdent("slt_vec",0);
+      FIdent("eq_vec",0);
+      FIdent("zcast_vec",0);
+      FIdent("scast_vec",0);
+      FIdent("trunc_vec",0);
+      FIdent("select_vec",0);
+      FIdent("shuffle_vec",0);
+      FIdent("reduce_add",0);
+    ] else [])
 
-  let impure = List.to_seq (Symbolic.prims_impure ())
-  let pure = List.to_seq @@  [
-        FIdent("ite",0);
-        FIdent("ite_vec",0);
-        FIdent("Elem.set",0);
-        FIdent("Elem.read",0);
-  ]  @ (Symbolic.prims_pure ())
-
-  let allowed_intrinsics =
-    IdentSet.add_seq pure @@
-    IdentSet.add_seq impure @@
+  let allowed_set () =
+    IdentSet.add_seq (List.to_seq (prims_pure_out ())) @@
+    IdentSet.add_seq (List.to_seq (Symbolic.prims_impure ())) @@
     IdentSet.of_list []
 
-  class allowed_intrinsics (vars) = object (self)
+  class allowed_intrinsics (intrinsics) = object (self)
     inherit Asl_visitor.nopAslVisitor
     (* Ensures loads only appear in statements of the form lhs := Mem_load(v) *)
 
@@ -120,18 +170,18 @@ module AllowedIntrinsics: InvChecker = struct
     val mutable curstmt = None
     method get_violating () = violating
 
-    method!vexpr e = match e with 
-        | Expr_TApply(f, _, _) when (not @@ IdentSet.mem f allowed_intrinsics) ->  (
+    method!vexpr e = match e with
+        | Expr_TApply(f, _, _) when (not @@ IdentSet.mem f intrinsics) ->  (
           let f = (name_of_FIdent f) in
           violating <- {at_statement=curstmt; violation=(`DisallowedIntrinsic f)}::violating ;
           DoChildren
         )
         | _ -> DoChildren
 
-    method!vstmt s = 
-      curstmt <- Some s ; 
-      match s with 
-      | Stmt_TCall(f, _, _, _) when (not @@ IdentSet.mem f allowed_intrinsics) -> 
+    method!vstmt s =
+      curstmt <- Some s ;
+      match s with
+      | Stmt_TCall(f, _, _, _) when (not @@ IdentSet.mem f intrinsics) ->
           let f = (name_of_FIdent f) in
           violating <- {at_statement=curstmt; violation=(`DisallowedIntrinsic f)}::violating ;
           DoChildren
@@ -139,15 +189,17 @@ module AllowedIntrinsics: InvChecker = struct
 
   end
 
-  let check_stmts s = 
-    let v = new allowed_intrinsics () in
+  let check_stmts s =
+    let i = allowed_set () in
+    let v = new allowed_intrinsics i in
     ignore @@ visit_stmts v s ;
     v#get_violating ()
 
   let check_stmt s = check_stmts [s]
 
-  let check_expr e = 
-    let v = new allowed_intrinsics () in
+  let check_expr e =
+    let i = allowed_set () in
+    let v = new allowed_intrinsics i in
     ignore @@ visit_expr v e ;
     v#get_violating ()
 
