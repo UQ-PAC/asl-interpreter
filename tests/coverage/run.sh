@@ -3,7 +3,7 @@
 pattern="${1:?requires regex pattern as first argument}"
 
 input="
-:set +dis:invariant_check
+:set +dis:check_rasl
 :coverage A64 $pattern
 "
 
