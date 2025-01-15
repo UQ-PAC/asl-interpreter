@@ -15,7 +15,6 @@ depends: [
   "cohttp-eio"
   "yojson"
   "asli"
-  "janestreet_lru_cache"
   "odoc" {with-doc}
 ]
 build: [

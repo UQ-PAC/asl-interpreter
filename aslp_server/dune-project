@@ -25,7 +25,6 @@
     "cohttp-eio"
     "yojson"
     "asli"
-    janestreet_lru_cache
  )
  )
 

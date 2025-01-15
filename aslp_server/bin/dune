@@ -4,6 +4,6 @@
  (name main)
  (modules main)
  (libraries asli.libASL yojson cohttp-eio pprint
-            core eio eio_main eio.unix janestreet_lru_cache
+            core eio eio_main eio.unix
             ))
 

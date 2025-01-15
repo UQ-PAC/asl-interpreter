@@ -61,14 +61,7 @@ let get_resp (opcode : string) : Cohttp.Code.status_code * string =
   if String.equal opcode "die" then exit 0;
   get_reply opcode
 
-(* Cache *)
-
 type 'a work = Decode of (string * ('a, exn) result Eio.Promise.u)
-
-module DisCache = Lru_cache.Make (Core.String)
-
-let cache : (Code.status_code * string) DisCache.t =
-  DisCache.create ~max_size:5000 ()
 
 (* Paralellism Structure
 
@@ -82,21 +75,8 @@ let cache : (Code.status_code * string) DisCache.t =
 *)
 
 let submit_req_executor_pool pool opcode =
-  (* CACHE IS NOT THREADSAFE, only call this from one domain
-     (the single request handler domain).
-
-    We put the cache on the request handler side rather
-    than the lifter side to
-
-    a) avoid duplicating essentially the same cache for each domain and
-    b) avoid synchonisation/queuing overhead for requests when they 
-       just hit the cache.
-    *)
-  let default () =
-    Atomic.incr count;
-    Eio.Executor_pool.submit_exn pool ~weight:0.001 (fun () -> get_resp opcode)
-  in
-  DisCache.find_or_add cache opcode ~default
+  Atomic.incr count; 
+  Eio.Executor_pool.submit_exn pool ~weight:0.001 (fun () -> get_resp opcode)
 
 (* Request handling *)
 let server socket addr port get_resp =
@@ -146,8 +126,7 @@ let speclist =
 
 let rec periodic t () =
   Eio.Time.sleep t 5.0;
-  Eio.traceln "Cache hit rate: %f handled: %d" (DisCache.hit_rate cache)
-    (Atomic.get count);
+  Eio.traceln "lifted %d ops" (Atomic.get count);
   periodic t ()
 
 let () =
