@@ -1532,7 +1532,7 @@ let dis_core ~(config:config) ((lenv,globals): env) (decode: decode_case) (op: P
         Printf.printf "===========\n";
     end;
 
-    RASL_check.LoadStatementInvariantExc.check_stmts_exc ~suppress:(not !check_rasl) stmts';
+    if (!check_rasl) then RASL_check.LoadStatementInvariantExc.check_stmts_exc stmts';
 
     enc, stmts'
 
@@ -1550,7 +1550,9 @@ let dis_decode_entry_with_inst (env: Eval.Env.t) ((lenv,globals): env) (decode: 
         let (res,stmts') = Transforms.LoopClassify.run stmts' env in
         if res then (enc,stmts') else
         dis_core ~config (lenv,globals) decode op
-    in RASL_check.AllowedIntrinsicsExc.check_stmts_exc ~suppress:(not !check_rasl) (snd stmts); 
+    in if (!check_rasl) then
+        RASL_check.AllowedIntrinsicsExc.check_stmts_exc (snd stmts); 
+        RASL_check.AllowedLanguageConstructsExc.check_stmts_exc (snd stmts);
     stmts
 
 let dis_decode_entry (env: Eval.Env.t) ((lenv,globals): env) (decode: decode_case) (op: Primops.bigint): stmt list =

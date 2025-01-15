@@ -12,14 +12,23 @@ open Asl_visitor
  * Check invariants of the reduced asl language
  ****************************************************************)
 
+type rasl_structure_error =  [`NonemptyElseIf | `IllegalStatement | `LoadSingle | `IllegalIntrinsic of string 
+    | `IllegalExpr of expr | `IllegalSlice of expr | `IllegalLExpr of lexpr]
+
 type error_info = {
   at_statement: stmt option; 
-  violation: [`LoadSingle | `DisallowedIntrinsic of string];
+  violation: rasl_structure_error
 }
+
 
 let show_violation = function 
   | `LoadSingle -> "Loads are limited to rhs of constdecl"
-  | `DisallowedIntrinsic s -> "Illegal intrinsic: '" ^ s ^ "'"
+  | `IllegalIntrinsic s -> "Illegal intrinsic: '" ^ s ^ "'"
+  | `NonemptyElseIf -> "If statements contains an else-if branch"
+  | `IllegalStatement -> "Illegal statement type"
+  | `IllegalExpr e -> "Illegal expression: '" ^ (pp_expr e) ^ "'"
+  | `IllegalSlice e -> "Illegal slice expr (must have single slice of constant values) type: '" ^ (pp_expr e) ^ "'"
+  | `IllegalLExpr e -> "Illegal lexpr (not var field or array): '" ^ (pp_lexpr e) ^ "'"
 
 let show_error_info (e: error_info) = 
   Printf.sprintf "%s at %s" (show_violation e.violation) 
@@ -41,15 +50,14 @@ end
 
 module type InvCheckerExc = sig 
   include InvChecker
-  val check_stmts_exc : ?suppress:bool -> stmt list -> unit
+  val check_stmts_exc : ?suppress:(rasl_structure_error -> bool) -> stmt list -> unit
 end
 
 module MakeInvCheckerExc(E : InvChecker) : InvCheckerExc = struct 
   include E
 
-  let check_stmts_exc ?(suppress=false) s =
-    if suppress then ()
-    else match check_stmts s with
+  let check_stmts_exc ?(suppress=fun _ -> false) s =
+    match (List.filter (fun e -> suppress e.violation) (check_stmts s)) with
     | [] -> ()
     | es -> raise (RASLInvariantFailed es)
 end
@@ -173,7 +181,7 @@ module AllowedIntrinsics: InvChecker = struct
     method!vexpr e = match e with
         | Expr_TApply(f, _, _) when (not @@ IdentSet.mem f intrinsics) ->  (
           let f = (name_of_FIdent f) in
-          violating <- {at_statement=curstmt; violation=(`DisallowedIntrinsic f)}::violating ;
+          violating <- {at_statement=curstmt; violation=(`IllegalIntrinsic f)}::violating ;
           DoChildren
         )
         | _ -> DoChildren
@@ -183,7 +191,7 @@ module AllowedIntrinsics: InvChecker = struct
       match s with
       | Stmt_TCall(f, _, _, _) when (not @@ IdentSet.mem f intrinsics) ->
           let f = (name_of_FIdent f) in
-          violating <- {at_statement=curstmt; violation=(`DisallowedIntrinsic f)}::violating ;
+          violating <- {at_statement=curstmt; violation=(`IllegalIntrinsic f)}::violating ;
           DoChildren
       | _ -> DoChildren
 
@@ -205,5 +213,75 @@ module AllowedIntrinsics: InvChecker = struct
 
 end
 
+module AllowedLanguageConstructs: InvChecker = struct 
+
+  (*
+  Only the following statements are allowed: 
+    VarDeclsNoInit, VarDecl, ConstDecl, TCall, Assign, Assert, Throw, If (with no elseif)
+  Only the following expressions are allowd:
+    Var, Field, Array, TApply, LitBits, LitInt, Slices
+   *)
+
+  let is_const = function
+    | Expr_LitInt _ -> true
+    | Expr_LitHex _ -> true
+    | _ -> false
+
+  class allowed_constructs() = object (self)
+    inherit Asl_visitor.nopAslVisitor
+    (* Ensures loads only appear in statements of the form lhs := Mem_load(v) *)
+
+    val mutable curstmt = None
+    val mutable violating : error_info list = []
+    method get_violating () : error_info list = violating
+
+    method!vstmt s = 
+      curstmt <- Some s ; 
+      match s with 
+        | Stmt_TCall _ ->  DoChildren
+        | Stmt_VarDeclsNoInit _ -> DoChildren
+        | Stmt_VarDecl _ -> DoChildren
+        | Stmt_ConstDecl _ -> DoChildren
+        | Stmt_Assign _ -> DoChildren
+        | Stmt_Assert _ -> DoChildren
+        | Stmt_Throw _ -> DoChildren
+        | Stmt_If (_, _, [], _ , _) -> DoChildren
+        | Stmt_If (_, _, elseif, _, _) -> violating <- {at_statement=Some s; violation=`NonemptyElseIf} :: violating ; DoChildren
+        | _ -> violating <- {at_statement=Some s; violation=`IllegalStatement}::violating; DoChildren
+
+
+    method!vexpr e = match e with 
+      | Expr_Var _ -> DoChildren
+      | Expr_Field _ -> DoChildren
+      | Expr_Array _ -> DoChildren
+      | Expr_TApply _  -> DoChildren
+      | Expr_LitBits _ -> DoChildren
+      | Expr_Slices (e, [Slice_LoWd(l,w)]) when is_const(l) && is_const(w) -> DoChildren
+      | Expr_Slices _ ->  violating <- {at_statement=curstmt; violation=(`IllegalSlice e)}::violating ; DoChildren
+      | _ -> violating <- {at_statement=curstmt; violation=(`IllegalExpr e)}::violating ; DoChildren
+
+    method! vlexpr e = match e with 
+      | LExpr_Var _ -> DoChildren
+      | LExpr_Field _ -> DoChildren
+      | LExpr_Array _ -> DoChildren
+      | _ -> violating <- {at_statement=curstmt; violation=(`IllegalLExpr e)}::violating ; DoChildren
+
+  end
+
+  let check_stmts s = 
+    let v = new allowed_constructs () in
+    ignore @@ visit_stmts v s ;
+    v#get_violating ()
+
+  let check_stmt s = check_stmts [s]
+
+  let check_expr e = 
+    let v = new allowed_constructs () in
+    ignore @@ visit_expr v e ;
+    v#get_violating ()
+
+end
+
 module LoadStatementInvariantExc = MakeInvCheckerExc(LoadStatmentInvariant)
 module AllowedIntrinsicsExc = MakeInvCheckerExc(AllowedIntrinsics)
+module AllowedLanguageConstructsExc = MakeInvCheckerExc(AllowedLanguageConstructs)
