@@ -5,23 +5,22 @@ module Env = Eval.Env
 
 open AST
 open Visitor
-open Asl_utils 
+open Asl_utils
 open Asl_visitor
 
 (****************************************************************
  * Check invariants of the reduced asl language
  ****************************************************************)
 
-type rasl_structure_error =  [`NonemptyElseIf | `IllegalStatement | `LoadSingle | `IllegalIntrinsic of string 
+type rasl_structure_error =  [`NonemptyElseIf | `IllegalStatement | `LoadSingle | `IllegalIntrinsic of string
     | `IllegalExpr of expr | `IllegalSlice of expr | `IllegalLExpr of lexpr]
 
-type error_info = {
-  at_statement: stmt option; 
-  violation: rasl_structure_error
+type 'a error_info = {
+  at_statement: stmt option;
+    violation: 'a
 }
 
-
-let show_violation = function 
+let show_violation = function
   | `LoadSingle -> "Loads are limited to rhs of constdecl"
   | `IllegalIntrinsic s -> "Illegal intrinsic: '" ^ s ^ "'"
   | `NonemptyElseIf -> "If statements contains an else-if branch"
@@ -30,78 +29,72 @@ let show_violation = function
   | `IllegalSlice e -> "Illegal slice expr (must have single slice of constant values) type: '" ^ (pp_expr e) ^ "'"
   | `IllegalLExpr e -> "Illegal lexpr (not var field or array): '" ^ (pp_lexpr e) ^ "'"
 
-let show_error_info (e: error_info) = 
-  Printf.sprintf "%s at %s" (show_violation e.violation) 
+let show_error_info (e: 'a error_info) =
+  Printf.sprintf "%s at %s" (show_violation e.violation)
     ((Option.map (fun s -> pp_stmt s) e.at_statement) |> function | Some x -> x | None -> "")
 
-exception RASLInvariantFailed of (error_info list)
+let show_error_info_list es = ((String.concat "; " (List.map show_error_info es)))
 
-let () = Printexc.register_printer (function 
-    | RASLInvariantFailed es -> Some (Printf.sprintf "RASL invariant(s) failed: %s" (String.concat "; " (List.map show_error_info es)))
-    | _ -> None
-  )
+module LoadStatementInvariant  = struct
+  type checks = [`LoadSingle]
 
-module type InvChecker  = sig
-  val check_stmts : stmt list -> error_info list
-  val check_expr : expr -> error_info list
-  val check_stmt : stmt -> error_info list
-end
+  exception RASLInvariantFailed of (checks error_info list)
+  let () = Printexc.register_printer (function
+      | RASLInvariantFailed es -> Some (Printf.sprintf "RASL invariant(s) failed: %s" (show_error_info_list es))
+      | _ -> None
+    )
 
-
-module type InvCheckerExc = sig 
-  include InvChecker
-  val check_stmts_exc : ?suppress:(rasl_structure_error -> bool) -> stmt list -> unit
-end
-
-module MakeInvCheckerExc(E : InvChecker) : InvCheckerExc = struct 
-  include E
-
-  let check_stmts_exc ?(suppress=fun _ -> false) s =
-    match (List.filter (fun e -> suppress e.violation) (check_stmts s)) with
-    | [] -> ()
-    | es -> raise (RASLInvariantFailed es)
-end
-
-module LoadStatmentInvariant : InvChecker = struct 
-
-  class single_load (vars) = object (self)
+  class single_load (vars) = object
     inherit Asl_visitor.nopAslVisitor
     (* Ensures loads only appear in statements of the form lhs := Mem_load(v) *)
 
-    val mutable violating = []
+  val mutable violating : [`LoadSingle] error_info list = []
     val mutable curstmt = None
     method get_violating () = violating
 
-    method!vexpr e = match e with 
+    method!vexpr e = match e with
         | Expr_TApply(f, _, _) when (name_of_FIdent f = "Mem.read") ->  (
           violating <- {at_statement=curstmt; violation=`LoadSingle}::violating ;
           SkipChildren
         )
         | _ -> DoChildren
 
-    method!vstmt s = 
-      curstmt <- Some s ; 
-      match s with 
+    method!vstmt s =
+      curstmt <- Some s ;
+      match s with
       | Stmt_ConstDecl(t, ident, Expr_TApply(f, _, _), loc) when (name_of_FIdent f = "Mem.read") -> SkipChildren
       | _ -> DoChildren
 
   end
 
-  let check_stmts s = 
+  let check_stmts s =
     let v = new single_load () in
     ignore @@ visit_stmts v s ;
     v#get_violating ()
 
   let check_stmt s = check_stmts [s]
 
-  let check_expr e = 
+  let check_expr e =
     let v = new single_load () in
     ignore @@ visit_expr v e ;
     v#get_violating ()
 
+  let check_stmts_exc ?(suppress:('a -> bool)=fun x -> false) stmts =
+      let r: 'a error_info list = check_stmts stmts in
+      let r = List.filter (fun x -> not @@ suppress x.violation) r in
+      match r with
+        | [] -> ()
+        | es -> raise (RASLInvariantFailed es)
 end
 
-module AllowedIntrinsics: InvChecker = struct 
+module AllowedIntrinsics = struct
+  type checks = [`IllegalIntrinsic of string]
+
+  exception RASLInvariantFailed of (checks error_info list)
+  let () = Printexc.register_printer (function
+      | RASLInvariantFailed es -> Some (Printf.sprintf "RASL invariant(s) failed: %s" (show_error_info_list es))
+      | _ -> None
+    )
 
   (*
   Ensure the only intrinsic function calls are appear in the following list.
@@ -174,7 +167,7 @@ module AllowedIntrinsics: InvChecker = struct
     inherit Asl_visitor.nopAslVisitor
     (* Ensures loads only appear in statements of the form lhs := Mem_load(v) *)
 
-    val mutable violating = []
+    val mutable violating : [`IllegalIntrinsic of string] error_info list = []
     val mutable curstmt = None
     method get_violating () = violating
 
@@ -211,16 +204,30 @@ module AllowedIntrinsics: InvChecker = struct
     ignore @@ visit_expr v e ;
     v#get_violating ()
 
+  let check_stmts_exc ?(suppress:('a -> bool)=fun x -> false) stmts =
+      let r: 'a error_info list = check_stmts stmts in
+      let r = List.filter (fun x -> not @@ suppress x.violation) r in
+      match r with
+        | [] -> ()
+        | es -> raise (RASLInvariantFailed es)
 end
 
-module AllowedLanguageConstructs: InvChecker = struct 
 
+module AllowedLanguageConstructs = struct
   (*
-  Only the following statements are allowed: 
+  Only the following statements are allowed:
     VarDeclsNoInit, VarDecl, ConstDecl, TCall, Assign, Assert, Throw, If (with no elseif)
   Only the following expressions are allowd:
     Var, Field, Array, TApply, LitBits, LitInt, Slices
    *)
+
+  type checks = [`IllegalLExpr of lexpr | `IllegalStatement | `IllegalExpr of expr | `NonemptyElseIf | `IllegalSlice of expr ]
+
+  exception RASLInvariantFailed of (checks error_info list)
+  let () = Printexc.register_printer (function
+      | RASLInvariantFailed es -> Some (Printf.sprintf "RASL invariant(s) failed: %s" (show_error_info_list es))
+      | _ -> None
+    )
 
   let is_const = function
     | Expr_LitInt _ -> true
@@ -232,12 +239,12 @@ module AllowedLanguageConstructs: InvChecker = struct
     (* Ensures loads only appear in statements of the form lhs := Mem_load(v) *)
 
     val mutable curstmt = None
-    val mutable violating : error_info list = []
-    method get_violating () : error_info list = violating
+    val mutable violating : checks error_info list = []
+    method get_violating () = violating
 
-    method!vstmt s = 
-      curstmt <- Some s ; 
-      match s with 
+    method!vstmt s =
+      curstmt <- Some s ;
+      match s with
         | Stmt_TCall _ ->  DoChildren
         | Stmt_VarDeclsNoInit _ -> DoChildren
         | Stmt_VarDecl _ -> DoChildren
@@ -250,17 +257,19 @@ module AllowedLanguageConstructs: InvChecker = struct
         | _ -> violating <- {at_statement=Some s; violation=`IllegalStatement}::violating; DoChildren
 
 
-    method!vexpr e = match e with 
+    method!vexpr e = match e with
       | Expr_Var _ -> DoChildren
       | Expr_Field _ -> DoChildren
       | Expr_Array _ -> DoChildren
       | Expr_TApply _  -> DoChildren
       | Expr_LitBits _ -> DoChildren
+      | Expr_LitInt _ -> DoChildren
+      | Expr_LitHex _ -> DoChildren
       | Expr_Slices (e, [Slice_LoWd(l,w)]) when is_const(l) && is_const(w) -> DoChildren
       | Expr_Slices _ ->  violating <- {at_statement=curstmt; violation=(`IllegalSlice e)}::violating ; DoChildren
       | _ -> violating <- {at_statement=curstmt; violation=(`IllegalExpr e)}::violating ; DoChildren
 
-    method! vlexpr e = match e with 
+    method! vlexpr e = match e with
       | LExpr_Var _ -> DoChildren
       | LExpr_Field _ -> DoChildren
       | LExpr_Array _ -> DoChildren
@@ -268,20 +277,22 @@ module AllowedLanguageConstructs: InvChecker = struct
 
   end
 
-  let check_stmts s = 
+  let check_stmts s =
     let v = new allowed_constructs () in
     ignore @@ visit_stmts v s ;
     v#get_violating ()
 
   let check_stmt s = check_stmts [s]
 
-  let check_expr e = 
+  let check_expr e =
     let v = new allowed_constructs () in
     ignore @@ visit_expr v e ;
     v#get_violating ()
 
+  let check_stmts_exc ?(suppress:('a -> bool)=fun x -> false) stmts =
+      let r: 'a error_info list = check_stmts stmts in
+      let r = List.filter (fun x -> not @@ suppress x.violation) r in
+      match r with
+        | [] -> ()
+        | es -> raise (RASLInvariantFailed es)
 end
-
-module LoadStatementInvariantExc = MakeInvCheckerExc(LoadStatmentInvariant)
-module AllowedIntrinsicsExc = MakeInvCheckerExc(AllowedIntrinsics)
-module AllowedLanguageConstructsExc = MakeInvCheckerExc(AllowedLanguageConstructs)

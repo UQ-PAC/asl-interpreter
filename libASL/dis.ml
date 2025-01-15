@@ -1532,7 +1532,7 @@ let dis_core ~(config:config) ((lenv,globals): env) (decode: decode_case) (op: P
         Printf.printf "===========\n";
     end;
 
-    if (!check_rasl) then RASL_check.LoadStatementInvariantExc.check_stmts_exc stmts';
+    if (!check_rasl) then RASL_check.LoadStatementInvariant.check_stmts_exc stmts';
 
     enc, stmts'
 
@@ -1551,8 +1551,8 @@ let dis_decode_entry_with_inst (env: Eval.Env.t) ((lenv,globals): env) (decode: 
         if res then (enc,stmts') else
         dis_core ~config (lenv,globals) decode op
     in if (!check_rasl) then
-        RASL_check.AllowedIntrinsicsExc.check_stmts_exc (snd stmts); 
-        RASL_check.AllowedLanguageConstructsExc.check_stmts_exc (snd stmts);
+        RASL_check.AllowedIntrinsics.check_stmts_exc (snd stmts);
+        RASL_check.AllowedLanguageConstructs.check_stmts_exc (snd stmts);
     stmts
 
 let dis_decode_entry (env: Eval.Env.t) ((lenv,globals): env) (decode: decode_case) (op: Primops.bigint): stmt list =
