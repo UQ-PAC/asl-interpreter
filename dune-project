@@ -31,12 +31,22 @@
   )
 )
 
+(package
+  (name aslp_offline)
+  (synopsis "AArch64 Offline lifter")
+  (description "" )
+  (depends
+    ("ocaml"     (>= "4.14"))
+    "asli"
+  )
+)
+
 (license BSD-3-Clause)
-(authors "Alastair Reid")
-(maintainers "Alastair Reid <alastair.d.reid@gmail.com>")
-(source (github alastairreid/asl-interpreter))
-(bug_reports "https://github.com/alastairreid/asl-interpreter/issues")
-(homepage "https://github.com/alastairreid/asl-interpreter")
+(authors "UQ-PAC")
+(maintainers "UQ-PAC")
+(source (github UQ-PAC/aslp))
+(bug_reports "https://github.com/UQ-PAC/aslp/issues")
+(homepage "https://github.com/UQ-PAC/aslp")
 ; (documentation ...)
 
 (generate_opam_files true)

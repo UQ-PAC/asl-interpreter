@@ -12,7 +12,7 @@ let () = Printexc.register_printer
 let op_dis (op: int): stmt list opresult =
   let bv = Primops.prim_cvt_int_bits (Z.of_int 32) (Z.of_int op) in
   try
-    let stmts = OfflineASL.Offline.run bv in
+    let stmts = OfflineASL.Offline.run ~pc:0 bv in
     Result.Ok stmts
   with
     | e -> Result.Error (Op_DisFail e)
