@@ -73,7 +73,7 @@ let write_epilogue use_pc fid st =
     | false ->  Printf.sprintf "%s enc"
   ) (name_of_ident fid)
   in
-  let pc_arg = " ?(pc:int option)" in
+  let pc_arg = if use_pc then " ~(pc:int)" else "" in
   Printf.fprintf st.oc "let run%s enc =\n  reset_ir ();\n  %s;\n  get_ir ()\n" pc_arg dis_call
 
 let write_line s st =
@@ -385,20 +385,24 @@ let write_new_dune_file use_pc files dir  : unit =
   ) files in
   let oc = open_out (dir ^ "/dune") in
   Printf.fprintf oc "
-  (rule (targets \n%s) 
+  (rule (targets 
+  %s    
+  ) 
     (deps gen-command)
-    (action (chdir %%{workspace_root} 
-    (with-stdin-from %s/gen-command (run asli))
-  )))"
-  target_gen_files dir ;
+    (action 
+    (with-stdin-from gen-command (run asli))
+  ))"
+  target_gen_files ;
   Printf.fprintf oc "\n\n";
+  let name = if use_pc then "offlineASL_pc" else "off" in
   Printf.fprintf oc "
   (library
-    (name offlineASL)
+    (name %s)
     (public_name aslp_offline.%s)
     (flags
       (:standard -w -27 -w -33 -cclib -lstdc++))
     (modules \n"
+    name
     (if use_pc then "pc_aarch64" else "aarch64") ;
     List.iter (fun k ->
       Printf.fprintf oc "    %s\n" k
@@ -436,8 +440,8 @@ let run config dfn dfnsig tests fns =
   let files = Bindings.fold (fun fn fnsig acc -> (write_instr_file fn fnsig dir)::acc) fns [] in
   let files = (write_test_file tests dir)::files in
   let decoder = write_decoder_file config.use_pc dfn dfnsig files dir in
-  write_new_dune_file config.use_pc (decoder::files@global_deps) dir ;
-  write_ibi dir
+  write_ibi dir ;
+  write_new_dune_file config.use_pc (decoder::files@global_deps) dir
 
 module OcamlBackend : Backend = struct
   let run ~(config:conf) dfn dfnsig tests fns = run config dfn dfnsig tests fns

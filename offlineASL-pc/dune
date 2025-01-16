@@ -394,8 +394,8 @@
 
 
   (library
-    (name offlineASL)
-    (public_name aslp_offline.aarch64)
+    (name offlineASL_pc)
+    (public_name aslp_offline.pc_aarch64)
     (flags
       (:standard -w -27 -w -33 -cclib -lstdc++))
     (modules
