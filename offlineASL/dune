@@ -1,4 +1,4 @@
-(rule (targets     
+(rule (targets
     offline.ml
     decode_tests.ml
     aarch64_vector_transfer_vector_table.ml
@@ -387,9 +387,9 @@
     aarch64_branch_conditional_cond.ml
     aarch64_branch_conditional_compare.ml
     Offline_utils.ml
-) 
+)
     (deps gen-command)
-    (action (chdir %{workspace_root} 
+    (action (chdir %{workspace_root}
     (progn (with-stdin-from offlineASL/gen-command (run asli))))
  ))
 
@@ -399,7 +399,7 @@
     (public_name aslp_offline.pc_aarch64)
     (flags
       (:standard -w -27 -w -33 -cclib -lstdc++))
-    (modules 
+    (modules
     offline
     decode_tests
     aarch64_vector_transfer_vector_table
@@ -790,3 +790,8 @@
     Offline_utils
   )
     (libraries asli.libASL))
+
+
+(alias
+ (name default)
+ (deps (package aslp_offline) ../aslp_offline.install))
