@@ -27,7 +27,7 @@
  (name libASL_stage0)
  (public_name asli.libASL-stage0)
  (flags (:standard -w -27))
- (modules asl_ast asl_parser asl_parser_pp asl_utils asl_visitor visitor utils)
+ (modules asl_ast asl_parser asl_parser_pp asl_utils asl_visitor visitor utils value primops symbolic)
  (libraries pprint (re_export zarith)))
 
 (library
@@ -37,8 +37,7 @@
   (:standard -w -27 -cclib -lstdc++ -open LibASL_stage0))
  (modules 
    gen_backend cpu dis elf eval
-   lexer lexersupport loadASL monad primops rws symbolic tcheck testing transforms value
-   rASL_check
+   lexer lexersupport loadASL monad rws tcheck testing transforms rASL_check
    symbolic_lifter decoder_program call_graph req_analysis
    offline_transform dis_tc offline_opt
    ocaml_backend 

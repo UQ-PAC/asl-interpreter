@@ -67,9 +67,9 @@ let write_preamble opens st =
   Printf.fprintf st.oc "\n"
 
 let write_epilogue use_pc fid st =
-  let conv_pc = "let pc = (mkBits (Z.of_int 64) (Z.of_int (Option.get pc))) in" in
+  let conv_pc = "let pc = (mkBits (Z.of_int 64) (Z.of_int pc)) in" in
   let dis_call = (match use_pc with 
-    | true ->  Printf.sprintf "if (Option.is_none pc) then (failwith \"Must provide PC\");\n  %s\n  %s enc pc" conv_pc
+    | true ->  Printf.sprintf "%s\n  %s enc pc" conv_pc
     | false ->  Printf.sprintf "%s enc"
   ) (name_of_ident fid)
   in
