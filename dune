@@ -1,4 +1,4 @@
-(alias 
+(alias
   (name asl_files)
   (deps
     prelude.asl
@@ -22,4 +22,4 @@
 
 (alias
  (name default)
- (deps (package asli) (alias install)))
+ (deps (package asli) asli.install))
