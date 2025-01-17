@@ -522,9 +522,13 @@ module RtCopyProp = struct
     | Some (Defined ids) -> (st, IdentSet.union i ids)
     | _ -> (st, i)
 
+  let impure_ident = Ident "CopyProp_impure"
+
   let write_var v (st,i) =
-    let st = if has_context st then (set_var v Essential st) else st  in
       (* cannot copy-prop exprs dependent on a run-time branch*)
+    let st = if has_context st then (set_var v Essential st) else st  in
+      (* cannot copy-prop impure exprs *)
+    let st = if IdentSet.mem impure_ident i then (set_var v Essential st) else st  in
     let st = clobber_var v st in
     let (st,i) = match get_var v st with
     | Some (Declared) -> (set_var v (Defined i) st, i)
@@ -534,8 +538,6 @@ module RtCopyProp = struct
       | None -> (st, i)
   in  (st,i)
 
-
-  let impure_ident = Ident "CopyProp_impure"
 
   let read_vars (vs: IdentSet.t) (st: state): state =
     let read_set s st = IdentSet.fold read_var s (st,IdentSet.empty) in
