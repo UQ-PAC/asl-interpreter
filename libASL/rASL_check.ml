@@ -231,7 +231,6 @@ module AllowedLanguageConstructs = struct
 
   let is_const = function
     | Expr_LitInt _ -> true
-    | Expr_LitHex _ -> true
     | _ -> false
 
   class allowed_constructs() = object (self)
@@ -264,7 +263,6 @@ module AllowedLanguageConstructs = struct
       | Expr_TApply _  -> DoChildren
       | Expr_LitBits _ -> DoChildren
       | Expr_LitInt _ -> DoChildren
-      | Expr_LitHex _ -> DoChildren
       | Expr_Slices (e, [Slice_LoWd(l,w)]) when is_const(l) && is_const(w) -> DoChildren
       | Expr_Slices _ ->  violating <- {at_statement=curstmt; violation=(`IllegalSlice e)}::violating ; DoChildren
       | _ -> violating <- {at_statement=curstmt; violation=(`IllegalExpr e)}::violating ; DoChildren
