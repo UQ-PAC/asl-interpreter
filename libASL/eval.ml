@@ -493,19 +493,37 @@ let initializeGlobals (env: Env.t): unit =
     let g = Env.getGlobals env in
     g.bs <- Bindings.map (eval_uninitialized_to_defaults env) g.bs
 
-let initializeRegistersAndMemory (env: Env.t) (xs: bigint list): unit =
+let initializeRegistersAndMemory (env: Env.t) (regs: bitvector list) (vecs: bitvector list): unit =
     let d = VBits {n=64; v=Z.zero} in
-    let vals = List.mapi (fun i v -> (i, VBits {n=64; v})) xs in
+
+    let vals = List.mapi (fun i v -> (i, VBits v)) regs in
     let arr = List.fold_left
         (fun a (k,v) -> ImmutableArray.add k v a)
         ImmutableArray.empty
         vals
     in
     Env.setVar Unknown env (Ident "_R") (VArray (arr, d));
+
+    let vals = List.mapi (fun i v -> (i, VBits v)) vecs in
+    let arr = List.fold_left
+        (fun a (k,v) -> ImmutableArray.add k v a)
+        ImmutableArray.empty
+        vals
+    in
+    Env.setVar Unknown env (Ident "_Z") (VArray (arr, d));
+
+    (* Init memory *)
     let ram = Primops.init_ram (char_of_int 0) in
     ram.default <- None;
     Env.setVar Unknown env (Ident "__Memory") (VRAM ram)
 
+let randomRegistersAndMemory (env: Env.t): unit =
+    let rnd n = Primops.({ n ; v = Z.random_bits n }) in
+    (* Init register array, should be 31 elements, each 64 bits wide *)
+    let regs = List.init 31 (fun i -> (rnd 64)) in
+    (* Init vector array, should be 32 elements, each 128 bits wide *)
+    let vecs = List.init 32 (fun i -> (rnd 128)) in
+    initializeRegistersAndMemory env regs vecs
 
 let isGlobalConst (env: Env.t) (id: AST.ident): bool =
     match Env.getGlobalConst env id with
@@ -811,7 +829,7 @@ and eval_lexpr (loc: l) (env: Env.t) (x: AST.lexpr) (r: value): unit =
                 | (s :: ss) ->
                         let (i, w) = eval_slice loc env s in
                         let v      = extract_bits'' loc r o w in
-                        eval (eval_add_int loc o w) ss (insert_bits loc prev i w v)
+                        eval (eval_add_int loc o w) ss (insert_bits'' loc prev i w v)
                 )
             in
             eval_lexpr_modify loc env l (eval (VInt Z.zero) (List.rev ss))

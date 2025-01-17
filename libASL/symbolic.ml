@@ -984,6 +984,8 @@ let prims_impure () =
     FIdent("BFAdd",0);
     FIdent("BFMul",0);
     FIdent("FPRecipEstimate",0);
+    FIdent("UnsignedRSqrtEstimate",0);
+    FIdent("FPRSqrtEstimate",0);
     FIdent("Mem.read",0);
     FIdent("Mem.set",0);
     FIdent("AtomicStart",0);
