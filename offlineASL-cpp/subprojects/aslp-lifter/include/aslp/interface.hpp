@@ -168,6 +168,8 @@ public:
   virtual rt_expr f_gen_FPRecpX(rt_expr x, rt_expr fpcr) = 0;
   virtual rt_expr f_gen_FPSqrt(rt_expr x, rt_expr fpcr) = 0;
   virtual rt_expr f_gen_FPRecipEstimate(rt_expr x, rt_expr fpcr) = 0;
+  virtual rt_expr f_gen_UnsignedRSqrtEstimate(rt_expr x) = 0;
+  virtual rt_expr f_gen_FPRSqrtEstimate(rt_expr x, rt_expr fpcr) = 0;
   virtual rt_expr f_gen_BFAdd(rt_expr x, rt_expr y) = 0;
   virtual rt_expr f_gen_BFMul(rt_expr x, rt_expr y) = 0;
   virtual rt_expr f_gen_FPConvertBF(rt_expr x, rt_expr fpcr,
