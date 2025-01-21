@@ -1,4 +1,5 @@
-(rule (targets
+(rule 
+  (targets
     offline.ml
     decode_tests.ml
     aarch64_vector_transfer_vector_table.ml
@@ -258,9 +259,6 @@
     aarch64_system_exceptions_runtime_hvc.ml
     aarch64_system_exceptions_debug_halt.ml
     aarch64_system_exceptions_debug_breakpoint.ml
-    aarch64_system_barriers_ssbb.ml
-    aarch64_system_barriers_sb.ml
-    aarch64_system_barriers_pssbb.ml
     aarch64_system_barriers_isb.ml
     aarch64_system_barriers_dsb.ml
     aarch64_system_barriers_dmb.ml
@@ -300,23 +298,8 @@
     aarch64_memory_atomicops_cas_single.ml
     aarch64_memory_atomicops_cas_pair.ml
     aarch64_integer_tags_mcsubtag.ml
-    aarch64_integer_tags_mcsettagpre.ml
-    aarch64_integer_tags_mcsettagpost.ml
-    aarch64_integer_tags_mcsettagpairpre.ml
-    aarch64_integer_tags_mcsettagpairpost.ml
-    aarch64_integer_tags_mcsettagpairandzerodatapre.ml
-    aarch64_integer_tags_mcsettagpairandzerodatapost.ml
-    aarch64_integer_tags_mcsettagpairandzerodata.ml
-    aarch64_integer_tags_mcsettagpair.ml
     aarch64_integer_tags_mcsettagarray.ml
-    aarch64_integer_tags_mcsettagandzerodatapre.ml
-    aarch64_integer_tags_mcsettagandzerodatapost.ml
-    aarch64_integer_tags_mcsettagandzerodata.ml
     aarch64_integer_tags_mcsettagandzeroarray.ml
-    aarch64_integer_tags_mcsettaganddatapairpre.ml
-    aarch64_integer_tags_mcsettaganddatapairpost.ml
-    aarch64_integer_tags_mcsettaganddatapair.ml
-    aarch64_integer_tags_mcsettag.ml
     aarch64_integer_tags_mcinserttagmask.ml
     aarch64_integer_tags_mcinsertrandomtag.ml
     aarch64_integer_tags_mcgettagarray.ml
@@ -387,10 +370,10 @@
     aarch64_branch_conditional_cond.ml
     aarch64_branch_conditional_compare.ml
     Offline_utils.ml
+) 
+  (deps gen-command)
+  (action (with-stdin-from gen-command (run asli)))
 )
-    (deps gen-command)
-    (action (with-stdin-from gen-command (run asli))
- ))
 
 
   (library
@@ -398,7 +381,7 @@
     (public_name aslp_offline.pc_aarch64)
     (flags
       (:standard -w -27 -w -33 -cclib -lstdc++))
-    (modules
+    (modules 
     offline
     decode_tests
     aarch64_vector_transfer_vector_table
@@ -658,9 +641,6 @@
     aarch64_system_exceptions_runtime_hvc
     aarch64_system_exceptions_debug_halt
     aarch64_system_exceptions_debug_breakpoint
-    aarch64_system_barriers_ssbb
-    aarch64_system_barriers_sb
-    aarch64_system_barriers_pssbb
     aarch64_system_barriers_isb
     aarch64_system_barriers_dsb
     aarch64_system_barriers_dmb
@@ -700,23 +680,8 @@
     aarch64_memory_atomicops_cas_single
     aarch64_memory_atomicops_cas_pair
     aarch64_integer_tags_mcsubtag
-    aarch64_integer_tags_mcsettagpre
-    aarch64_integer_tags_mcsettagpost
-    aarch64_integer_tags_mcsettagpairpre
-    aarch64_integer_tags_mcsettagpairpost
-    aarch64_integer_tags_mcsettagpairandzerodatapre
-    aarch64_integer_tags_mcsettagpairandzerodatapost
-    aarch64_integer_tags_mcsettagpairandzerodata
-    aarch64_integer_tags_mcsettagpair
     aarch64_integer_tags_mcsettagarray
-    aarch64_integer_tags_mcsettagandzerodatapre
-    aarch64_integer_tags_mcsettagandzerodatapost
-    aarch64_integer_tags_mcsettagandzerodata
     aarch64_integer_tags_mcsettagandzeroarray
-    aarch64_integer_tags_mcsettaganddatapairpre
-    aarch64_integer_tags_mcsettaganddatapairpost
-    aarch64_integer_tags_mcsettaganddatapair
-    aarch64_integer_tags_mcsettag
     aarch64_integer_tags_mcinserttagmask
     aarch64_integer_tags_mcinsertrandomtag
     aarch64_integer_tags_mcgettagarray
@@ -789,8 +754,4 @@
     Offline_utils
   )
     (libraries asli.libASL-stage0))
-
-
-(alias
- (name default)
- (deps (package aslp_offline) ../aslp_offline.install))
+(alias (name default) (deps (package aslp_offline) ../aslp_offline.install))

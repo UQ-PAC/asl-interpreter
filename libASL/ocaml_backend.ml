@@ -384,17 +384,13 @@ let write_new_dune_file use_pc files dir  : unit =
     Printf.sprintf "    %s.ml\n" k
   ) files in
   let oc = open_out (dir ^ "/dune") in
-  Printf.fprintf oc "
-  (rule (targets 
-  %s    
-  ) 
-    (deps gen-command)
-    (action 
-    (with-stdin-from gen-command (run asli))
-  ))"
-  target_gen_files ;
+  Printf.fprintf oc "(rule 
+  (targets\n%s) 
+  (deps gen-command)
+  (action (with-stdin-from gen-command (run asli)))
+)" target_gen_files ;
   Printf.fprintf oc "\n\n";
-  let name = if use_pc then "offlineASL_pc" else "off" in
+  let name = if use_pc then "offlineASL_pc" else "offlineASL" in
   Printf.fprintf oc "
   (library
     (name %s)
@@ -408,7 +404,8 @@ let write_new_dune_file use_pc files dir  : unit =
       Printf.fprintf oc "    %s\n" k
     ) (files);
     Printf.fprintf oc "  )
-    (libraries asli.libASL))"
+    (libraries asli.libASL-stage0))" ;
+    Printf.fprintf oc  "\n(alias (name default) (deps (package aslp_offline) ../aslp_offline.install))"
 
 
 (* Write the dune build file *)
@@ -426,7 +423,7 @@ let write_dune_file use_pc files dir =
     Printf.fprintf oc "    %s\n" k
   ) files;
   Printf.fprintf oc "  )
-  (libraries asli.libASL))";
+  (libraries asli.libASL-stage0))";
   close_out oc
 
 let write_ibi dir = 
