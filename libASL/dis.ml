@@ -28,6 +28,9 @@ let debug_level = ref debug_level_none
 let debug_show_trace = ref false
 let no_debug = fun () -> !debug_level <= debug_level_none
 
+(** whether to validate particular invariants of the rasl *)
+let check_rasl = ref false
+
 (** (name, arg, location) tuple for tracing disassembly calls.
     For example: ("dis_expr", "1+1", loc).
 *)
@@ -44,9 +47,10 @@ let internal_error (loc: l) (msg: string) =
   raise (DisInternalError (loc, msg))
 
 let print_dis_trace (trace: dis_trace) =
-    String.concat "\n" @@ List.map (fun (f, e, l) ->
-        Printf.sprintf "... at %s: %s --> %s" (pp_loc l) f e)
-        (trace)
+    if trace == [] then "(empty trace)"
+    else String.concat "\n" @@ List.map (fun (f, e, l) ->
+            Printf.sprintf "... at %s: %s --> %s" (pp_loc l) f e)
+            (trace)
 
 let () = Printexc.register_printer
     (function
@@ -1499,10 +1503,9 @@ let enum_types env i =
     | _ -> None
 
 (* Actually perform dis *)
-let dis_core (env: Eval.Env.t) (unroll_bound) ((lenv,globals): env) (decode: decode_case) (op: Primops.bigint): string * stmt list =
+let dis_core ~(config:config) ((lenv,globals): env) (decode: decode_case) (op: Primops.bigint): string * stmt list =
     let DecoderCase_Case (_,_,loc) = decode in
-    let config = { eval_env = env ; unroll_bound } in
-
+    let lenv = {lenv with trace = ["dis_core", "0x" ^ Z.format "%08x" op, Unknown]} in
     let (enc,lenv',stmts) = (dis_decode_case loc decode op) config lenv in
     let varentries = List.(concat @@ map (fun vars -> StringMap.(bindings (map fst vars))) lenv.locals) in
     let bindings = Asl_utils.Bindings.of_seq @@ List.to_seq @@ List.map (fun (x,y) -> (Ident x,y)) varentries in
@@ -1511,7 +1514,7 @@ let dis_core (env: Eval.Env.t) (unroll_bound) ((lenv,globals): env) (decode: dec
     let stmts' = Transforms.RemoveUnused.remove_unused globals @@ stmts in
     let stmts' = Transforms.RedundantSlice.do_transform Bindings.empty stmts' in
     let stmts' = Transforms.FixRedefinitions.run (globals : IdentSet.t) stmts' in
-    let stmts' = Transforms.StatefulIntToBits.run (enum_types env) stmts' in
+    let stmts' = Transforms.StatefulIntToBits.run (enum_types config.eval_env) stmts' in
     let stmts' = Transforms.IntToBits.ints_to_bits stmts' in
     let stmts' = Transforms.CommonSubExprElim.do_transform stmts' in
     let stmts' = Transforms.CopyProp.copyProp stmts' in
@@ -1528,6 +1531,9 @@ let dis_core (env: Eval.Env.t) (unroll_bound) ((lenv,globals): env) (decode: dec
         List.iter (fun s -> Printf.printf "%s\n" (pp_stmt s)) stmts';
         Printf.printf "===========\n";
     end;
+
+    if (!check_rasl) then RASL_check.LoadStatementInvariant.check_stmts_exc stmts';
+
     enc, stmts'
 
 
@@ -1537,13 +1543,17 @@ let dis_core (env: Eval.Env.t) (unroll_bound) ((lenv,globals): env) (decode: dec
  *)
 let dis_decode_entry_with_inst (env: Eval.Env.t) ((lenv,globals): env) (decode: decode_case) (op: Primops.bigint): string * stmt list =
   let max_upper_bound = Z.of_int64 Int64.max_int in
-  match !Symbolic.use_vectoriser with
-  | false -> dis_core env max_upper_bound (lenv,globals) decode op
-  | true ->
-    let enc,stmts' = dis_core env Z.one (lenv,globals) decode op in
-    let (res,stmts') = Transforms.LoopClassify.run stmts' env in
-    if res then (enc,stmts') else
-      dis_core env max_upper_bound (lenv,globals) decode op
+  let config = { eval_env = env ; unroll_bound=max_upper_bound } in
+  let stmts = match !Symbolic.use_vectoriser with
+    | false -> dis_core ~config (lenv,globals) decode op
+    | true -> let enc,stmts' = dis_core ~config:{config with unroll_bound= Z.one} (lenv,globals) decode op in
+        let (res,stmts') = Transforms.LoopClassify.run stmts' env in
+        if res then (enc,stmts') else
+        dis_core ~config (lenv,globals) decode op
+    in if (!check_rasl) then
+        RASL_check.AllowedIntrinsics.check_stmts_exc (snd stmts);
+        RASL_check.AllowedLanguageConstructs.check_stmts_exc (snd stmts);
+    stmts
 
 let dis_decode_entry (env: Eval.Env.t) ((lenv,globals): env) (decode: decode_case) (op: Primops.bigint): stmt list =
   snd @@ dis_decode_entry_with_inst env (lenv,globals) decode op

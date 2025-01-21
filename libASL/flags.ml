@@ -7,6 +7,7 @@ let flags = StringMap.of_seq @@ List.to_seq [
     ("trace:instr", Eval.trace_instruction);
     ("eval:concrete_unknown", Value.concrete_unknown);
     ("dis:vectors", Symbolic.use_vectoriser);
+    ("dis:check_rasl", Dis.check_rasl);
 ]
 
 let set_flag s =
@@ -26,3 +27,4 @@ let get_flags () =
 
 let set_flags xs =
     StringMap.iter (fun k v -> StringMap.find k flags := v) xs;
+

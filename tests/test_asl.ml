@@ -82,6 +82,7 @@ let test_compare env () : unit =
 
                 (try
                     (* Generate and evaluate partially evaluated instruction *)
+                    Dis.check_rasl := true;
                     let disStmts = Dis.dis_decode_entry disEnv lenv decoder op in
                     List.iter (Eval.eval_stmt disEvalEnv) disStmts;
 

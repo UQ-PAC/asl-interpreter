@@ -4,7 +4,8 @@ tests building and running of the antlr grammar. requires java
 
   $ javac -cp ./antlr.jar *.java
 
-  $ for op in $(grep '^0x' ./ops.txt); do printf '%s\n' ":ast A64 $op"; done > commands
+  $ echo ':set +dis:check_rasl' > commands
+  $ for op in $(grep '^0x' ./ops.txt); do printf '%s\n' ":ast A64 $op"; done >> commands
 
   $ asli < commands > stmts
 

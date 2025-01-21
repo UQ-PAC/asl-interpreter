@@ -942,9 +942,27 @@ let prims_pure () =
     FIdent("slt_bits",0);
     FIdent("sle_bits",0);
     FIdent("sdiv_bits",0);
+    FIdent("ite",0);
   ] @ (if !use_vectoriser then [
     FIdent("Elem.set",0);
     FIdent("Elem.read",0);
+    FIdent("add_vec",0);
+    FIdent("sub_vec",0);
+    FIdent("mul_vec",0);
+    FIdent("sdiv_vec",0);
+    FIdent("lsr_vec",0);
+    FIdent("asr_vec",0);
+    FIdent("lsl_vec",0);
+    FIdent("ite_vec",0);
+    FIdent("sle_vec",0);
+    FIdent("slt_vec",0);
+    FIdent("eq_vec",0);
+    FIdent("zcast_vec",0);
+    FIdent("scast_vec",0);
+    FIdent("trunc_vec",0);
+    FIdent("select_vec",0);
+    FIdent("shuffle_vec",0);
+    FIdent("reduce_add",0);
   ] else [])
 
 (** Primitives that are placed into the evaluation trace. They must be

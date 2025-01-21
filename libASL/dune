@@ -37,6 +37,7 @@
   (:standard -w -27 -cclib -lstdc++ -open LibASL_stage0))
  (modules cpu dis elf eval
    lexer lexersupport loadASL monad primops rws symbolic tcheck testing transforms value
+   rASL_check
    symbolic_lifter decoder_program call_graph req_analysis
    offline_transform dis_tc offline_opt
    ocaml_backend 
