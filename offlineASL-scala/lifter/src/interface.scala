@@ -55,6 +55,8 @@ trait LiftState[RTSym, RTLabel, BV <: RTSym] {
   def f_gen_FPMulX(targ0: BigInt, arg0: RTSym, arg1: RTSym, arg2: RTSym): RTSym
   def f_gen_FPRSqrtStepFused(targ0: BigInt, arg0: RTSym, arg1: RTSym): RTSym
   def f_gen_FPRecipEstimate(targ0: BigInt, arg0: RTSym, arg1: RTSym): RTSym
+  def f_gen_UnsignedRSqrtEstimate(targ0: BigInt, arg0: RTSym): RTSym 
+  def f_gen_FPRSqrtEstimate(targ0: BigInt, arg0: RTSym, arg1: RTSym): RTSym
   def f_gen_FPRecipStepFused(targ0: BigInt, arg0: RTSym, arg1: RTSym): RTSym
   def f_gen_FPRecpX(targ0: BigInt, arg0: RTSym, arg1: RTSym): RTSym
   def f_gen_FPRoundInt(targ0: BigInt, arg0: RTSym, arg1: RTSym, arg2: RTSym, arg3: RTSym): RTSym

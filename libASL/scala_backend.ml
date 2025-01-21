@@ -52,6 +52,7 @@ module StringSet = Set.Make(String)
         "f_gen_FPRecipEstimate"; "f_gen_FPRecipStepFused"; "f_gen_FPRecpX";
         "f_gen_FPRoundInt"; "f_gen_FPRoundIntN"; "f_gen_FPSqrt"; "f_gen_FPSub";
         "f_gen_FPToFixed"; "f_gen_FPToFixedJS_impl"; "f_gen_FixedToFP";
+        "f_gen_FPRSqrtEstimate"; "f_gen_UnsignedRSqrtEstimate";
         "f_gen_bit_lit"; "f_gen_bool_lit"; "f_gen_branch"; "f_cvt_bits_uint";
         "f_gen_cvt_bits_uint"; "f_gen_cvt_bool_bv"; "f_gen_eor_bits";
         "f_gen_eq_bits"; "f_gen_eq_enum"; "f_gen_int_lit"; "f_gen_store";

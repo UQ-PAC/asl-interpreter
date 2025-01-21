@@ -405,8 +405,7 @@ let op_test_opcode (env: Env.t) (iset: string) (op: int): Env.t opresult =
 
   let initenv = Env.copy env in
   Random.self_init ();
-  let vals = (List.init 64 (fun _ -> Z.of_int64 (Random.int64 Int64.max_int))) in
-  Eval.initializeRegistersAndMemory initenv vals;
+  Eval.randomRegistersAndMemory initenv;
   Eval.initializeGlobals initenv;
 
   let initenv = Env.freeze initenv in

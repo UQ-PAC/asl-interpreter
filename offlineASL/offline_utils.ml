@@ -290,6 +290,10 @@ let f_gen_FPSqrt w x t =
   Expr_TApply (FIdent ("FPSqrt", 0), [expr_of_z w], [x; t])
 let f_gen_FPRecipEstimate w x r =
   Expr_TApply (FIdent ("FPRecipEstimate", 0), [expr_of_z w], [x; r])
+let f_gen_UnsignedRSqrtEstimate w x =
+  Expr_TApply (FIdent ("UnsignedRSqrtEstimate", 0), [expr_of_z w], [x])
+let f_gen_FPRSqrtEstimate w x r =
+  Expr_TApply (FIdent ("FPRSqrtEstimate", 0), [expr_of_z w], [x; r])
 
 let f_gen_BFAdd x y =
   Expr_TApply (FIdent ("BFAdd", 0), [], [x; y])

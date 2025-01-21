@@ -307,7 +307,7 @@ let eval_prim (f: string) (tvs: value list) (vs: value list): value option =
     | ("round_tozero_real", [      ], [VReal x             ])     -> Some (VInt    (prim_round_tozero_real x))
     | ("round_down_real",   [      ], [VReal x             ])     -> Some (VInt    (prim_round_down_real x))
     | ("round_up_real",     [      ], [VReal x             ])     -> Some (VInt    (prim_round_up_real x))
-    | ("sqrt_real",         [      ], [VReal x; VReal y    ])     -> Some (VReal   (prim_sqrt_real x))
+    | ("sqrt_real",         [      ], [VReal x             ])     -> Some (VReal   (prim_sqrt_real x))
     | ("cvt_int_bits",      [_     ], [VInt  x; VInt  n    ])     -> Some (VBits   (prim_cvt_int_bits n x))
     | ("cvt_bits_sint",     [VInt n], [VBits x             ])     -> Some (VInt    (prim_cvt_bits_sint x))
     | ("cvt_bits_uint",     [VInt n], [VBits x             ])     -> Some (VInt    (prim_cvt_bits_uint x))
@@ -424,6 +424,11 @@ let insert_bits (loc: AST.l) (x: value) (i: value) (w: value) (y: value): value 
 
 let insert_bits' (loc: AST.l) (x: value) (i: int) (w: int) (y: value): value =
     VBits (prim_insert (to_bits loc x) (Z.of_int i) (Z.of_int w) (to_bits loc y))
+
+let insert_bits'' (loc: AST.l) (x: value) (i: value) (w: value) (y: value): value =
+    (match x with
+    | VInt(x')  -> VInt (prim_insert_int x' (to_integer loc i) (to_integer loc w) (to_bits loc y))
+    | _ -> insert_bits loc x i w y)
 
 let rec eval_eq (loc: AST.l) (x: value) (y: value): bool =
     (match (x, y) with

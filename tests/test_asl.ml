@@ -61,8 +61,7 @@ let test_compare env () : unit =
             let initEnv = Eval.Env.copy env in
             (* Obtain and set random initial values for _R registers. *)
             Random.self_init ();
-            let vals = (List.init 64 (fun _ -> Z.of_int64 (Random.int64 Int64.max_int))) in
-            Eval.initializeRegistersAndMemory initEnv vals;
+            Eval.randomRegistersAndMemory initEnv;
             (* Replace remaining VUninitialized with default zero values. *)
             Eval.initializeGlobals initEnv;
 
