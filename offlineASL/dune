@@ -1,6 +1,7 @@
 
   (rule (targets 
-      offline.ml
+    offline.ml
+    dune.template
     decode_tests.ml
     aarch64_vector_transfer_vector_table.ml
     aarch64_vector_transfer_vector_permute_zip.ml
@@ -370,7 +371,6 @@
     aarch64_branch_conditional_cond.ml
     aarch64_branch_conditional_compare.ml
     Offline_utils.ml
-    
   ) 
     (deps gen-command)
     (action 
@@ -379,7 +379,7 @@
 
 
   (library
-    (name off)
+    (name offlineASL)
     (public_name aslp_offline.aarch64)
     (flags
       (:standard -w -27 -w -33 -cclib -lstdc++))

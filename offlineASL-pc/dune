@@ -1,6 +1,7 @@
 (rule 
   (targets
     offline.ml
+    dune.template
     decode_tests.ml
     aarch64_vector_transfer_vector_table.ml
     aarch64_vector_transfer_vector_permute_zip.ml

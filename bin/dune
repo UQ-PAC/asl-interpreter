@@ -42,7 +42,7 @@
  (modes exe)
  (modules offline_coverage)
  (flags (-cclib -lstdc++))
- (libraries asli.libASL offlineASL))
+ (libraries asli.libASL aslp_offline.aarch64))
 
 (executable
  (name offline_sem)
@@ -51,4 +51,4 @@
  (modes exe)
  (modules offline_sem)
  (flags (-cclib -lstdc++))
- (libraries asli.libASL offlineASL))
+ (libraries asli.libASL aslp_offline.aarch64 aslp_offline.pc_aarch64))

@@ -5,7 +5,9 @@ open Asl_utils
 let run (opcode: string) (pc: int option) =
   let op = Z.of_string opcode in
   let bv = Primops.prim_cvt_int_bits (Z.of_int 32) op in
-  let stmts = OfflineASL.Offline.run  bv in
+  let stmts = match pc with 
+    | None -> OfflineASL.Offline.run  bv 
+    | Some x -> OfflineASL_pc.Offline.run ~pc:x bv in
   List.iter (fun s -> Printf.printf "%s\n" (pp_stmt s)) stmts
 
 let opt_instr = ref []
