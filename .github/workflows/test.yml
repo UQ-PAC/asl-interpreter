@@ -3,7 +3,7 @@ name: Test partial eval
 on:
   push:
     branches:
-      - partial_eval 
+      - partial_eval
   pull_request:
     types: []
   workflow_dispatch:
@@ -45,18 +45,27 @@ jobs:
 
   offline:
     runs-on: ubuntu-latest
+    env:
+      PREFIX: /tmp/prefix
+      DUNE_INSTALL_PREFIX: /tmp/prefix
 
     steps:
     - uses: actions/checkout@v4
 
     - uses: cachix/install-nix-action@v25
-    - run: echo 'preparing nix shell environment'
+
+    - run: |
+        echo 'preparing nix shell environment'
+        set -u
+        mkdir -p "$DUNE_INSTALL_PREFIX"
+        # echo "OCAMLPATH=$DUNE_INSTALL_PREFIX/lib:$OCAMLPATH" | tee -a "$GITHUB_ENV"
+        # ^ note: the nix shell would override this external variable
 
     - run: dune build -p asli -j4 --profile=release
 
     - run: dune install -p asli --profile=release
 
-    - run: dune build -p aslp_offline -j4
+    - run: 'OCAMLPATH=$PREFIX/lib:$OCAMLPATH PATH=$PREFIX/bin:$PATH dune build -p aslp_offline -j4'
 
     - run: dune install -p aslp_offline
 
