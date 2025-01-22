@@ -41,6 +41,20 @@
   )
 )
 
+(package
+  (name aslp_offline_jsoo)
+  (synopsis "AArch64 Offline lifter javascript library")
+  (description "" )
+  (depends
+    ("ocaml"     (>= "4.14"))
+    aslp_offline
+    asli
+    js_of_ocaml
+    js_of_ocaml-ppx
+    zarith_stubs_js
+  )
+)
+
 (license BSD-3-Clause)
 (authors "UQ-PAC")
 (maintainers "UQ-PAC")

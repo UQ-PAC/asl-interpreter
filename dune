@@ -23,3 +23,8 @@
 (alias
  (name default)
  (deps (package asli) asli.install))
+
+
+(alias
+ (name aslp_offline_jsoo)
+ (deps (package aslp_offline_jsoo ) bin/offline_js.bc.js))
