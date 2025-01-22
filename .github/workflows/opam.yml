@@ -19,7 +19,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - uses: ocaml/setup-ocaml@v2
+    - uses: ocaml/setup-ocaml@v3
       with:
         ocaml-compiler: 4.14
     - run: opam install dune
