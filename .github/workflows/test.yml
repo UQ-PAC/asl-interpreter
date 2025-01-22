@@ -52,10 +52,13 @@ jobs:
     - uses: cachix/install-nix-action@v25
     - run: echo 'preparing nix shell environment'
 
-    - run: dune build --profile release -j4
-    - run: echo ':gen A64 aarch64_* ocaml false offlineASL' | OCAMLRUNPARAM=b dune exec asli
+    - run: dune build -p asli -j4 --profile=release
 
-    - run: dune build offlineASL -j4
+    - run: dune install -p asli --profile=release
+
+    - run: dune build -p aslp_offline -j4
+
+    - run: dune install -p aslp_offline
 
     - run: dune build @offline-coverage -j4
 
