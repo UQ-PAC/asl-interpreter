@@ -10,11 +10,11 @@ interactive execution of ASL statements and expressions,
 executing opcodes one at a time,
 loading ELF files and executing Arm binaries.
 """
-maintainer: ["Alastair Reid <alastair.d.reid@gmail.com>"]
-authors: ["Alastair Reid"]
+maintainer: ["UQ-PAC"]
+authors: ["UQ-PAC"]
 license: "BSD-3-Clause"
-homepage: "https://github.com/alastairreid/asl-interpreter"
-bug-reports: "https://github.com/alastairreid/asl-interpreter/issues"
+homepage: "https://github.com/UQ-PAC/aslp"
+bug-reports: "https://github.com/UQ-PAC/aslp/issues"
 depends: [
   "dune" {>= "2.8"}
   "ocaml" {>= "4.14"}
@@ -46,4 +46,4 @@ build: [
     "@doc" {with-doc}
   ]
 ]
-dev-repo: "git+https://github.com/alastairreid/asl-interpreter.git"
+dev-repo: "git+https://github.com/UQ-PAC/aslp.git"

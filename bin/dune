@@ -2,6 +2,7 @@
 (executable
  (name asli)
  (public_name asli)
+ (package asli)
  (modes exe byte)
  (modules asli)
  (flags (-cclib -lstdc++))
@@ -11,6 +12,7 @@
 (executable
  (name server)
  (public_name aslp-server)
+ (package asli)
  (modes exe)
  (modules server)
  (flags (-cclib -lstdc++))
@@ -36,15 +38,28 @@
 (executable
  (name offline_coverage)
  (public_name asloff-coverage)
+ (package aslp_offline)
  (modes exe)
  (modules offline_coverage)
  (flags (-cclib -lstdc++))
- (libraries asli.libASL offlineASL))
+ (libraries asli.libASL aslp_offline.aarch64))
 
 (executable
  (name offline_sem)
  (public_name asloff-sem)
+ (package aslp_offline)
  (modes exe)
  (modules offline_sem)
  (flags (-cclib -lstdc++))
- (libraries asli.libASL offlineASL))
+ (libraries asli.libASL aslp_offline.aarch64 aslp_offline.pc_aarch64))
+
+
+(executable
+ (name offline_js)
+ (modes js)
+ (modules offline_js)
+ (libraries asli.libASL-stage0 aslp_offline.aarch64 
+  zarith_stubs_js
+ )
+ (preprocess (pps js_of_ocaml-ppx))
+)

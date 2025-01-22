@@ -418,6 +418,7 @@ let run include_pc iset pat env : offline_result =
 
 let run_marshal include_pc iset pat env : offline_result = 
   let fname = Printf.sprintf "marshalled-offline-lifter-%x" 
+    (*FIXME: I don't think this is working as expected *)
     (Hashtbl.seeded_hash 1234 (Printf.sprintf "%b %s %s" include_pc iset pat))
   in
   if (Sys.file_exists fname) 
@@ -431,5 +432,6 @@ let run_marshal include_pc iset pat env : offline_result =
   else 
     let r: offline_result = run include_pc iset pat env in
     let oc = open_out_bin fname in
+    Printf.printf "Writing marshalled lifter (pc: %b iset: %s pat: %s):  %s\n" include_pc iset pat fname;
     Marshal.to_channel oc r []; close_out oc;
     r

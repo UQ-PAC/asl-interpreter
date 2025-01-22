@@ -1,5 +1,6 @@
 open Asl_ast
 open Asl_utils
+open Gen_backend
 
 (****************************************************************
  * Write State
@@ -569,3 +570,7 @@ let run dfn dfnsig tests fns root =
     Printf.eprintf "Warning: cpp gen directory '%s' is missing build system files. These might need to be copied manually.\n\n" root;
 
   ()
+
+module CppBackend : Backend = struct
+  let run ~(config:conf) dfn dfnsig tests fns = run dfn dfnsig tests fns config.output_directory
+end

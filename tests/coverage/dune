@@ -13,7 +13,7 @@
  (action (copy ./run.sh ./run)))
 
 (rule
- (deps (package asli) ./encodings)
+ (deps (package aslp_offline) ./encodings)
  (action (copy ./off_run.sh ./off_run)))
 
 (rule (with-stdout-to cov_integer (run ./run "aarch64_integer.+")))

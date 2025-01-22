@@ -1,5 +1,5 @@
-
-  (rule (targets 
+(rule 
+  (targets
     offline.ml
     dune.template
     decode_tests.ml
@@ -371,16 +371,15 @@
     aarch64_branch_conditional_cond.ml
     aarch64_branch_conditional_compare.ml
     Offline_utils.ml
-  ) 
-    (deps gen-command)
-    (action 
-    (with-stdin-from gen-command (run asli))
-  ))
+) 
+  (deps gen-command)
+  (action (with-stdin-from gen-command (run asli)))
+)
 
 
   (library
-    (name offlineASL)
-    (public_name aslp_offline.aarch64)
+    (name offlineASL_pc)
+    (public_name aslp_offline.pc_aarch64)
     (flags
       (:standard -w -27 -w -33 -cclib -lstdc++))
     (modules 
@@ -755,4 +754,5 @@
     aarch64_branch_conditional_compare
     Offline_utils
   )
-    (libraries asli.libASL))
+    (libraries asli.libASL-stage0))
+(alias (name default) (deps (package aslp_offline) ../aslp_offline.install))
