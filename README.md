@@ -158,14 +158,15 @@ Then, use:
 dune build -p aslp_offline
 dune install -p aslp_offline
 ```
-Note: this uses the installed copy of ASLp to generate the offline lifter.
-If you want to simultaneously build ASLp and use this version to generate the lifter,
-use `dune build offlineASL`.
-
+Note: this uses the _installed_ copy of ASLp to generate the offline lifter.
 Basically, `-p` acts as if all packages other than the one listed
 do not exist in this dune project, forcing it to look elsewhere.
 This can be useful when building and installing packages individually.
 
+If you want to simultaneously build ASLp and use this version to generate the lifter,
+use `dune build @offline`.
+Be aware that this might re-use a cached offline lifter, even if ASLp code has changed.
+To clean the cached lifters, use `rm -v ./marshalled-offline-lifter-*`.
 
 
 ### Using ASL lexer
