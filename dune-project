@@ -1,4 +1,4 @@
-(lang dune 2.9)
+(lang dune 3.17)
 (name asli)
 (version 0.2.0)
 
