@@ -151,8 +151,12 @@ Once complete, you can verify the package is installed by running `ocamlfind que
 
 #### ASLp Offline OCaml lifter
 
-To build the offline lifter, which depends on the main ASLp package, first install the ASLp
-package as above.
+If you want to simultaneously build ASLp and use this version to generate the lifter,
+use `dune build @offline`.
+Be aware that this might re-use a cached offline lifter, even if ASLp code has changed.
+To clean the cached lifters, use `rm -v ./_build/default/*/marshalled-offline-lifter-*`.
+
+To build the offline lifter using previously compiled asli (e.g. as installed through `opam pin` as above),
 Then, use:
 ```bash
 dune build -p aslp_offline
@@ -162,12 +166,6 @@ Note: this uses the _installed_ copy of ASLp to generate the offline lifter.
 Basically, `-p` acts as if all packages other than the one listed
 do not exist in this dune project, forcing it to look elsewhere.
 This can be useful when building and installing packages individually.
-
-If you want to simultaneously build ASLp and use this version to generate the lifter,
-use `dune build @offline`.
-Be aware that this might re-use a cached offline lifter, even if ASLp code has changed.
-To clean the cached lifters, use `rm -v ./marshalled-offline-lifter-*`.
-
 
 ### Using ASL lexer
 
