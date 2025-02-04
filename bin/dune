@@ -63,3 +63,8 @@
  )
  (preprocess (pps js_of_ocaml-ppx))
 )
+
+(install
+ (files offline_js.bc.js)
+ (section lib)
+ (package aslp_offline_jsoo))
