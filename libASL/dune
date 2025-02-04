@@ -28,29 +28,36 @@
  (public_name asli.libASL-stage0)
  (flags (:standard -w -27))
  (modules asl_ast asl_parser asl_parser_pp asl_utils asl_visitor visitor utils value primops symbolic)
- (libraries pprint (re_export zarith)))
+ (libraries (re_export pprint) (re_export zarith)))
+
+(library
+ (name offline_utils)
+ (public_name asli.offline_utils)
+ (modules offline_utils)
+ (flags (:standard -w -27))
+ (libraries libASL_stage0))
 
 (library
  (name libASL_stage1)
  (public_name asli.libASL-stage1)
  (flags
   (:standard -w -27 -cclib -lstdc++ -open LibASL_stage0))
- (modules 
+ (modules
    gen_backend cpu dis elf eval
    lexer lexersupport loadASL monad rws tcheck testing transforms rASL_check
    symbolic_lifter decoder_program call_graph req_analysis
    offline_transform dis_tc offline_opt
-   ocaml_backend 
+   ocaml_backend
    cpp_backend
-   scala_backend 
+   scala_backend
    arm_env pretransforms flags
    )
  (preprocessor_deps (alias ../asl_files) (alias cpp_backend_files) ../offlineASL/template_offline_utils.ml)
  (preprocess (pps ppx_blob))
- (libraries libASL_stage0 libASL_support str mlbdd))
+ (libraries (re_export libASL_stage0) (re_export libASL_support) str mlbdd))
 
 
-(alias 
+(alias
   (name cpp_backend_files)
   (deps
     ../offlineASL-cpp/subprojects/aslp-lifter/meson.build.in
@@ -61,7 +68,7 @@
  (public_name asli.libASL-virtual)
  (modules libASL)
  (wrapped false) ; exports LibASL module
- (libraries libASL_stage0 libASL_stage1))
+ (libraries (re_export libASL_stage0) (re_export libASL_stage1)))
 
 (library
  (name libASL_dummy)

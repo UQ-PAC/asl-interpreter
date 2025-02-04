@@ -58,7 +58,7 @@
  (name offline_js)
  (modes js)
  (modules offline_js)
- (libraries asli.libASL-stage0 aslp_offline.aarch64 
+ (libraries asli.libASL-stage0 aslp_offline.aarch64
   zarith_stubs_js
  )
  (preprocess (pps js_of_ocaml-ppx))
