@@ -1,4 +1,4 @@
-(alias 
+(alias
   (name asl_files)
   (deps
     prelude.asl
@@ -22,4 +22,13 @@
 
 (alias
  (name default)
- (deps (package asli) (alias install)))
+ (deps (package asli) asli.install))
+
+
+(alias
+ (name aslp_offline_jsoo)
+ (deps (package aslp_offline_jsoo ) bin/offline_js.bc.js))
+
+(alias
+ (name offline)
+ (deps (package aslp_offline) aslp_offline.install))

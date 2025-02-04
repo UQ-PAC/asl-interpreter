@@ -15,8 +15,10 @@
 
 (cram
  (applies_to *)
+ (package asli)
  (deps (package asli) (glob_files *.txt)))
 
 (cram
  (applies_to * \ test_dis)
+ (package asli)
  (deps ./antlr.jar ./Semantics.g4))

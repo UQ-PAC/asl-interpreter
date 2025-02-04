@@ -27,7 +27,7 @@
  (name libASL_stage0)
  (public_name asli.libASL-stage0)
  (flags (:standard -w -27))
- (modules asl_ast asl_parser asl_parser_pp asl_utils asl_visitor visitor utils)
+ (modules asl_ast asl_parser asl_parser_pp asl_utils asl_visitor visitor utils value primops symbolic)
  (libraries pprint (re_export zarith)))
 
 (library
@@ -35,9 +35,9 @@
  (public_name asli.libASL-stage1)
  (flags
   (:standard -w -27 -cclib -lstdc++ -open LibASL_stage0))
- (modules cpu dis elf eval
-   lexer lexersupport loadASL monad primops rws symbolic tcheck testing transforms value
-   rASL_check
+ (modules 
+   gen_backend cpu dis elf eval
+   lexer lexersupport loadASL monad rws tcheck testing transforms rASL_check
    symbolic_lifter decoder_program call_graph req_analysis
    offline_transform dis_tc offline_opt
    ocaml_backend 
@@ -45,7 +45,7 @@
    scala_backend 
    arm_env pretransforms flags
    )
- (preprocessor_deps (alias ../asl_files) (alias cpp_backend_files))
+ (preprocessor_deps (alias ../asl_files) (alias cpp_backend_files) ../offlineASL/template_offline_utils.ml)
  (preprocess (pps ppx_blob))
  (libraries libASL_stage0 libASL_support str mlbdd))
 

@@ -1,9 +1,9 @@
 # *ASLp* - ASL Partial Evaluator
 
-This forks ASLi to extract usable semantics from the 
-architecture specifications. 
-The semantics produced are in ASL but are reduced to contain 
-only simple control flow and scalar types, 
+This forks ASLi to extract usable semantics from the
+architecture specifications.
+The semantics produced are in ASL but are reduced to contain
+only simple control flow and scalar types,
 for use in further static analysis.
 
 ## Introduction
@@ -29,10 +29,10 @@ To build and run the ASL interpreter, you will need:
       * odoc      - OCaml documentation generator (optional)
       * dune      - OCaml build system
       * menhir    - parser generator tool
-      * ott       - tool for defining language grammars and semantics 
+      * ott       - tool for defining language grammars and semantics
       * linenoise - OCaml line editing library
       * pprint    - OCaml pretty-printing library
-      * z3        - OCaml bindings for the Z3 SMT solver 
+      * z3        - OCaml bindings for the Z3 SMT solver
       * zarith    - OCaml multiprecision arithmetic library
 
 
@@ -144,11 +144,28 @@ these steps will install the package in a location discoverable by opam and dune
 
 After installing dependencies and testing the build, run these commands in this directory:
 ```
-    opam pin . -k path
-    opam install .
+    dune build
+    dune install -p asli
 ```
 Once complete, you can verify the package is installed by running `ocamlfind query asli`.
 
+#### ASLp Offline OCaml lifter
+
+If you want to simultaneously build ASLp and use this version to generate the lifter,
+use `dune build @offline`.
+Be aware that this might re-use a cached offline lifter, even if ASLp code has changed.
+To clean the cached lifters, use `rm -v ./_build/default/*/marshalled-offline-lifter-*`.
+
+To build the offline lifter using previously compiled asli (e.g. as installed through `opam pin` as above),
+Then, use:
+```bash
+dune build -p aslp_offline
+dune install -p aslp_offline
+```
+Note: this uses the _installed_ copy of ASLp to generate the offline lifter.
+Basically, `-p` acts as if all packages other than the one listed
+do not exist in this dune project, forcing it to look elsewhere.
+This can be useful when building and installing packages individually.
 
 ### Using ASL lexer
 
@@ -206,7 +223,7 @@ ASLi>
 ```
 LLVM can be used to obtain the bytecode for a particular instruction mnemonic:
 ```bash
-$ echo 'add x1, x2, x3, LSL 4' | 
+$ echo 'add x1, x2, x3, LSL 4' |
     clang -x assembler -target aarch64 - -c -o/dev/stdout |
     llvm-objdump - -d --section=.text |
     tail -n1
@@ -274,12 +291,12 @@ For the coverage tests, the tests are simple diff tests against an expected outp
 In both cases, dune will report test failures as a difference against the expected output.
 [`dune promote`](https://dune.readthedocs.io/en/latest/concepts/promotion.html)
 can be used to update the expected files with the output from the latest run.
- 
+
 #### Differential testing
 
 The `:coverage` command is used to test equivalence of the partial evaluator and the interpreter.
 It takes a regular expression of an instruction group, then generates and evaluates the partially evaluated
-ASL as well as the original ASL and compares the final states. 
+ASL as well as the original ASL and compares the final states.
 Instruction groups can be found in the [mra_tools/arch/arch_instrs.asl](mra_tools/arch/arch_instrs.asl) file.
 ```
 ASLi> :coverage A64 aarch64_integer.+
@@ -295,7 +312,7 @@ ASLi> :coverage A64 aarch64_integer.+
 [...]
 ```
 
-"OK" indicates the machine state after both executions are the same, 
+"OK" indicates the machine state after both executions are the same,
 as we would expect if the partial evaluation is correct.
 UNDEFINED means that particular bytecode is an undefined case in the architecture.
 If an exception occurs somewhere else in the process, that will be reported as well.
@@ -304,9 +321,9 @@ If an exception occurs somewhere else in the process, that will be reported as w
 
 - Lam, K., & Coughlin, N. (2023).
 Lift-off: Trustworthy ARMv8 semantics from formal specifications.
-In A. Nadel & K. Y. Rozier (Eds.), 
+In A. Nadel & K. Y. Rozier (Eds.),
 _Proceedings of the 23rd Conference on Formal Methods in Computer-Aided Design – FMCAD 2023_
-(pp. 274–283). 
+(pp. 274–283).
 TU Wien Academic Press.
 [10.34727/2023/isbn.978-3-85448-060-0_36](https://doi.org/10.34727/2023/isbn.978-3-85448-060-0_36)
 

@@ -2,11 +2,13 @@
  (modes exe)
  (flags (-cclib -lstdc++))
  (modules test_asl)
- (libraries alcotest asli.libASL))
+ (libraries alcotest asli.libASL)
+ (package asli))
 
 
 (test (name bdd_ops)
  (modes exe)
  (flags (-cclib -lstdc++))
-(modules bdd_ops)
- (libraries alcotest asli.libASL))
+ (modules bdd_ops)
+ (libraries alcotest asli.libASL)
+ (package asli))

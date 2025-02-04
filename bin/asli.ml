@@ -42,7 +42,7 @@ let help_msg = [
     {|:sem <instr-set> <int>         Decode and print opcode semantics|};
     {|:ast <instr-set> <int> [file]  Decode and write opcode semantics to stdout or a file, in a structured ast format|};
     {|:gen <instr-set> <regex>       Generate an offline lifter using the given backend|};
-    {|      [pc-option] [backend] [dir]|};
+    {|      [backend] [pc-option] [dir]|};
     {|:project <file>                Execute ASLi commands in <file>|};
     {|:q :quit                       Exit the interpreter|};
     {|:run                           Execute instructions|};
@@ -199,8 +199,8 @@ let rec process_command (tcenv: TC.Env.t) (cpu: Cpu.cpu) (fname: string) (input0
             (Dis.dis_decode_entry cpu.env cpu.denv decoder op);
         Option.iter close_out chan_opt
     | ":gen" :: iset :: id :: rest when List.length rest <= 3 ->
-        let pc_option = Option.value List.(nth_opt rest 1) ~default:"false" in
         let backend_str = Option.value List.(nth_opt rest 0) ~default:"ocaml" in
+        let pc_option = Option.value List.(nth_opt rest 1) ~default:"false" in
         Printf.printf "Generating lifter for %s %s with pc option %s using %s backend\n" iset id pc_option backend_str;
 
         let pc_option = match String.lowercase_ascii pc_option with

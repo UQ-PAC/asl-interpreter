@@ -1,0 +1,22 @@
+; this manually-written file implements the bootstrapping for the offline lifter dune files.
+
+; to bootstrap without a dune.generated file:
+; 
+; 1. cd offlineASL
+; 2. make blank file so dune executes: touch dune.generated
+; 3. write file which calls gen-command: ASLP_OFFLINE_BOOTSTRAP=true dune runtest offlineASL --auto-promote
+; 4. update file with result from gen-command: dune runtest offlineASL --auto-promote
+
+(rule
+ (target dune.generated.new)
+ (action
+  (write-file %{target} "
+  (rule (targets %{target})
+   (deps gen-command)
+   (action (with-stdin-from gen-command (run asli))))"))
+ (enabled_if %{env:ASLP_OFFLINE_BOOTSTRAP=false}))
+
+(rule
+ (alias runtest)
+ (package aslp_offline)
+ (action (diff dune.generated dune.generated.new)))
