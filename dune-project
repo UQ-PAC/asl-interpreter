@@ -1,6 +1,6 @@
 (lang dune 2.9)
 (name asli)
-(version 0.2.0)
+(version 0.3.0)
 
 (using menhir 2.0)
 
