@@ -57,6 +57,7 @@
 (executable
  (name offline_js)
  (modes js)
+ (js_of_ocaml (flags --enable with-js-error --pretty))
  (modules offline_js)
  (libraries asli.libASL-stage0 aslp_offline.aarch64
   zarith_stubs_js

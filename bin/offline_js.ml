@@ -9,11 +9,12 @@ let init input out err =
   Js_of_ocaml.Sys_js.set_channel_filler stdin input;
   ()
 
-let dis (opcode: string) : stmt list =
+let dis (opcode: string) : unit =
   let op = Z.of_string opcode in
   let bv = Primops.prim_cvt_int_bits (Z.of_int 32) op in
-  OfflineASL.Offline.run  bv
-
+  let stmts = OfflineASL.Offline.run bv in
+  List.iter (fun x -> print_endline (pp_stmt x)) stmts;
+  flush stdout
 
 (*
 import("offline_js.bc.js");
@@ -28,7 +29,7 @@ let () = Js.export "aslp_offline"
     method formatException (exn : exn) = Printexc.to_string exn
     method printException (exn : exn) = output_string stderr (Printexc.to_string exn)
 
-    method dis x = List.iter (fun x -> print_endline (pp_stmt x)) (dis (Js.to_string x)); flush stdout
+    method dis x = dis (Js.to_string x)
   end end
 
 
