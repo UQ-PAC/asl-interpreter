@@ -28,7 +28,7 @@ let () = Js.export "aslp_offline"
     method formatException (exn : exn) = Printexc.to_string exn
     method printException (exn : exn) = output_string stderr (Printexc.to_string exn)
 
-    method dis x = List.map (fun s -> pp_stmt s |> Js.string) (dis (Js.to_string x))
+    method dis x = List.iter (fun x -> print_endline (pp_stmt x)) (dis (Js.to_string x)); flush stdout
   end end
 
 

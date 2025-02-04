@@ -64,7 +64,14 @@
  (preprocess (pps js_of_ocaml-ppx))
 )
 
+; empty library so dune allows %{lib:aslp_offline_jsoo:offline_js.bc.js}
+(library
+ (name aslp_offline_jsoo)
+ (public_name aslp_offline_jsoo)
+ (modules))
+
 (install
  (files offline_js.bc.js)
  (section lib)
  (package aslp_offline_jsoo))
+
