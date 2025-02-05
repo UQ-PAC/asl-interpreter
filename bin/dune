@@ -57,24 +57,9 @@
 (executable
  (name offline_js)
  (modes js)
- (js_of_ocaml
-  (flags --enable with-js-error)
-  (sourcemap file))
  (modules offline_js)
- (libraries asli.libASL-stage0 aslp_offline.aarch64
+ (libraries asli.libASL-stage0 aslp_offline.aarch64 
   zarith_stubs_js
  )
  (preprocess (pps js_of_ocaml-ppx))
 )
-
-; empty library so dune allows %{lib:aslp_offline_jsoo:offline_js.bc.js}
-(library
- (name aslp_offline_jsoo)
- (public_name aslp_offline_jsoo)
- (modules))
-
-(install
- (files offline_js.bc.js offline_js.bc.map)
- (section lib)
- (package aslp_offline_jsoo))
-
