@@ -3,3 +3,4 @@
 *.t     linguist-vendored
 *.asl   linguist-vendored
 /aslp-cpp/lib/** linguist-vendored
+dune.generated linguist-generated
