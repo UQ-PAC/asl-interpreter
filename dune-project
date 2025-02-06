@@ -24,9 +24,6 @@
     ("z3"        (>= "4.8.7"))
     ("alcotest"  :with-test)
     "ppx_blob"
-    "lwt"
-    "cohttp-lwt-unix"
-    "yojson"
     "mlbdd"
   )
 )
