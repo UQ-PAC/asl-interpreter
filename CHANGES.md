@@ -1,4 +1,10 @@
 
+
+0.3.1 (2025-02-04)
+------------------
+
+* make offline lifter emit cvt-bool-bv instead of ite
+
 0.3.0 (2025-02-04)
 ------------------
 

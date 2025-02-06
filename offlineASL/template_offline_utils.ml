@@ -216,7 +216,7 @@ let f_gen_ne_bits w e1 e2 =
 let f_gen_not_bits w e1 =
   Expr_TApply (FIdent ("not_bits", 0), [expr_of_z w], [e1])
 let f_gen_cvt_bool_bv e =
-  Expr_If (Type_Bits (Expr_LitInt "1"), e, Expr_LitBits "1", [], Expr_LitBits "0")
+  Expr_TApply (FIdent ("cvt_bool_bv", 0), [(Expr_LitInt "1")], [e])
 let f_gen_or_bits w e1 e2 =
   Expr_TApply (FIdent ("or_bits", 0), [expr_of_z w], [e1;e2])
 let f_gen_eor_bits w e1 e2 =
