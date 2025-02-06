@@ -202,7 +202,12 @@ let f_gen_or_bool e1 e2 =
 let f_gen_not_bool e1 =
   Expr_TApply (FIdent ("not_bool", 0), [], [e1])
 let f_gen_eq_enum e1 e2 =
-  Expr_TApply (FIdent ("eq_enum", 0), [], [e1;e2])
+  match e1, e2 with 
+    | (Expr_Var (Ident "TRUE")), x -> x
+    | (Expr_Var (Ident "FALSE")), x -> f_gen_not_bool x
+    | x, (Expr_Var (Ident "TRUE")) -> x
+    | x, (Expr_Var (Ident "FALSE")) -> f_gen_not_bool x
+    | _ ->  Expr_TApply (FIdent ("eq_enum", 0), [], [e1;e2])
 
 (* Prim int ops *)
 let f_gen_cvt_bits_uint w x =

@@ -19,8 +19,7 @@ let op_dis (op: int): stmt list opresult =
     (* Load statement invariant doesn't hold for offline *)
     (* RASL_check.LoadStatementInvariant.check_stmts_exc stmts ; *)
 
-    (* Intrinsics invariant doesnt hold due to eq_enum being present *)
-    (* RASL_check.AllowedIntrinsics.check_stmts_exc (stmts); *)
+    RASL_check.AllowedIntrinsics.check_stmts_exc (stmts);
     Result.Ok stmts
   with
     | e -> Result.Error (Op_DisFail e)
