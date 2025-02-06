@@ -32,12 +32,12 @@
 (rule (alias coverage) (action (diff ./aarch64_vector2 cov_vector2)))
 (rule (alias coverage) (action (diff ./aarch64_memory cov_memory)))
 
-(rule (with-stdout-to off_cov_integer (run ./off_run "aarch64_integer.+")))
-(rule (with-stdout-to off_cov_branch  (run ./off_run "aarch64_branch.+")))
-(rule (with-stdout-to off_cov_float   (run ./off_run "aarch64_float_.+")))
-(rule (with-stdout-to off_cov_vector1 (run ./off_run "aarch64_vector_arithmetic_binary.+")))
-(rule (with-stdout-to off_cov_vector2 (run ./off_run "aarch64_vector_\\(arithmetic_unary\\|[^a]\\).+")))
-(rule (with-stdout-to off_cov_memory  (run ./off_run "aarch64_memory_.+")))
+(rule (deps ../../bin/offline_coverage.exe) (action (with-stdout-to off_cov_integer (run ./off_run "aarch64_integer.+"))))
+(rule (deps ../../bin/offline_coverage.exe) (action (with-stdout-to off_cov_branch  (run ./off_run "aarch64_branch.+"))))
+(rule (deps ../../bin/offline_coverage.exe) (action (with-stdout-to off_cov_float   (run ./off_run "aarch64_float_.+"))))
+(rule (deps ../../bin/offline_coverage.exe) (action (with-stdout-to off_cov_vector1 (run ./off_run "aarch64_vector_arithmetic_binary.+"))))
+(rule (deps ../../bin/offline_coverage.exe) (action (with-stdout-to off_cov_vector2 (run ./off_run "aarch64_vector_\\(arithmetic_unary\\|[^a]\\).+"))))
+(rule (deps ../../bin/offline_coverage.exe) (action (with-stdout-to off_cov_memory  (run ./off_run "aarch64_memory_.+"))))
 
 (rule (alias offline-coverage) (action (diff ./aarch64_integer off_cov_integer)))
 (rule (alias offline-coverage) (action (diff ./aarch64_branch  off_cov_branch)))
