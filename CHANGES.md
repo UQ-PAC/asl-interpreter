@@ -1,9 +1,10 @@
 
 
-0.3.1 (2025-02-04)
+0.3.1 (2025-02-06)
 ------------------
 
-* make offline lifter emit cvt-bool-bv instead of ite
+* make offline lifter emit cvt-bool-bv instead of ite (now never emits IfExpr)
+* remove eq_enum from offline lifter output
 
 0.3.0 (2025-02-04)
 ------------------
