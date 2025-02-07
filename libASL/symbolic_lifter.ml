@@ -399,15 +399,15 @@ let run include_pc iset pat env : offline_result =
   let offline_fns = Offline_transform.run fns env in
   let offline_fns = Bindings.mapi (fun k -> fnsig_upd_body (Offline_opt.DeadContextSwitch.run k)) offline_fns in
 
-  let freachable k = 
-    let k = match k with 
+  let freachable k =
+    let k = match k with
       | FIdent (n, _) -> Ident n
       | n -> n in
-    Bindings.find k decoderst.instrs 
+    Bindings.find k decoderst.instrs
   in
 
   let offline_fns = Bindings.mapi (fun k -> fnsig_upd_body (Offline_opt.RtCopyProp.run k (freachable k))) offline_fns in
-  Transforms.BDDSimp.print_unknown_prims (); 
+  Transforms.BDDSimp.print_unknown_prims ();
 
   let dsig = fnsig_upd_body (DecoderCleanup.run (unsupported_inst tests offline_fns)) dsig in
   let dsig = fnsig_upd_body (Transforms.RemoveUnused.remove_unused IdentSet.empty) dsig in
@@ -416,12 +416,13 @@ let run include_pc iset pat env : offline_result =
   (did,dsig,tests,offline_fns)
 
 
-let run_marshal include_pc iset pat env : offline_result = 
-  let fname = Printf.sprintf "marshalled-offline-lifter-%x" 
-    (*FIXME: I don't think this is working as expected *)
+let run_marshal include_pc iset pat env : offline_result =
+  let marshal_dir = Option.value ~default:"." (Sys.getenv_opt "ASLP_OFFLINE_MARSHAL_DIR") in
+  let fname = Printf.sprintf "%s/marshalled-offline-lifter-%x"
+    marshal_dir
     (Hashtbl.seeded_hash 1234 (Printf.sprintf "%b %s %s" include_pc iset pat))
   in
-  if (Sys.file_exists fname) 
+  if (Sys.file_exists fname)
   then begin
     Printf.printf "Using marshalled lifter (pc: %b iset: %s pat: %s):  %s\n" include_pc iset pat fname;
     let ic = open_in_bin fname in
@@ -429,9 +430,11 @@ let run_marshal include_pc iset pat env : offline_result =
     close_in ic;
     r
     end
-  else 
+  else
     let r: offline_result = run include_pc iset pat env in
-    let oc = open_out_bin fname in
     Printf.printf "Writing marshalled lifter (pc: %b iset: %s pat: %s):  %s\n" include_pc iset pat fname;
-    Marshal.to_channel oc r []; close_out oc;
+    (try
+      Out_channel.with_open_bin fname (fun oc -> Marshal.to_channel oc r [])
+    with e ->
+      Printf.printf "... writing failed: %s\n" (Printexc.to_string e));
     r
