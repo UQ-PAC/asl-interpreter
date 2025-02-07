@@ -699,6 +699,11 @@ let gen_var_decl loc ty v =
   | _ -> fail @@ "gen_var_decl: Unknown ty " ^ (pp_type ty)) in
   write [Stmt_ConstDecl(rt_var_ty, v, e, loc)]
 
+let gen_lt_var loc ty =
+  let@ i = get_fresh_name in
+  let+ _ = write[Stmt_VarDeclsNoInit(ty, [i], loc)] in
+  i
+
 (* Generate a fresh variable in the runtime program of some type *)
 let gen_fresh_var loc ty =
   let@ i = get_fresh_name in
@@ -768,9 +773,30 @@ let gen_assert loc e =
 (* Generate a prim, where all type arguments are lifttime and standard arguments are runtime*)
 let rec gen_prim loc f tes es =
   let@ tes = traverse (lt_expr loc) tes in
-  let@ es = traverse (rt_expr loc) es in
-  let f = FIdent("gen_" ^ name_of_FIdent f, 0) in
-  pure (Expr_TApply(f,tes,es))
+  let@ es = traverse (gen_expr loc) es in
+  (* Operations over both runtime and lifttime arguments often expose an opportunity for
+     simplification at lifttime, by injecting transforms conditional on the lifttime value.
+     Ideally this could be done in a later pass with an analysis over the possible lifttime values
+     to determine whether the conditional transform is even possible.
+
+     Simple examples:
+       rt + lt ~> if lt = 0 then rt else rt + gen_lit lt
+       rt * lt ~> if lt = 1 then rt else rt * gen_lit lt
+   *)
+  match f, tes, es with
+  (* If comparing a runtime and lifttime boolean, just pass the runtime through or negate it *)
+  | FIdent("eq_enum", 0), [], [(RunTime, e1);(LiftTime, e2)]
+  | FIdent("eq_enum", 0), [], [(LiftTime, e2);(RunTime, e1)] ->
+      let@ i = gen_lt_var loc rt_expr_ty in
+      let ne = Expr_TApply(FIdent("gen_not_bool", 0), [], [e1]) in
+      let+ _ = write [Stmt_If(e2,
+        [Stmt_Assign(LExpr_Var i, e1, loc)], [],
+        [Stmt_Assign(LExpr_Var i, ne, loc)], loc)] in
+      Expr_Var i
+  | _ ->
+    let f = FIdent("gen_" ^ name_of_FIdent f, 0) in
+    let@ es = traverse (fun (t,e) -> if t = LiftTime then gen_lit e else pure e) es in
+    pure (Expr_TApply(f,tes,es))
 and gen_eff loc f tes es =
   let@ tes = traverse (lt_expr loc) tes in
   let@ es = traverse (rt_expr loc) es in
