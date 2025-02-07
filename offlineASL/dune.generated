@@ -371,7 +371,6 @@
     aarch64_branch_conditional_test.ml
     aarch64_branch_conditional_cond.ml
     aarch64_branch_conditional_compare.ml
-    Offline_utils.ml
 
   )
   (deps gen-command)
@@ -754,7 +753,9 @@
     aarch64_branch_conditional_test
     aarch64_branch_conditional_cond
     aarch64_branch_conditional_compare
-    Offline_utils
   )
-    (libraries asli.libASL-stage0))
+  (libraries asli.libASL-stage0    asli.offline_utils
+))
+
+
 (alias (name default) (deps (package aslp_offline) ../aslp_offline.install))

@@ -342,8 +342,8 @@ let write_fn name (ret_tyo,_,targs,args,_,body) st =
  ****************************************************************)
 
 let init_st oc = { depth = 0; skip_seq = false; oc ; ref_vars = IdentSet.empty }
-let global_deps = ["Offline_utils"]
-let offline_utils_file = [%blob "../offlineASL/template_offline_utils.ml"]
+let global_deps = ["asli.offline_utils"]
+let global_dep_opens = ["Offline_utils"]
 
 (* Write an instruction file, containing just the behaviour of one instructions *)
 let write_instr_file fn fnsig dir =
@@ -351,7 +351,7 @@ let write_instr_file fn fnsig dir =
   let path = dir ^ "/" ^ m ^ ".ml" in
   let oc = open_out path in
   let st = init_st oc in
-  write_preamble global_deps st;
+  write_preamble global_dep_opens st;
   write_fn fn fnsig st;
   close_out oc;
   name_of_FIdent fn
@@ -362,7 +362,7 @@ let write_test_file tests dir =
   let path = dir ^ "/" ^ m ^".ml" in
   let oc = open_out path in
   let st = init_st oc in
-  write_preamble global_deps st;
+  write_preamble global_dep_opens st;
   Bindings.iter (fun i s -> write_fn i s st) tests;
   close_out oc;
   m
@@ -373,13 +373,13 @@ let write_decoder_file use_pc fn fnsig deps dir =
   let path = dir ^ "/" ^ m ^ ".ml" in
   let oc = open_out path in
   let st = init_st oc in
-  write_preamble (global_deps @ deps) st;
+  write_preamble (global_dep_opens @ deps) st;
   write_fn fn fnsig st;
   write_epilogue use_pc fn st;
   close_out oc;
   m
 
-let write_new_dune_file use_pc files dir  : unit =
+let write_new_dune_file use_pc files global_deps dir  : unit =
   let target_gen_files = String.concat "" @@ List.map (fun k ->
     Printf.sprintf "    %s.ml\n" k
   ) files in
@@ -403,12 +403,16 @@ let write_new_dune_file use_pc files dir  : unit =
     (modules \n"
     name
     (if use_pc then "pc_aarch64" else "aarch64") ;
-    List.iter (fun k ->
-      Printf.fprintf oc "    %s\n" k
-    ) (files);
-    Printf.fprintf oc "  )
-    (libraries asli.libASL-stage0))" ;
-    Printf.fprintf oc  "\n(alias (name default) (deps (package aslp_offline) ../aslp_offline.install))"
+  List.iter (fun k ->
+    Printf.fprintf oc "    %s\n" k
+  ) (files);
+  Printf.fprintf oc "  )
+  (libraries asli.libASL-stage0" ;
+  List.iter (fun k ->
+    Printf.fprintf oc "    %s\n" k
+  ) global_deps;
+  Printf.fprintf oc "))\n\n";
+  Printf.fprintf oc  "\n(alias (name default) (deps (package aslp_offline) ../aslp_offline.install))"
 
 
 (* Write the dune build file *)
@@ -430,20 +434,14 @@ let write_dune_file use_pc files dir =
   (libraries asli.libASL-stage0))";
   close_out oc
 
-let write_ibi dir =
-  let oc = open_out (dir ^ "/Offline_utils.ml") in
-  output_string oc offline_utils_file ;
-  close_out oc
-
 (* Write all of the above, expecting offline_utils.ml to already be present in dir *)
 let run config dfn dfnsig tests fns =
   let dir = config.output_directory in
   let files = Bindings.fold (fun fn fnsig acc -> (write_instr_file fn fnsig dir)::acc) fns [] in
   let files = (write_test_file tests dir)::files in
   let decoder = write_decoder_file config.use_pc dfn dfnsig files dir in
-  write_ibi dir ;
   try
-  write_new_dune_file config.use_pc (decoder::files@global_deps) dir
+  write_new_dune_file config.use_pc (decoder::files) global_deps dir
   with
     | Sys_error _ as e -> Printf.eprintf "failed to write dune file\n%s" (Printexc.to_string e); Printexc.print_backtrace stderr
 
