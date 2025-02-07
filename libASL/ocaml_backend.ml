@@ -414,7 +414,6 @@ let write_new_dune_file use_pc files global_deps dir  : unit =
   Printf.fprintf oc "))\n\n";
   Printf.fprintf oc  "\n(alias (name default) (deps (package aslp_offline) ../aslp_offline.install))"
 
-
 (* Write the dune build file *)
 (* XXX: this function is not used anymore? *)
 let write_dune_file use_pc files dir =
@@ -434,10 +433,40 @@ let write_dune_file use_pc files dir =
   (libraries asli.libASL-stage0))";
   close_out oc
 
+(** Bundles the given Ocaml modules into a fixed number of bundles,
+    distributing modules into bundles in a round-robin order.
+    The round-robin order hopes to split up adjacent slow-compiling instructions.
+
+    If a single module is larger than [thresholdsize] bytes, that module will be placed into its
+    own separate bundle.
+*)
+let bundle_ocaml_files bundle ~n ~thresholdsize files dir =
+  let bundles = List.init n (Printf.sprintf "%s/%s_%03d.ml" dir bundle) in
+  let ocs = List.map open_out bundles in
+
+  let separated_modules = List.concat @@ List.mapi (fun i k ->
+    let text = In_channel.with_open_text (dir ^ "/" ^ k ^ ".ml") In_channel.input_all in
+    if String.length text <= thresholdsize then
+      let oc = List.nth ocs (i mod n) in
+      output_string oc text;
+      output_string oc "\n\n";
+      []
+    else
+      [k]
+  ) files in
+
+  List.iter close_out ocs;
+
+  let bundles = bundles @ separated_modules in
+
+  let module_names = List.map (fun x -> Filename.(remove_extension @@ basename x)) bundles in
+  module_names
+
 (* Write all of the above, expecting offline_utils.ml to already be present in dir *)
 let run config dfn dfnsig tests fns =
   let dir = config.output_directory in
   let files = Bindings.fold (fun fn fnsig acc -> (write_instr_file fn fnsig dir)::acc) fns [] in
+  let files = bundle_ocaml_files "bundle" ~n:15 ~thresholdsize:250_000 files dir in
   let files = (write_test_file tests dir)::files in
   let decoder = write_decoder_file config.use_pc dfn dfnsig files dir in
   try

@@ -7,4 +7,4 @@ rm -rfv offlineASL{,-pc}/dune.generated
 touch offlineASL{,-pc}/dune.generated
 ASLP_OFFLINE_BOOTSTRAP=true dune build @offlineASL-pc/runtest @offlineASL/runtest --auto-promote || true
 dune build @offlineASL-pc/runtest @offlineASL/runtest --auto-promote || true
-dune build @offline
+dune build @offline "$@"
